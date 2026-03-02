@@ -1,0 +1,67 @@
+/* Minimal landing page styling with 3D scene */
+.landing-page {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  background: #1e3a8a;
+  overflow: hidden;
+}
+
+.landing-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.landing-canvas canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.landing-login-button {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 10;
+  padding: 0.75rem 2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #111111;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.landing-login-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.05);
+}
+
+
+
+/* Pulse animation for instruction text */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.02);
+  }
+}
+
+/* Full-screen OS overlay — sits above the 3D canvas, fades in/out via inline styles */
+.os-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+}

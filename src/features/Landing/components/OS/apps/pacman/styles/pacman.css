@@ -1,0 +1,306 @@
+/* ══════════════════════════════════════
+   Pac-Man App – Styles
+   ══════════════════════════════════════ */
+
+/* ── App shell ─────────────────────── */
+.pm-app {
+  background: #000;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Courier New', 'Consolas', monospace;
+  display: flex;
+  flex-direction: column;
+}
+
+.pm-layout {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.pm-game-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  min-width: 0;
+}
+
+.pm-canvas {
+  display: block;
+  image-rendering: pixelated;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* ── Sidebar ───────────────────────── */
+.pm-sidebar {
+  width: 160px;
+  min-width: 160px;
+  background: #1a1a2e;
+  border-left: 2px solid #333366;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: #ccc;
+  font-size: 12px;
+}
+
+.pm-sidebar__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pm-sidebar__label {
+  font-size: 10px;
+  color: #888;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.pm-sidebar__value {
+  font-size: 16px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.pm-sidebar__value--score {
+  color: #FFFF00;
+  font-size: 20px;
+}
+
+.pm-sidebar__value--high {
+  color: #00FFFF;
+}
+
+.pm-sidebar__value--ai {
+  color: #FFB8FF;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.pm-sidebar__lives {
+  display: flex;
+  gap: 4px;
+}
+
+.pm-sidebar__life {
+  display: flex;
+}
+
+.pm-sidebar__levels {
+  display: flex;
+  gap: 6px;
+}
+
+.pm-sidebar__level-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  color: #555;
+  transition: all 0.3s ease;
+}
+
+.pm-sidebar__level-dot.active {
+  border-color: #FFFF00;
+  color: #FFFF00;
+}
+
+.pm-sidebar__level-dot.current {
+  background: rgba(255, 255, 0, 0.2);
+  box-shadow: 0 0 8px rgba(255, 255, 0, 0.3);
+}
+
+/* ── Overlay screens ──────────────── */
+.pm-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.pm-overlay__box {
+  text-align: center;
+  color: #fff;
+  max-width: 360px;
+  padding: 32px;
+}
+
+/* ── Title ─────────────────────────── */
+.pm-title {
+  font-size: 42px;
+  font-weight: bold;
+  color: #FFFF00;
+  margin: 0 0 8px 0;
+  text-shadow: 2px 2px 0 #FF0000, 4px 4px 0 rgba(0,0,0,0.3);
+  letter-spacing: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+.pm-title--win {
+  color: #00FF00;
+  text-shadow: 2px 2px 0 #008800, 4px 4px 0 rgba(0,0,0,0.3);
+}
+
+.pm-title--gameover {
+  color: #FF0000;
+  text-shadow: 2px 2px 0 #880000, 4px 4px 0 rgba(0,0,0,0.3);
+}
+
+.pm-subtitle {
+  font-size: 14px;
+  color: #00FFFF;
+  margin: 0 0 24px 0;
+  letter-spacing: 2px;
+}
+
+/* ── Level preview ─────────────────── */
+.pm-level-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.pm-level-preview__item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid #FFFF00;
+}
+
+.pm-level-preview__num {
+  font-size: 18px;
+  font-weight: bold;
+  color: #FFFF00;
+  min-width: 20px;
+}
+
+.pm-level-preview__algo {
+  font-size: 13px;
+  color: #ccc;
+}
+
+/* ── Controls info ─────────────────── */
+.pm-controls-info {
+  margin-bottom: 20px;
+  color: #888;
+  font-size: 12px;
+}
+
+.pm-controls-info p {
+  margin: 4px 0;
+}
+
+/* ── Start / Restart button ────────── */
+.pm-start-btn {
+  background: transparent;
+  border: 2px solid #FFFF00;
+  color: #FFFF00;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 12px 36px;
+  cursor: pointer;
+  letter-spacing: 3px;
+  transition: all 0.2s ease;
+  animation: pm-blink 1.2s ease-in-out infinite;
+}
+
+.pm-start-btn:hover {
+  background: #FFFF00;
+  color: #000;
+  animation: none;
+}
+
+@keyframes pm-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ── High scores on start screen ──── */
+.pm-high-scores {
+  margin-top: 24px;
+  text-align: left;
+}
+
+.pm-high-scores h3 {
+  font-size: 12px;
+  color: #888;
+  letter-spacing: 2px;
+  margin: 0 0 8px 0;
+  border-bottom: 1px solid #333;
+  padding-bottom: 4px;
+}
+
+.pm-high-scores__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pm-high-scores__row {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.pm-high-scores__rank {
+  color: #888;
+  min-width: 20px;
+}
+
+.pm-high-scores__score {
+  color: #FFFF00;
+  font-weight: bold;
+  min-width: 70px;
+}
+
+.pm-high-scores__level {
+  color: #00FFFF;
+}
+
+/* ── Final score (win / game over) ── */
+.pm-final-score {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid #333;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.pm-final-score__label {
+  font-size: 12px;
+  color: #888;
+  letter-spacing: 2px;
+}
+
+.pm-final-score__value {
+  font-size: 36px;
+  font-weight: bold;
+  color: #FFFF00;
+}
+
+.pm-final-score__badge {
+  font-size: 14px;
+  color: #00FF00;
+  animation: pm-blink 0.8s ease-in-out infinite;
+}

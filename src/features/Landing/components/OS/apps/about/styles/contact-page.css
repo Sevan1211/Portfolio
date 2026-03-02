@@ -1,0 +1,140 @@
+/* ══════════════════════════════════════
+   Contact Page – Links, location & resume
+   ══════════════════════════════════════ */
+
+/* Shared card panel */
+.contact-box,
+.resume-box {
+  background: #e6e6ea;
+  border: 2px solid #808080;
+  padding: 24px 28px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.contact-box {
+  margin-bottom: 24px;
+}
+
+.contact-box h4,
+.resume-header h4 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #000080;
+  margin: 0 0 4px 0;
+}
+
+/* Link rows */
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 12px;
+}
+
+.contact-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #000080;
+  text-decoration: none;
+  border-bottom: 1px solid #c0c0c0;
+  transition: background 0.12s ease;
+}
+
+.contact-link:last-child {
+  border-bottom: none;
+}
+
+.contact-link:hover {
+  background: #d4d4dc;
+}
+
+.contact-link--static {
+  cursor: default;
+}
+
+.contact-link--static:hover {
+  background: transparent;
+}
+
+.contact-link svg {
+  flex-shrink: 0;
+  color: #000080;
+}
+
+.contact-link-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.contact-link-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #666;
+}
+
+.contact-link-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #000080;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-link--static .contact-link-value {
+  color: #333;
+}
+
+/* Resume section */
+.resume-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.resume-header svg {
+  color: #000080;
+}
+
+.resume-box p {
+  font-size: 15px;
+  color: #333;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.resume-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  color: #000;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #fff #808080 #808080 #fff;
+  box-shadow: 1px 1px 0 #000;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.1s ease;
+}
+
+.resume-btn:hover {
+  background: #d4d4d4;
+}
+
+.resume-btn:active {
+  border-color: #808080 #fff #fff #808080;
+  box-shadow: none;
+  transform: translate(1px, 1px);
+}

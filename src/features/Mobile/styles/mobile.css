@@ -1,0 +1,396 @@
+/* ══════════════════════════════════════════════════════════
+   Mobile Portfolio – Retro iPhone aesthetic
+   Only active when useIsMobile → true (< 768 px)
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Root container ── */
+.mobile-landing {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  font-family: 'Helvetica Neue', 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #fff;
+}
+
+/* ── 3D background canvas ── */
+.mobile-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ══════════════════════════════════════
+   LOCK SCREEN
+   ══════════════════════════════════════ */
+.lock-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24px 40px;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  user-select: none;
+  cursor: default;
+  touch-action: none;
+}
+
+/* ── Clock ── */
+.lock-clock {
+  text-align: center;
+  margin-top: 25vh;
+}
+
+.lock-time {
+  font-size: 72px;
+  font-weight: 200;
+  letter-spacing: -2px;
+  line-height: 1;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+.lock-date {
+  font-size: 18px;
+  font-weight: 400;
+  margin-top: 8px;
+  opacity: 0.85;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Swipe prompt ── */
+.lock-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  animation: lockBounce 2s ease-in-out infinite;
+  cursor: pointer;
+}
+
+.lock-prompt span {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  opacity: 0.8;
+}
+
+.lock-chevron {
+  opacity: 0.7;
+}
+
+@keyframes lockBounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+/* ══════════════════════════════════════
+   APP CONTAINER (slide-up transition)
+   ══════════════════════════════════════ */
+.mobile-app-container {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1),
+              opacity 0.3s ease;
+}
+
+.mobile-app-container--open {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ══════════════════════════════════════
+   MOBILE ABOUT APP
+   ══════════════════════════════════════ */
+.m-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #fff;
+  overflow: hidden;
+}
+
+/* ── Tab bar ── */
+.m-tab-bar {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+}
+
+.m-tab {
+  flex: 1;
+  padding: 12px 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.55);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.m-tab--active {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+
+/* ── Scrollable content ── */
+.m-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px 18px 100px;
+}
+
+/* ── Section ── */
+.m-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.m-title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+  margin: 0;
+}
+
+.m-tagline {
+  font-size: 14px;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.65);
+  margin: -4px 0 8px;
+}
+
+/* ── Card ── */
+.m-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.m-card p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.m-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+/* ── Photo ── */
+.m-photo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.m-photo {
+  width: 100%;
+  max-width: 200px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  object-fit: cover;
+}
+
+.m-photo--award {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.m-photo-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Experience ── */
+.m-exp-role {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.m-exp-meta {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.m-bullets {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.m-bullets li {
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.m-bullets li::marker {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── Skills ── */
+.m-skill-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.m-skill-row + .m-skill-row {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.m-skill-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.m-skill-row p {
+  font-size: 13px;
+}
+
+/* ── Projects ── */
+.m-project-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.m-project-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  font-style: italic;
+}
+
+.m-github-btn {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  padding: 6px 12px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.m-github-btn:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.m-tech-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.m-tech-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ── Contact ── */
+.m-contact-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.m-contact-row:last-child {
+  border-bottom: none;
+}
+
+.m-contact-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.m-contact-value {
+  font-size: 14px;
+  color: #fff;
+  text-decoration: none;
+}
+
+a.m-contact-value:active {
+  opacity: 0.7;
+}
+
+/* ── Desktop prompt banner ── */
+.m-desktop-prompt {
+  flex-shrink: 0;
+  text-align: center;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ══════════════════════════════════════
+   Scrollbar (thin, subtle)
+   ══════════════════════════════════════ */
+.m-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.m-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.m-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}

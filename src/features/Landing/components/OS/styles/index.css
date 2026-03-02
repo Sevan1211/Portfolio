@@ -1,0 +1,8 @@
+/* Main OS Styles - Import all style modules */
+@import './base.css';
+@import './desktop.css';
+@import './window.css';
+@import './taskbar.css';
+@import './apps.css';
+@import './fullscreen.css';
+

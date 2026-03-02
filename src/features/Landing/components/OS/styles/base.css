@@ -1,0 +1,71 @@
+/* Base OS Styles */
+.retro-os {
+  --taskbar-height: 72px;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  color: #0c0c0c;
+  font-family: 'MS Sans Serif', 'Segoe UI', sans-serif;
+  transition: opacity 0.3s ease;
+  background: #008080;
+}
+
+.retro-os-workspace {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: inherit;
+}
+
+.desktop {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  padding: 16px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* App Content Base */
+.app-content {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: #fff;
+  color: #000;
+  font-family: 'Segoe UI', 'MS Sans Serif', sans-serif;
+}
+
+.retro-os *,
+.retro-os *::before,
+.retro-os *::after {
+  scrollbar-width: thin;
+  scrollbar-color: #b0b0b0 transparent;
+}
+
+.retro-os ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background: transparent;
+}
+
+.retro-os ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.retro-os ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #d9d9d9 0%, #b5b5b5 100%);
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.retro-os ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #cfcfcf 0%, #a8a8a8 100%);
+}
+

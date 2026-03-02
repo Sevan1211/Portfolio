@@ -1,0 +1,6 @@
+export const MONITOR_WIDTH = 1446;
+export const MONITOR_HEIGHT = 1600;
+
+export const TASKBAR_HEIGHT = 72;
+export const DESKTOP_WORKSPACE_HEIGHT = MONITOR_HEIGHT - TASKBAR_HEIGHT;
+

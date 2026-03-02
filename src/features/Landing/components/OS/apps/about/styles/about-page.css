@@ -1,0 +1,74 @@
+/* ══════════════════════════════════════
+   About Page – Bio, photo & awards
+   ══════════════════════════════════════ */
+
+/* Photo + text row */
+.about-me-row {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+  margin-bottom: 32px;
+}
+
+.about-me-row .about-me-section {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Bio / Awards panel */
+.about-me-section {
+  background: #e6e6ea;
+  border: 2px solid #808080;
+  padding: 20px;
+  margin-bottom: 32px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+  color: #111;
+}
+
+.about-me-section p {
+  color: #111;
+  margin-bottom: 16px;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+/* Photo card */
+.profile-photo-card {
+  width: 220px;
+  flex-shrink: 0;
+  background: #e6e6ea;
+  border: 2px solid;
+  border-color: #fff #808080 #808080 #fff;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.profile-photo-frame {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #000;
+}
+
+.profile-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-photo-label {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000080;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+

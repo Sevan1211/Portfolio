@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#1e3a8a">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/blue_and_white_logo.png" />
+    <link rel="apple-touch-icon" href="/blue_and_white_logo.png" />
+    
+    <!-- DNS prefetch and preconnect for performance -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts: Inter (UI) and Fira Code (Monospace) with preload for critical font -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"></noscript>
+    
+    <!-- Performance optimizations -->
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="description" content="Portfolio - Interactive 3D Developer Portfolio">
+    
+    <title>Portfolio</title>
+    
+    <style>
+      /* Reset and base styles */
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #1e3a8a;
+      }
+      
+      #root {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Blue curtain: covers everything on load. Dismissed by JS once loading canvas is painted.
+         Re-shown on beforeunload so CSS3D content can never flash during reload. -->
+    <div id="page-cover" style="position:fixed;inset:0;background:#1e3a8a;z-index:99999"></div>
+    <script>
+      window.addEventListener('beforeunload', function () {
+        var c = document.getElementById('page-cover');
+        if (c) c.style.display = '';
+      });
+    </script>
+
+    <script type="module" src="/src/app/main.tsx"></script>
+  </body>
+</html>

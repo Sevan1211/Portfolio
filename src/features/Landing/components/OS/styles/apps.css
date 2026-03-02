@@ -1,0 +1,9 @@
+/*
+ * App-specific styles have been moved into each app's own styles/ folder:
+ *   - apps/about/styles/   (about, experience, projects, contact pages)
+ *   - apps/terminal/styles/ (terminal)
+ *
+ * Shared app-content base styles live in base.css.
+ */
+
+

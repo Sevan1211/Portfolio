@@ -1,0 +1,157 @@
+/* Window Frame Styles */
+.window-frame {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #fff #000 #000 #fff;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+}
+
+.window-active {
+  z-index: 999 !important;
+}
+
+/* Window Titlebar */
+.window-titlebar {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: #fff;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+  font-weight: bold;
+  font-size: 18px;
+  min-height: 36px;
+}
+
+.window-title {
+  flex: 1;
+  padding-left: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.window-titlebar__icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 2px;
+}
+
+/* Window Controls */
+.window-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.window-btn {
+  width: 36px;
+  height: 32px;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #fff #000 #000 #fff;
+  color: #000;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.window-btn:active {
+  border-color: #000 #fff #fff #000;
+  padding-top: 2px;
+  padding-left: 2px;
+}
+
+.window-btn--close:hover {
+  background: #e81123;
+  color: #fff;
+}
+
+/* Window Content */
+.window-content {
+  flex: 1;
+  background: #fff;
+  overflow: hidden;
+  position: relative;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+}
+
+/* Resize Handles */
+.resize-handle {
+  position: absolute;
+  background: transparent;
+}
+
+.resize-n, .resize-s {
+  left: 4px;
+  right: 4px;
+  height: 4px;
+  cursor: ns-resize;
+}
+
+.resize-n {
+  top: 0;
+}
+
+.resize-s {
+  bottom: 0;
+}
+
+.resize-e, .resize-w {
+  top: 4px;
+  bottom: 4px;
+  width: 4px;
+  cursor: ew-resize;
+}
+
+.resize-e {
+  right: 0;
+}
+
+.resize-w {
+  left: 0;
+}
+
+.resize-ne, .resize-nw, .resize-se, .resize-sw {
+  width: 8px;
+  height: 8px;
+}
+
+.resize-ne {
+  top: 0;
+  right: 0;
+  cursor: nesw-resize;
+}
+
+.resize-nw {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+
+.resize-se {
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+}
+
+.resize-sw {
+  bottom: 0;
+  left: 0;
+  cursor: nesw-resize;
+}
+

@@ -1,0 +1,142 @@
+/* ══════════════════════════════════════
+   Terminal App
+   ══════════════════════════════════════ */
+
+.terminal-app {
+  --term-fg: #0f0;
+  --term-prompt: #0f0;
+  --term-accent: #0a0;
+
+  background: #0a0a0a !important;
+  color: var(--term-fg);
+  font-family: 'Courier New', 'Consolas', monospace;
+  padding: 0;
+  cursor: text;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── CRT scanline overlay ──────────── */
+.terminal-scanlines {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 1px,
+    rgba(0, 0, 0, 0.06) 1px,
+    rgba(0, 0, 0, 0.06) 2px
+  );
+}
+
+/* ── Content area ──────────────────── */
+.terminal-content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 16px 20px;
+  box-sizing: border-box;
+}
+
+/* ── Lines ─────────────────────────── */
+.terminal-line {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.terminal-line--command {
+  color: #888;
+  margin-top: 6px;
+}
+
+.terminal-line--output {
+  color: var(--term-fg);
+}
+
+.terminal-line--error {
+  color: #ff5555;
+}
+
+/* ── Input line ────────────────────── */
+.terminal-input-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 0;
+}
+
+.terminal-prompt {
+  color: var(--term-prompt);
+  font-weight: bold;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.terminal-input-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--term-fg);
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  caret-color: var(--term-fg);
+  padding: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.terminal-input::selection {
+  background: var(--term-fg);
+  color: #000;
+}
+
+/* ── Ghost suggestion (tab to complete) ── */
+.terminal-suggestion {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+/* ══════════════════════════════════════
+   Scrollbar
+   ══════════════════════════════════════ */
+.terminal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terminal-content::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.terminal-content::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+.terminal-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

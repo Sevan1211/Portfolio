@@ -1,0 +1,553 @@
+/* ─── Fullscreen Mode Overrides ────────────────────────────────────────────────
+ * When the OS runs as a full-screen overlay (not projected onto the CSS3D
+ * monitor), scale all UI elements down to normal desktop proportions.
+ * The base styles are designed for the 1446×1600 CSS3D canvas; these
+ * overrides bring them to viewport-appropriate sizes.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/* ─── Base / Workspace ──────────────────────────────────────────────────────── */
+.retro-os--fullscreen {
+  --taskbar-height: 40px;
+}
+
+.retro-os--fullscreen .desktop {
+  padding: 12px;
+}
+
+/* ─── Desktop Icons ─────────────────────────────────────────────────────────── */
+.retro-os--fullscreen .desktop-icons {
+  gap: 10px;
+}
+
+.retro-os--fullscreen .desktop-icon {
+  width: 72px;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.retro-os--fullscreen .desktop-icon__image {
+  width: 40px;
+  height: 40px;
+}
+
+.retro-os--fullscreen .desktop-icon__emoji {
+  font-size: 28px;
+}
+
+/* ─── Window Frame ──────────────────────────────────────────────────────────── */
+.retro-os--fullscreen .window-titlebar {
+  padding: 4px 6px;
+  font-size: 13px;
+  min-height: 28px;
+}
+
+.retro-os--fullscreen .window-controls {
+  gap: 2px;
+}
+
+.retro-os--fullscreen .window-btn {
+  width: 22px;
+  height: 20px;
+  font-size: 14px;
+}
+
+/* ─── Taskbar ───────────────────────────────────────────────────────────────── */
+.retro-os--fullscreen .taskbar {
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.retro-os--fullscreen .taskbar-start {
+  height: calc(var(--taskbar-height) - 8px);
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.retro-os--fullscreen .taskbar-start:active,
+.retro-os--fullscreen .taskbar-start.active {
+  padding-left: 14px;
+}
+
+.retro-os--fullscreen .start-icon {
+  font-size: 14px;
+}
+
+.retro-os--fullscreen .taskbar-items {
+  gap: 4px;
+}
+
+.retro-os--fullscreen .taskbar-item {
+  height: calc(var(--taskbar-height) - 8px);
+  min-width: 120px;
+  max-width: 200px;
+  padding: 0 8px;
+  font-size: 12px;
+  gap: 6px;
+}
+
+.retro-os--fullscreen .taskbar-item:active,
+.retro-os--fullscreen .taskbar-item.active {
+  padding-left: 10px;
+}
+
+.retro-os--fullscreen .taskbar-item__icon {
+  font-size: 14px;
+}
+
+.retro-os--fullscreen .taskbar-clock {
+  height: calc(var(--taskbar-height) - 8px);
+  padding: 0 10px;
+  font-size: 12px;
+  min-width: 60px;
+}
+
+/* ─── Start Menu ────────────────────────────────────────────────────────────── */
+.retro-os--fullscreen .start-menu {
+  width: 240px;
+  bottom: calc(var(--taskbar-height) + 4px);
+}
+
+.retro-os--fullscreen .start-menu__header {
+  padding: 10px 14px;
+}
+
+.retro-os--fullscreen .start-menu__title {
+  font-size: 15px;
+}
+
+.retro-os--fullscreen .start-menu__subtitle {
+  font-size: 11px;
+}
+
+.retro-os--fullscreen .start-menu__item {
+  padding: 8px 14px;
+  font-size: 13px;
+  gap: 10px;
+}
+
+.retro-os--fullscreen .start-menu__icon {
+  width: 28px;
+  height: 28px;
+}
+
+.retro-os--fullscreen .start-menu__emoji {
+  font-size: 20px;
+}
+
+/* ─── About App ─────────────────────────────────────────────────────────────── */
+
+/* Sidebar */
+.retro-os--fullscreen .about-sidebar {
+  width: 200px;
+  padding: 12px;
+  gap: 16px;
+}
+
+.retro-os--fullscreen .nav-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  gap: 8px;
+}
+
+.retro-os--fullscreen .nav-item-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.retro-os--fullscreen .sidebar-widget {
+  font-size: 12px;
+  padding: 8px;
+}
+
+.retro-os--fullscreen .widget-title {
+  font-size: 12px;
+}
+
+/* Content */
+.retro-os--fullscreen .about-content {
+  padding: 24px;
+}
+
+.retro-os--fullscreen .section-title {
+  font-size: 26px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+}
+
+.retro-os--fullscreen .lead-paragraph {
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+.retro-os--fullscreen .text-block {
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.retro-os--fullscreen .tagline {
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.retro-os--fullscreen .section-header h3 {
+  font-size: 18px;
+}
+
+.retro-os--fullscreen .about-me-section p {
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.retro-os--fullscreen .subsection-title {
+  font-size: 18px;
+  margin: 24px 0 12px;
+}
+
+/* Feature Grid */
+.retro-os--fullscreen .feature-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.retro-os--fullscreen .feature-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 10px;
+}
+
+.retro-os--fullscreen .feature-title {
+  font-size: 15px;
+}
+
+.retro-os--fullscreen .feature-desc {
+  font-size: 13px;
+}
+
+/* Problem / Solution Cards */
+.retro-os--fullscreen .problem-solution-section {
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.retro-os--fullscreen .split-card {
+  padding: 14px;
+}
+
+.retro-os--fullscreen .split-card h4 {
+  font-size: 14px;
+}
+
+.retro-os--fullscreen .split-card li {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+/* CTA & Buttons */
+.retro-os--fullscreen .login-cta {
+  padding: 20px;
+  margin-top: 32px;
+  gap: 16px;
+}
+
+.retro-os--fullscreen .cta-text {
+  font-size: 15px;
+}
+
+.retro-os--fullscreen .retro-button {
+  padding: 8px 20px;
+  font-size: 14px;
+  gap: 8px;
+}
+
+.retro-os--fullscreen .retro-button.small {
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+/* Pricing */
+.retro-os--fullscreen .pricing-grid {
+  gap: 16px;
+}
+
+.retro-os--fullscreen .pricing-header h4 {
+  font-size: 18px;
+}
+
+.retro-os--fullscreen .price {
+  font-size: 24px;
+}
+
+.retro-os--fullscreen .price .period {
+  font-size: 12px;
+}
+
+.retro-os--fullscreen .pricing-features li {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+/* Specs Table */
+.retro-os--fullscreen .specs-table td {
+  padding: 10px;
+  font-size: 13px;
+}
+
+/* Status Bar */
+.retro-os--fullscreen .about-statusbar {
+  height: 26px;
+  font-size: 11px;
+  padding: 0 8px;
+  gap: 12px;
+}
+
+.retro-os--fullscreen .status-segment {
+  padding: 2px 8px;
+}
+
+/* Creator Tools */
+.retro-os--fullscreen .creator-tools-grid {
+  gap: 16px;
+}
+
+.retro-os--fullscreen .tool-card {
+  padding: 14px;
+}
+
+.retro-os--fullscreen .tool-card p {
+  font-size: 12px;
+}
+
+/* Target Audience */
+.retro-os--fullscreen .target-audience-box {
+  padding: 14px;
+}
+
+.retro-os--fullscreen .target-audience-box h4 {
+  font-size: 15px;
+}
+
+.retro-os--fullscreen .target-audience-box p {
+  font-size: 13px;
+}
+
+/* apps.css about overrides (legacy about layout) */
+.retro-os--fullscreen .about-header-banner {
+  padding: 14px 20px;
+}
+
+.retro-os--fullscreen .about-logo-large {
+  font-size: 32px;
+  letter-spacing: 2px;
+}
+
+.retro-os--fullscreen .about-subtitle {
+  font-size: 14px;
+}
+
+.retro-os--fullscreen .about-left-panel {
+  width: 220px;
+  padding: 14px;
+}
+
+.retro-os--fullscreen .about-nav li {
+  padding: 8px 12px;
+  font-size: 13px;
+  gap: 8px;
+}
+
+.retro-os--fullscreen .nav-icon {
+  font-size: 16px;
+}
+
+.retro-os--fullscreen .about-right-panel {
+  padding: 24px;
+}
+
+.retro-os--fullscreen .content-tab h2 {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.retro-os--fullscreen .lead-text {
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+.retro-os--fullscreen .content-tab p {
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.retro-os--fullscreen .about-tip-box {
+  padding: 12px;
+}
+
+.retro-os--fullscreen .tip-header {
+  font-size: 14px;
+}
+
+.retro-os--fullscreen .login-section {
+  padding: 20px;
+  margin-top: 32px;
+}
+
+.retro-os--fullscreen .login-prompt {
+  font-size: 16px;
+  margin-bottom: 14px;
+}
+
+.retro-os--fullscreen .retro-btn-large {
+  font-size: 16px;
+  padding: 10px 28px;
+  gap: 10px;
+}
+
+.retro-os--fullscreen .retro-card {
+  padding: 14px;
+}
+
+.retro-os--fullscreen .retro-card h4 {
+  font-size: 16px;
+}
+
+.retro-os--fullscreen .retro-card p {
+  font-size: 13px;
+}
+
+/* ─── Code Editor App ───────────────────────────────────────────────────────── */
+.retro-os--fullscreen .editor-sidebar {
+  width: 200px;
+}
+
+.retro-os--fullscreen .sidebar-header {
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+.retro-os--fullscreen .file-item {
+  padding: 6px 12px;
+  font-size: 13px;
+  gap: 8px;
+}
+
+.retro-os--fullscreen .file-icon {
+  font-size: 14px;
+}
+
+.retro-os--fullscreen .tab {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.retro-os--fullscreen .editor-content {
+  padding: 14px;
+}
+
+.retro-os--fullscreen .code-display {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.retro-os--fullscreen .editor-footer {
+  padding: 4px 10px;
+  font-size: 11px;
+  gap: 12px;
+}
+
+/* ─── Browser App ───────────────────────────────────────────────────────────── */
+.retro-os--fullscreen .browser-header {
+  padding: 6px 8px;
+  gap: 8px;
+}
+
+.retro-os--fullscreen .browser-nav {
+  gap: 4px;
+}
+
+.retro-os--fullscreen .nav-btn {
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+}
+
+.retro-os--fullscreen .browser-addressbar {
+  padding: 0 10px;
+  height: 28px;
+  gap: 8px;
+}
+
+.retro-os--fullscreen .protocol {
+  font-size: 13px;
+}
+
+.retro-os--fullscreen .address-input {
+  font-size: 13px;
+}
+
+.retro-os--fullscreen .browser-content {
+  padding: 20px;
+}
+
+.retro-os--fullscreen .browser-hero h1 {
+  font-size: 28px;
+}
+
+.retro-os--fullscreen .browser-hero p {
+  font-size: 14px;
+}
+
+.retro-os--fullscreen .link-category h2 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.retro-os--fullscreen .link-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.retro-os--fullscreen .link-card {
+  padding: 14px;
+  gap: 6px;
+}
+
+.retro-os--fullscreen .link-title {
+  font-size: 14px;
+  gap: 8px;
+}
+
+.retro-os--fullscreen .link-icon {
+  font-size: 16px;
+}
+
+.retro-os--fullscreen .link-description {
+  font-size: 12px;
+}
+
+.retro-os--fullscreen .link-url {
+  font-size: 11px;
+}
+
+.retro-os--fullscreen .no-results {
+  font-size: 14px;
+  padding: 40px 20px;
+}
+
+/* ─── Terminal App ──────────────────────────────────────────────────────────── */
+.retro-os--fullscreen .terminal-app {
+  padding: 12px;
+}
+
+.retro-os--fullscreen .terminal-content {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.retro-os--fullscreen .terminal-line {
+  margin: 2px 0;
+}
+
+.retro-os--fullscreen .terminal-input-line {
+  gap: 8px;
+}

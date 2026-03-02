@@ -1,0 +1,169 @@
+/* ══════════════════════════════════════
+   Experience Page – Timeline cards
+   ══════════════════════════════════════ */
+
+.exp-timeline {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: 28px;
+}
+
+/* Vertical connector */
+.exp-timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: #808080;
+}
+
+/* Card wrapper */
+.exp-card {
+  position: relative;
+  padding-bottom: 28px;
+}
+
+.exp-card:last-child {
+  padding-bottom: 0;
+}
+
+/* Dot */
+.exp-dot {
+  position: absolute;
+  left: -24px;
+  top: 22px;
+  width: 14px;
+  height: 14px;
+  background: #000080;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #808080;
+}
+
+.exp-card:first-child .exp-dot {
+  background: #008000;
+}
+
+/* Panel */
+.exp-panel {
+  background: #e6e6ea;
+  border: 2px solid #808080;
+  padding: 20px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.exp-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 6px 0 rgba(0, 0, 0, 0.15);
+}
+
+.exp-panel .section-header {
+  margin-bottom: 4px;
+}
+
+.exp-role {
+  font-size: 15px;
+  font-style: italic;
+  color: #444;
+  margin: 0 0 12px 0;
+  padding-left: 36px;
+}
+
+.exp-meta {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #c0c0c0;
+}
+
+.exp-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
+}
+
+.exp-meta svg {
+  color: #000080;
+  flex-shrink: 0;
+}
+
+.exp-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.exp-bullets li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 8px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #222;
+}
+
+.exp-bullets li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: #000080;
+  font-weight: bold;
+}
+
+/* ══════════════════════════════════════
+   Skills & Technologies – Card grid
+   ══════════════════════════════════════ */
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.feature-card {
+  background: #f0f0f0;
+  border: 2px solid;
+  border-color: #fff #808080 #808080 #fff;
+  padding: 24px;
+  transition: transform 0.2s;
+  color: #000;
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  background: #e6e6ea;
+}
+
+.feature-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: #cacad8;
+  color: #000080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  border: 2px solid #000080;
+}
+
+.feature-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.feature-desc {
+  font-size: 16px;
+  color: #333;
+  line-height: 1.4;
+}

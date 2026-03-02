@@ -1,0 +1,209 @@
+/* ══════════════════════════════════════
+   About App – Shell (layout, sidebar, statusbar, shared primitives)
+   ══════════════════════════════════════ */
+
+/* Root container */
+.about-app {
+  padding: 0;
+  font-family: 'Segoe UI', 'MS Sans Serif', sans-serif;
+  background: #c0c0c0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #000;
+}
+
+.about-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #c0c0c0;
+}
+
+/* ── Layout ── */
+.about-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.about-sidebar {
+  width: 260px;
+  background: #d4d0c8;
+  border-right: 2px solid #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.1s;
+  color: #000;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.nav-item:hover {
+  background: #e0e0e0;
+  border-color: #fff #808080 #808080 #fff;
+}
+
+.nav-item.active {
+  background: #cacad8;
+  color: #000080;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  box-shadow: inset 1px 1px 0 #000;
+}
+
+.nav-item-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.sidebar-widget {
+  margin-top: auto;
+  background: #ffffe0;
+  border: 1px solid #000;
+  padding: 12px;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  color: #000;
+}
+
+.widget-title {
+  font-weight: bold;
+  border-bottom: 1px solid #000;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Content area ── */
+.about-content {
+  flex: 1;
+  background: #cacad8;
+  border-left: 2px solid #808080;
+  overflow-y: auto;
+  padding: 40px;
+  position: relative;
+  color: #111;
+}
+
+.content-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ── Status bar ── */
+.about-statusbar {
+  height: 36px;
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 16px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.status-segment {
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #000;
+}
+
+.status-led {
+  width: 8px;
+  height: 8px;
+  background: #00ff00;
+  border-radius: 50%;
+  box-shadow: 0 0 4px #00ff00;
+}
+
+/* ── CRT scanline overlay ── */
+.crt-overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+  background-size: 100% 4px;
+  z-index: 10;
+  opacity: 0.1;
+}
+
+/* ── Shared typography ── */
+.hero-section {
+  margin-bottom: 32px;
+  text-align: center;
+  color: #000;
+}
+
+.hero-section .section-title {
+  margin-bottom: 8px;
+  border-bottom: none;
+}
+
+.section-title {
+  font-size: 48px;
+  color: #000080;
+  margin-bottom: 24px;
+  font-weight: 800;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+  border-bottom: 4px double #000080;
+  padding-bottom: 16px;
+}
+
+.tagline {
+  font-size: 20px;
+  font-style: italic;
+  color: #333;
+  margin-bottom: 32px;
+  padding-left: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  color: #000080;
+}
+
+.section-header h3 {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+  color: #000080;
+}
+
+.subsection-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 32px 0 16px;
+  border-bottom: 2px solid #808080;
+  color: #000080;
+}

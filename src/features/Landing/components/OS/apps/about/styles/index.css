@@ -1,0 +1,6 @@
+/* About App – Style barrel */
+@import './about-shell.css';
+@import './about-page.css';
+@import './experience-page.css';
+@import './projects-page.css';
+@import './contact-page.css';

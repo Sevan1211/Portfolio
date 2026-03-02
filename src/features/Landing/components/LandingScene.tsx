@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
+import { AdaptiveDpr, AdaptiveEvents, PerformanceMonitor } from '@react-three/drei';
 import * as THREE from 'three';
 import { CubicleScene } from './CubicleScene';
 import { LoadingScene } from './loading/LoadingScene';
@@ -37,6 +38,7 @@ const LandingScene: React.FC = () => {
   const osOverlayVisibleRef = useRef(false);
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(true);
   const [loadingOverlayOpacity, setLoadingOverlayOpacity] = useState(1);
+  const [showScreenHint, setShowScreenHint] = useState(false);
   const minLoadTimePassed = useRef(false);
   const renderSettled = useRef(false);
 
@@ -83,14 +85,35 @@ const LandingScene: React.FC = () => {
     }
   }, [sceneReady]);
 
+  const loadingCompletedRef = useRef(false);
+  const hintTimerRef = useRef(0);
+
   const completeLoading = () => {
+    if (loadingCompletedRef.current) return;
+    loadingCompletedRef.current = true;
     setLoadingComplete(true);
     // Fade out the 3D loading overlay
     setLoadingOverlayOpacity(0);
     setTimeout(() => {
       setShowLoadingOverlay(false);
     }, FADE_DURATION);
+    // Show "click the screen" hint after the scene fades in
+    hintTimerRef.current = window.setTimeout(() => {
+      setShowScreenHint(true);
+      // Auto-hide after 5 seconds
+      hintTimerRef.current = window.setTimeout(() => setShowScreenHint(false), 5000);
+    }, 2000);
   };
+
+  // Cleanup hint timers
+  useEffect(() => {
+    return () => clearTimeout(hintTimerRef.current);
+  }, []);
+
+  // Hide hint when user zooms in
+  useEffect(() => {
+    if (isZoomedIn) setShowScreenHint(false);
+  }, [isZoomedIn]);
 
   // Keep ref in sync for use inside event listeners (avoids stale closure)
   useEffect(() => {
@@ -98,10 +121,16 @@ const LandingScene: React.FC = () => {
   }, [osOverlayVisible]);
 
   /** Called by CubicleScene once the zoom-in animation finishes */
+  const zoomCompleteRafRef = useRef(0);
   const handleZoomComplete = useCallback(() => {
     setOsOverlayMounted(true);
     // One rAF delay so React can paint the DOM node before we trigger the CSS transition
-    requestAnimationFrame(() => setOsOverlayVisible(true));
+    zoomCompleteRafRef.current = requestAnimationFrame(() => setOsOverlayVisible(true));
+  }, []);
+
+  // Cleanup rAF on unmount
+  useEffect(() => {
+    return () => cancelAnimationFrame(zoomCompleteRafRef.current);
   }, []);
 
   /** Called when the user presses Escape while the full-screen OS is open */
@@ -166,7 +195,7 @@ const LandingScene: React.FC = () => {
       {/* Main 3D scene Canvas */}
       <Canvas
         shadows
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         gl={{
           antialias: true,
           alpha: false, // Opaque — prevents background bleed-through during load
@@ -191,7 +220,7 @@ const LandingScene: React.FC = () => {
 
           // Better shadow quality
           gl.shadowMap.enabled = true;
-          gl.shadowMap.type = THREE.PCFSoftShadowMap; // Softer, more realistic shadows
+          gl.shadowMap.type = THREE.PCFShadowMap; // Faster than PCFSoftShadowMap
 
           // Set camera rotation immediately in onCreated (before first frame)
           // This prevents 1-2 frames of wrong camera angle
@@ -201,6 +230,11 @@ const LandingScene: React.FC = () => {
           webglCanvasRef.current = gl.domElement;
         }}
       >
+        {/* Auto-scale DPR and throttle events when FPS drops */}
+        <PerformanceMonitor>
+          <AdaptiveDpr pixelated />
+        </PerformanceMonitor>
+        <AdaptiveEvents />
         <EventController isZoomedIn={isZoomedIn} />
         <CubicleScene
           onModelLoaded={() => setModelLoaded(true)}
@@ -210,6 +244,13 @@ const LandingScene: React.FC = () => {
           zoomOutTrigger={zoomOutTrigger}
         />
       </Canvas>
+
+      {/* "Click the screen" hint for first-time visitors */}
+      {showScreenHint && (
+        <div className="screen-hint" aria-live="polite">
+          Click the monitor to enter
+        </div>
+      )}
 
       {/* Full-screen OS overlay — mounts after zoom-in completes, fades in/out */}
       {osOverlayMounted && (

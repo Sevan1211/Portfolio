@@ -1,0 +1,55 @@
+.not-found {
+  width: 100vw;
+  height: 100vh;
+  background: #0000aa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.not-found__bsod {
+  max-width: 700px;
+  width: 100%;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.not-found__header {
+  display: inline-block;
+  background: #c0c0c0;
+  color: #0000aa;
+  padding: 2px 12px;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.not-found__header-text {
+  font-size: 18px;
+}
+
+.not-found__body p {
+  margin: 0;
+}
+
+.not-found__title {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.not-found__prompt {
+  margin-top: 1rem !important;
+}
+
+.not-found__cursor {
+  animation: bsodBlink 1s step-end infinite;
+}
+
+@keyframes bsodBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}

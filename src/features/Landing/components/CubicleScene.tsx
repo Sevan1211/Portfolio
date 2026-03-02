@@ -504,14 +504,14 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
                 intensity={2.2}
                 color="#fff5e6"
                 castShadow
-                shadow-mapSize-width={1024}
-                shadow-mapSize-height={1024}
-                shadow-camera-left={-20}
-                shadow-camera-right={20}
-                shadow-camera-top={20}
-                shadow-camera-bottom={-20}
-                shadow-camera-far={40}
-                shadow-bias={-0.0001}
+                shadow-mapSize-width={512}
+                shadow-mapSize-height={512}
+                shadow-camera-left={-15}
+                shadow-camera-right={15}
+                shadow-camera-top={15}
+                shadow-camera-bottom={-15}
+                shadow-camera-far={30}
+                shadow-bias={-0.0002}
             />
 
             {/* Fill light - soft blue from opposite side */}
@@ -528,16 +528,8 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
                 color="#ffeaa7"
             />
 
-            {/* Ambient light - subtle base illumination */}
-            <ambientLight intensity={0.4} color="#ffffff" />
-
-            {/* Hemisphere light for natural gradient lighting */}
-            <hemisphereLight
-                intensity={0.6}
-                color="#ffffff"
-                groundColor="#000000"
-                position={[0, 50, 0]}
-            />
+            {/* Ambient light - base illumination (boosted to compensate for removed hemisphere light) */}
+            <ambientLight intensity={0.6} color="#ffffff" />
 
             {/* Scene content hidden until loading complete — fog managed in useFrame */}
             <group visible={loadingComplete}>

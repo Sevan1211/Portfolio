@@ -53,13 +53,15 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
   }, []);
 
   const renderTarget = useMemo(() => {
-    const rt = new THREE.WebGLRenderTarget(512, 512);
+    const rt = new THREE.WebGLRenderTarget(256, 256);
     rt.texture.colorSpace = THREE.SRGBColorSpace;
     return rt;
   }, []);
 
   // Render the offscreen screensaver scene into the render target each frame
+  // Skip when zoomed in — screen is covered by the CSS overlay, no point rendering
   useFrame((state) => {
+    if (isZoomedIn) return;
     state.gl.setRenderTarget(renderTarget);
     state.gl.clear();
     state.gl.render(screenScene, screenCamera);
@@ -178,8 +180,8 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
             mesh.renderOrder = 1;
           }
           
-          // Enhanced material properties for better quality
-          standardMat.side = THREE.DoubleSide;
+          // FrontSide only — DoubleSide doubles fragment shader work
+          standardMat.side = THREE.FrontSide;
           standardMat.vertexColors = !!mesh.geometry.attributes.color;
           
           // Better default PBR values
@@ -200,7 +202,22 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
     }
 
     return () => {
-      // Render target disposal handled by separate useEffect
+      // Dispose cloned scene geometries & materials to prevent GPU memory leaks
+      clonedScene.traverse((child: THREE.Object3D) => {
+        if (child instanceof THREE.Mesh) {
+          child.geometry?.dispose();
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach((m) => {
+            if (m) {
+              // Dispose all texture maps
+              Object.values(m).forEach((val) => {
+                if (val instanceof THREE.Texture) val.dispose();
+              });
+              m.dispose();
+            }
+          });
+        }
+      });
     };
   // onLoaded intentionally read via ref — prevents re-running this heavy
   // effect (which disposes + reloads the screen texture) when the parent
@@ -263,6 +280,7 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
     const pointer = new THREE.Vector2();
     let frameRequested = false;
     let hovering = false;
+    let rafId = 0;
 
     const updatePointerFromEvent = (event: MouseEvent) => {
       const rect = gl.domElement.getBoundingClientRect();
@@ -310,7 +328,7 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
       updatePointerFromEvent(e);
       if (!frameRequested) {
         frameRequested = true;
-        requestAnimationFrame(runRaycast);
+        rafId = requestAnimationFrame(runRaycast);
       }
     };
 
@@ -335,6 +353,7 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('click', onClick);
+      cancelAnimationFrame(rafId);
     };
   }, [camera, gl.domElement, isZoomedIn, onScreenClick, isDragging]);
 

@@ -42,11 +42,16 @@ export function desktopReducer(state: DesktopState, action: DesktopAction): Desk
     }
 
     case 'CLOSE_WINDOW': {
+      const remaining = state.windows.filter(w => w.id !== action.windowId);
+      // Focus the topmost remaining window by z-index
+      const topWindow = remaining.length > 0
+        ? remaining.reduce((top, w) => (w.zIndex > top.zIndex ? w : top))
+        : null;
       return {
         ...state,
-        windows: state.windows.filter(w => w.id !== action.windowId),
-        activeWindowId: state.activeWindowId === action.windowId 
-          ? state.windows[state.windows.length - 2]?.id || null 
+        windows: remaining,
+        activeWindowId: state.activeWindowId === action.windowId
+          ? topWindow?.id ?? null
           : state.activeWindowId,
       };
     }
@@ -141,6 +146,36 @@ export function desktopReducer(state: DesktopState, action: DesktopAction): Desk
           }
         }),
       };
+    }
+
+    case 'CLAMP_WINDOWS': {
+      const { boundsWidth, boundsHeight } = action;
+      const updated = state.windows.map(w => {
+        // Maximized windows snap to new bounds
+        if (w.isMaximized) {
+          return { ...w, x: 0, y: 0, width: boundsWidth, height: boundsHeight };
+        }
+
+        const app = getApp(w.appId);
+        let { x, y, width, height } = w;
+
+        // Shrink window if it's larger than new viewport
+        if (width > boundsWidth) width = Math.max(app.minWidth, boundsWidth);
+        if (height > boundsHeight) height = Math.max(app.minHeight, boundsHeight);
+
+        // Push window back into view
+        if (x + width > boundsWidth) x = Math.max(0, boundsWidth - width);
+        if (y + height > boundsHeight) y = Math.max(0, boundsHeight - height);
+
+        if (x === w.x && y === w.y && width === w.width && height === w.height) {
+          return w; // no change — preserve reference
+        }
+        return { ...w, x, y, width, height };
+      });
+
+      // Skip state update if nothing changed
+      if (updated.every((w, i) => w === state.windows[i])) return state;
+      return { ...state, windows: updated };
     }
 
     default:

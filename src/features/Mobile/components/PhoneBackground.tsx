@@ -51,6 +51,14 @@ const Spinning7: React.FC = () => {
     [],
   );
 
+  // Dispose GPU resources on unmount
+  useEffect(() => {
+    return () => {
+      geometry.dispose();
+      material.dispose();
+    };
+  }, [geometry, material]);
+
   useEffect(() => {
     const mesh = meshRef.current;
     if (!mesh) return;
@@ -77,7 +85,7 @@ const Spinning7: React.FC = () => {
             font="/fonts/helvetiker_regular.typeface.json"
             size={1.7}
             height={0.2}
-            curveSegments={12}
+            curveSegments={6}
           >
             7
             <meshBasicMaterial color="#ffffff" />

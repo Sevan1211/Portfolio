@@ -12,13 +12,16 @@ interface LockScreenProps {
  */
 export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
   const [time, setTime] = useState(getTime());
-  const [dateStr] = useState(getDate());
+  const [dateStr, setDateStr] = useState(getDate());
   const startYRef = useRef<number | null>(null);
   const screenRef = useRef<HTMLDivElement>(null);
 
   /* ── Clock ── */
   useEffect(() => {
-    const id = setInterval(() => setTime(getTime()), 1000);
+    const id = setInterval(() => {
+      setTime(getTime());
+      setDateStr(getDate());
+    }, 1000);
     return () => clearInterval(id);
   }, []);
 

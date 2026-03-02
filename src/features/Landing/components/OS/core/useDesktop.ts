@@ -58,6 +58,10 @@ export const useDesktop = () => {
     );
   }, [dispatch]);
 
+  const clampWindows = useCallback((boundsWidth: number, boundsHeight: number) => {
+    dispatch({ type: 'CLAMP_WINDOWS', boundsWidth, boundsHeight });
+  }, [dispatch]);
+
   return {
     ...state,
     openApp,
@@ -67,5 +71,6 @@ export const useDesktop = () => {
     resizeWindow,
     minimizeWindow,
     toggleMaximizeWindow,
+    clampWindows,
   };
 };

@@ -71,6 +71,16 @@ export const Taskbar: React.FC = () => {
         </div>
 
         <div className="taskbar-clock">{formattedClock}</div>
+
+        <a
+          href="https://github.com/Sevan1211/Portfolio"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="taskbar-source"
+          title="View source on GitHub"
+        >
+          &lt;/&gt;
+        </a>
       </div>
 
       {startMenuOpen && (

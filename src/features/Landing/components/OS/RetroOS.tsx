@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import monitorShadowTexture from '@shared/assets/images/landing/shadow-compressed.png';
 import monitorSmudgesTexture from '@shared/assets/images/landing/smudges.jpg';
 import { DesktopProvider } from './core/DesktopProvider';
@@ -16,10 +16,33 @@ interface RetroOSProps {
 
 const OSDesktop: React.FC = () => {
   const { windows, activeWindowId, fullscreen } = useDesktopState();
+  const { clampWindows } = useDesktop();
+  const workspaceRef = useRef<HTMLDivElement>(null);
+
+  // When the browser/container resizes, clamp all windows to stay in bounds
+  const clampWindowsRef = useRef(clampWindows);
+  clampWindowsRef.current = clampWindows;
+
+  useEffect(() => {
+    const el = workspaceRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          clampWindowsRef.current(width, height);
+        }
+      }
+    });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className={`retro-os${fullscreen ? ' retro-os--fullscreen' : ''}`}>
-      <div className="retro-os-workspace">
+      <div className="retro-os-workspace" ref={workspaceRef}>
         <Desktop />
 
         {windows.map((desktopWindow) => (
@@ -62,7 +85,6 @@ export const RetroOS: React.FC<RetroOSProps> = React.memo(({ isZoomedIn, fullscr
         borderRadius: fullscreen ? '0' : '4px',
         boxSizing: 'border-box',
         transform: 'translateZ(0)',
-        willChange: 'auto',
         backfaceVisibility: 'hidden',
         perspective: '1000px',
         ...(fullscreen ? {} : { containIntrinsicSize: '1446px 1600px' }),
@@ -73,6 +95,7 @@ export const RetroOS: React.FC<RetroOSProps> = React.memo(({ isZoomedIn, fullscr
         <>
           {/* Static blue screen background (replaces old video) */}
           <div
+            aria-hidden="true"
             style={{
               position: 'absolute',
               top: 0,

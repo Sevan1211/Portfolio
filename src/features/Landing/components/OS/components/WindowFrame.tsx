@@ -20,6 +20,9 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
   } = useDesktop();
 
   const windowRef = useRef<HTMLDivElement>(null);
+  const windowStateRef = useRef(windowState);
+  windowStateRef.current = windowState;
+
   const dragStateRef = useRef<{
     isDragging: boolean;
     startX: number;
@@ -80,6 +83,12 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
     };
   }, [windowState.width, windowState.height, windowState.x, windowState.y, windowState.isMaximized]);
 
+  // Stable refs for dispatch actions so the effect never re-attaches
+  const moveWindowRef = useRef(moveWindow);
+  const resizeWindowRef = useRef(resizeWindow);
+  moveWindowRef.current = moveWindow;
+  resizeWindowRef.current = resizeWindow;
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (dragStateRef.current?.isDragging) {
@@ -89,20 +98,21 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
         const workspace = windowRef.current?.parentElement;
         const boundsWidth = workspace?.clientWidth ?? MONITOR_WIDTH;
         const boundsHeight = workspace?.clientHeight ?? DESKTOP_WORKSPACE_HEIGHT;
+        const ws = windowStateRef.current;
 
         const newX = Math.max(
           0,
-          Math.min(boundsWidth - windowState.width, dragStateRef.current.initialX + deltaX)
+          Math.min(boundsWidth - ws.width, dragStateRef.current.initialX + deltaX)
         );
         const newY = Math.max(
           0,
           Math.min(
-            boundsHeight - windowState.height,
+            boundsHeight - ws.height,
             dragStateRef.current.initialY + deltaY
           )
         );
         
-        moveWindow(windowState.id, newX, newY);
+        moveWindowRef.current(ws.id, newX, newY);
       }
 
       if (resizeStateRef.current?.isResizing) {
@@ -136,7 +146,7 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
 
         // Prevent dragging past left/top boundaries
         if (newX < 0) {
-          newWidth += newX; // newX is negative, so this reduces width
+          newWidth += newX;
           newX = 0;
           if (newWidth < app.minWidth) {
             newWidth = app.minWidth;
@@ -144,7 +154,7 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
         }
 
         if (newY < 0) {
-          newHeight += newY; // newY is negative
+          newHeight += newY;
           newY = 0;
           if (newHeight < app.minHeight) {
             newHeight = app.minHeight;
@@ -158,9 +168,10 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
         newWidth = Math.min(newWidth, boundsWidth - newX);
         newHeight = Math.min(newHeight, boundsHeight - newY);
 
-        resizeWindow(windowState.id, newWidth, newHeight);
-        if (newX !== windowState.x || newY !== windowState.y) {
-          moveWindow(windowState.id, newX, newY);
+        const ws = windowStateRef.current;
+        resizeWindowRef.current(ws.id, newWidth, newHeight);
+        if (newX !== ws.x || newY !== ws.y) {
+          moveWindowRef.current(ws.id, newX, newY);
         }
       }
     };
@@ -177,7 +188,7 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [windowState.id, windowState.width, windowState.height, windowState.x, windowState.y, moveWindow, resizeWindow, app.minWidth, app.minHeight]);
+  }, [app.minWidth, app.minHeight]); // Stable — window state read via refs
 
   const style: React.CSSProperties = {
     position: 'absolute',

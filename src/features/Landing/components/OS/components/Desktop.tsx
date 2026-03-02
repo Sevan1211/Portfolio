@@ -18,6 +18,10 @@ export const Desktop: React.FC = () => {
               key={app.id}
               className="desktop-icon"
               onDoubleClick={() => openApp(app.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') openApp(app.id);
+              }}
+              aria-label={`Open ${app.title}`}
             >
               <div className="desktop-icon__image">
                 {isComponent ? (

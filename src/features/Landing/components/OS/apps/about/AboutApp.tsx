@@ -40,14 +40,16 @@ export const AboutApp: React.FC = () => {
           <div className="about-sidebar">
             <div className="nav-menu">
               {TABS.map(({ id, label, Icon }) => (
-                <div
+                <button
                   key={id}
                   className={`nav-item ${activeTab === id ? 'active' : ''}`}
                   onClick={() => setActiveTab(id)}
+                  aria-selected={activeTab === id}
+                  role="tab"
                 >
                   <Icon className="nav-item-icon" />
                   <span>{label}</span>
-                </div>
+                </button>
               ))}
             </div>
 

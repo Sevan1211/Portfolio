@@ -50,5 +50,6 @@ export type DesktopAction =
   | { type: 'MOVE_WINDOW'; windowId: string; x: number; y: number }
   | { type: 'RESIZE_WINDOW'; windowId: string; width: number; height: number }
   | { type: 'MINIMIZE_WINDOW'; windowId: string }
-  | { type: 'TOGGLE_MAXIMIZE_WINDOW'; windowId: string; bounds?: { width: number; height: number } };
+  | { type: 'TOGGLE_MAXIMIZE_WINDOW'; windowId: string; bounds?: { width: number; height: number } }
+  | { type: 'CLAMP_WINDOWS'; boundsWidth: number; boundsHeight: number };
 

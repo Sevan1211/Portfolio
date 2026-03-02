@@ -104,6 +104,33 @@
   min-width: 110px;
 }
 
+/* Taskbar Source Link */
+.taskbar-source {
+  height: calc(var(--taskbar-height, 48px) - 28px);
+  padding: 0 14px;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #fff #808080 #808080 #fff;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.taskbar-source:hover {
+  background: #d4d4d4;
+}
+
+.taskbar-source:active {
+  border-color: #808080 #fff #fff #808080;
+}
+
 /* Start Menu */
 .start-menu {
   position: absolute;

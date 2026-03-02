@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Text3D, Center } from '@react-three/drei';
 import * as THREE from 'three';
 
-const PARTICLE_COUNT = 2000;
+const PARTICLE_COUNT = 1200;
 const PARTICLE_COLOR = new THREE.Color('#ffffff');
 const PARTICLE_SIZE = 0.03;
 
@@ -18,7 +18,7 @@ const PHI_MIN = 10 * DEG2RAD;
 const PHI_MAX = 170 * DEG2RAD;
 
 /**
- * Precompute all 2000 particle transforms into a single Float32Array.
+ * Precompute all particle transforms into a single Float32Array.
  * This runs once at module load — zero cost at render time.
  */
 const particleMatrices = (() => {
@@ -52,10 +52,13 @@ export const LoadingScene: React.FC = () => {
   const geometry = useMemo(() => new THREE.BoxGeometry(PARTICLE_SIZE, PARTICLE_SIZE, PARTICLE_SIZE), []);
   const material = useMemo(() => new THREE.MeshBasicMaterial({ color: PARTICLE_COLOR }), []);
 
-  // Set instance matrices on first render
-  useMemo(() => {
-    // This will be applied via ref in the effect below
-  }, []);
+  // Dispose GPU resources on unmount
+  React.useEffect(() => {
+    return () => {
+      geometry.dispose();
+      material.dispose();
+    };
+  }, [geometry, material]);
 
   useFrame((_state, delta) => {
     if (groupRef.current) {
@@ -85,7 +88,7 @@ export const LoadingScene: React.FC = () => {
             font="/fonts/helvetiker_regular.typeface.json"
             size={1.7}
             height={0.2}
-            curveSegments={12}
+            curveSegments={6}
           >
             7
             <meshBasicMaterial color="#ffffff" />

@@ -1,10 +1,15 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { AdaptiveDpr, AdaptiveEvents, PerformanceMonitor } from '@react-three/drei';
-import * as THREE from 'three';
+import { ACESFilmicToneMapping, PCFShadowMap, SRGBColorSpace } from 'three';
 import { CubicleScene } from './CubicleScene';
 import { LoadingScene } from './loading/LoadingScene';
-import { RetroOS } from './OS';
+
+// Lazy-load the RetroOS — it mounts only after the zoom-in animation completes,
+// so the chunk download is fully hidden behind the user interaction delay.
+const RetroOS = React.lazy(() =>
+  import('./OS').then(m => ({ default: m.RetroOS }))
+);
 
 // Component to dynamically control R3F event system
 interface EventManager {
@@ -25,6 +30,7 @@ const EventController: React.FC<{ isZoomedIn: boolean }> = ({ isZoomedIn }) => {
 
 const LOADING_MIN_TIME = 3000;
 const FADE_DURATION = 750;
+const SETTLE_FRAMES = 15; // ~250ms at 60fps — allows GPU to finish shader compilation
 
 const LandingScene: React.FC = () => {
   const [loadingComplete, setLoadingComplete] = useState(false);
@@ -42,42 +48,60 @@ const LandingScene: React.FC = () => {
   const minLoadTimePassed = useRef(false);
   const renderSettled = useRef(false);
 
+  // Dismiss the page-cover once the loading scene has actually rendered.
+  // Double-rAF guarantees the browser has composited at least one frame
+  // with the visible "7" before the cover disappears.
+  const handleLoadingReady = useCallback(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const cover = document.getElementById('page-cover');
+        if (cover) cover.style.display = 'none';
+      });
+    });
+  }, []);
+
   // Canvas refs
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const webglCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Handle model loaded — wait for 2 animation frames to ensure GPU has composited
+  // Wait for enough animation frames after the model becomes visible (warm-up)
+  // so the GPU has time to compile all material/shadow shaders.
+  // The loading overlay stays fully opaque during this period.
   useEffect(() => {
     if (modelLoaded && !renderSettled.current) {
-      // Double-rAF: first rAF queues the paint, second rAF fires after the paint
-      const id1 = requestAnimationFrame(() => {
-        const id2 = requestAnimationFrame(() => {
+      let frameCount = 0;
+      let rafId = 0;
+
+      const tick = () => {
+        frameCount++;
+        if (frameCount >= SETTLE_FRAMES) {
           renderSettled.current = true;
           setSceneReady(true);
-        });
-        // Store inner ID for cleanup
-        innerFrameId.current = id2;
-      });
-      let innerFrameId = { current: 0 };
-      return () => {
-        cancelAnimationFrame(id1);
-        cancelAnimationFrame(innerFrameId.current);
+        } else {
+          rafId = requestAnimationFrame(tick);
+        }
       };
+
+      rafId = requestAnimationFrame(tick);
+      return () => cancelAnimationFrame(rafId);
     }
     return undefined;
   }, [modelLoaded]);
 
-  // Handle loading completion after minimum time and scene is ready
+  // Minimum loading time — runs once on mount. Fires completeLoading when
+  // the timer expires if the scene has already settled; otherwise the
+  // sceneReady effect below will fire it.
   useEffect(() => {
     const minLoadTime = setTimeout(() => {
       minLoadTimePassed.current = true;
-      if (sceneReady) {
+      if (renderSettled.current) {
         completeLoading();
       }
     }, LOADING_MIN_TIME);
 
     return () => clearTimeout(minLoadTime);
-  }, [sceneReady]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally mount-only — completeLoading uses refs and stable setters
 
   useEffect(() => {
     if (sceneReady && minLoadTimePassed.current) {
@@ -174,20 +198,16 @@ const LandingScene: React.FC = () => {
           <Canvas
             camera={{ position: [0, 0, 8], fov: 50 }}
             style={{ width: '100%', height: '100%' }}
-            gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+            dpr={1}
+            gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
             onCreated={({ gl }) => {
               // Force-paint the canvas blue RIGHT NOW, before R3F's render loop starts.
               gl.setClearColor(0x1e3a8a, 1);
               gl.clear();
-
-              // Dismiss the page-cover immediately — the loading overlay div (with
-              // background:#1e3a8a) is already behind us so there's no visual gap.
-              const cover = document.getElementById('page-cover');
-              if (cover) cover.style.display = 'none';
             }}
           >
             <color attach="background" args={['#1e3a8a']} />
-            <LoadingScene />
+            <LoadingScene onReady={handleLoadingReady} />
           </Canvas>
         </div>
       )}
@@ -209,8 +229,8 @@ const LandingScene: React.FC = () => {
         }}
         onCreated={({ gl, camera }) => {
           // Enhanced color and tone mapping
-          gl.outputColorSpace = THREE.SRGBColorSpace;
-          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.outputColorSpace = SRGBColorSpace;
+          gl.toneMapping = ACESFilmicToneMapping;
           gl.toneMappingExposure = 1.1; // Slightly brighter for better visibility
 
           // Blue background matching loading scene — transitions to black when scene is ready.
@@ -220,7 +240,7 @@ const LandingScene: React.FC = () => {
 
           // Better shadow quality
           gl.shadowMap.enabled = true;
-          gl.shadowMap.type = THREE.PCFShadowMap; // Faster than PCFSoftShadowMap
+          gl.shadowMap.type = PCFShadowMap; // Faster than PCFSoftShadowMap
 
           // Set camera rotation immediately in onCreated (before first frame)
           // This prevents 1-2 frames of wrong camera angle
@@ -239,6 +259,7 @@ const LandingScene: React.FC = () => {
         <CubicleScene
           onModelLoaded={() => setModelLoaded(true)}
           loadingComplete={loadingComplete}
+          warmUp={modelLoaded}
           onZoomChange={setIsZoomedIn}
           onZoomComplete={handleZoomComplete}
           zoomOutTrigger={zoomOutTrigger}
@@ -264,7 +285,9 @@ const LandingScene: React.FC = () => {
               : 'opacity 0.15s ease',
           }}
         >
-          <RetroOS isZoomedIn={true} fullscreen={true} />
+          <React.Suspense fallback={<div style={{ width: '100%', height: '100%', background: '#1e3a8a' }} />}>
+            <RetroOS isZoomedIn={true} fullscreen={true} />
+          </React.Suspense>
         </div>
       )}
     </div>

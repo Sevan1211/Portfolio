@@ -1,8 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import '../style/landing.css';
 import LandingScene from './LandingScene';
-import { MobileLanding } from '../../Mobile/MobileLanding';
 import { useIsMobile } from '@shared/hooks/useIsMobile';
+
+// Lazy-load mobile path — desktop users never download this code
+const MobileLanding = React.lazy(() =>
+  import('../../Mobile/MobileLanding').then(m => ({ default: m.MobileLanding }))
+);
 
 const Landing: React.FC = () => {
   const isMobile = useIsMobile();
@@ -35,7 +39,11 @@ const Landing: React.FC = () => {
   }, [isMobile]);
 
   if (isMobile) {
-    return <MobileLanding />;
+    return (
+      <Suspense fallback={<div style={{ width: '100%', height: '100%', background: '#1e3a8a' }} />}>
+        <MobileLanding />
+      </Suspense>
+    );
   }
 
   return (

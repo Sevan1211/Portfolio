@@ -107,14 +107,10 @@
 /* Taskbar Source Link */
 .taskbar-source {
   height: calc(var(--taskbar-height, 48px) - 28px);
-  padding: 0 14px;
+  padding: 0 12px;
   background: #c0c0c0;
   border: 2px solid;
   border-color: #fff #808080 #808080 #fff;
-  color: #000;
-  font-size: 16px;
-  font-weight: 700;
-  font-family: 'Fira Code', 'Courier New', monospace;
   display: flex;
   align-items: center;
   justify-content: center;

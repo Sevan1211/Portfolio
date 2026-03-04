@@ -3,7 +3,7 @@ import { useDesktop } from '../core/useDesktop';
 import { getAllApps } from '../core/appRegistry';
 
 export const Desktop: React.FC = () => {
-  const { openApp } = useDesktop();
+  const { openApp, windows } = useDesktop();
   const apps = getAllApps();
 
   return (
@@ -12,11 +12,16 @@ export const Desktop: React.FC = () => {
         {apps.map((app) => {
           const IconComponent = app.icon;
           const isComponent = typeof IconComponent !== 'string';
+          const existingWindow = windows.find(w => w.appId === app.id);
 
           return (
             <button
               key={app.id}
               className="desktop-icon"
+              onClick={() => {
+                // Single click restores an already-open (possibly minimized) window
+                if (existingWindow) openApp(app.id);
+              }}
               onDoubleClick={() => openApp(app.id)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') openApp(app.id);

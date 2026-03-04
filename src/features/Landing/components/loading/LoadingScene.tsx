@@ -1,11 +1,15 @@
 import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text3D, Center } from '@react-three/drei';
-import * as THREE from 'three';
+import { BoxGeometry, Color, Group, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, Object3D } from 'three';
 
 const PARTICLE_COUNT = 1200;
-const PARTICLE_COLOR = new THREE.Color('#ffffff');
+const PARTICLE_COLOR = new Color('#ffffff');
 const PARTICLE_SIZE = 0.03;
+
+// Frames to render with the "7" visible before firing onReady.
+// This gives the GPU time to present the frame before the page-cover goes away.
+const VISIBLE_SETTLE_FRAMES = 3;
 
 // Seeded random for deterministic particle positions
 const seededRandom = (seed: number): number => {
@@ -22,9 +26,9 @@ const PHI_MAX = 170 * DEG2RAD;
  * This runs once at module load — zero cost at render time.
  */
 const particleMatrices = (() => {
-  const dummy = new THREE.Object3D();
+  const dummy = new Object3D();
   const matrices = new Float32Array(PARTICLE_COUNT * 16);
-  const mat = new THREE.Matrix4();
+  const mat = new Matrix4();
 
   for (let i = 0; i < PARTICLE_COUNT; i++) {
     const r1 = seededRandom(i);
@@ -44,13 +48,18 @@ const particleMatrices = (() => {
   return matrices;
 })();
 
-export const LoadingScene: React.FC = () => {
-  const groupRef = useRef<THREE.Group>(null);
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+export const LoadingScene: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
+  const groupRef = useRef<Group>(null);
+  const meshRef = useRef<InstancedMesh>(null);
+  const textRef = useRef<Mesh>(null);
+  const readyFired = useRef(false);
+  const visibleFrames = useRef(0);
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
 
   // Apply precomputed matrices to InstancedMesh once on mount
-  const geometry = useMemo(() => new THREE.BoxGeometry(PARTICLE_SIZE, PARTICLE_SIZE, PARTICLE_SIZE), []);
-  const material = useMemo(() => new THREE.MeshBasicMaterial({ color: PARTICLE_COLOR }), []);
+  const geometry = useMemo(() => new BoxGeometry(PARTICLE_SIZE, PARTICLE_SIZE, PARTICLE_SIZE), []);
+  const material = useMemo(() => new MeshBasicMaterial({ color: PARTICLE_COLOR }), []);
 
   // Dispose GPU resources on unmount
   React.useEffect(() => {
@@ -64,6 +73,29 @@ export const LoadingScene: React.FC = () => {
     if (groupRef.current) {
       groupRef.current.rotation.y += delta * 0.3;
     }
+
+    if (readyFired.current) return;
+
+    const group = groupRef.current;
+    if (!group) return;
+
+    // Phase 1: wait for Text3D font to load and produce geometry
+    if (!group.visible) {
+      const geo = textRef.current?.geometry;
+      if (geo?.attributes?.position && geo.attributes.position.count > 0) {
+        // Geometry exists — make visible. R3F will render it THIS frame.
+        group.visible = true;
+      }
+      return;
+    }
+
+    // Phase 2: group is visible; count frames the GPU has actually rendered it
+    visibleFrames.current++;
+    if (visibleFrames.current >= VISIBLE_SETTLE_FRAMES) {
+      readyFired.current = true;
+      // Fire onReady — the caller uses double-rAF to guarantee browser paint
+      onReadyRef.current?.();
+    }
   });
 
   // Apply all instance transforms in one shot
@@ -71,7 +103,7 @@ export const LoadingScene: React.FC = () => {
     const mesh = meshRef.current;
     if (!mesh) return;
 
-    const mat = new THREE.Matrix4();
+    const mat = new Matrix4();
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       mat.fromArray(particleMatrices, i * 16);
       mesh.setMatrixAt(i, mat);
@@ -82,9 +114,10 @@ export const LoadingScene: React.FC = () => {
   return (
     <>
       <ambientLight intensity={0.6} />
-      <group ref={groupRef}>
+      <group ref={groupRef} visible={false}>
         <Center>
           <Text3D
+            ref={textRef}
             font="/fonts/helvetiker_regular.typeface.json"
             size={1.7}
             height={0.2}

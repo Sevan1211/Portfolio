@@ -15,6 +15,7 @@ import {
   FRIGHTENED_DURATION, SCATTER_DURATION, CHASE_DURATION,
   DYING_DURATION, LEVEL_COMPLETE_DURATION,
   LEVEL_ALGORITHMS, LEVEL_SPEED_MULTIPLIER,
+  GHOST_RELEASE_DELAYS,
 } from './constants';
 import {
   getMaze, getMazeDimensions, getPacmanStart,
@@ -86,7 +87,6 @@ function getScatterTargets(
 }
 
 const GHOST_ORDER: GhostName[] = ['blinky', 'pinky', 'inky', 'clyde'];
-const GHOST_HOME_RELEASE_DELAY = 0;
 const GHOST_RESPAWN_DELAY = 180;
 
 function getGhostHomeSlot(
@@ -121,7 +121,7 @@ export function initLevel(level: number, score: number, lives: number): GameStat
       frightenedTimer: 0,
       scatterTarget: scatterTargets[name],
       isInHouse: true,
-      releaseTimer: GHOST_HOME_RELEASE_DELAY,
+      releaseTimer: GHOST_RELEASE_DELAYS[name] ?? 120,
     };
   });
 
@@ -555,13 +555,14 @@ function checkCollisions(s: GameState): GameState {
     if (dist < TILE_SIZE * 0.8) {
       if (ghost.mode === 'frightened') {
         // Eat ghost — respawn inside the ghost house
+        // Stay in house until at least the frightened period ends
         const respawnPos = getGhostHomeSlot(ghostHomeInfo.house, ghostHomeInfo.entrance, ghost.name);
         const newGhosts = [...s.ghosts];
         newGhosts[i] = {
           ...ghost,
           mode: 'chase',
           isInHouse: true,
-          releaseTimer: GHOST_RESPAWN_DELAY,
+          releaseTimer: Math.max(GHOST_RESPAWN_DELAY, ghost.frightenedTimer),
           pos: { ...respawnPos },
           pixelPos: {
             x: respawnPos.x * TILE_SIZE + TILE_SIZE / 2,

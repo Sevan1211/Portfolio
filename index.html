@@ -39,8 +39,11 @@
     <meta name="twitter:description" content="Full-Stack Software Developer — React, TypeScript, Go, Python. View my projects and experience." />
     <meta name="twitter:image" content="https://sevanlewispayne.com/blue_and_white_logo.png" />
 
-    <!-- Preload 3D model so it starts downloading before React mounts -->
-    <link rel="preload" href="/models/low_poly_90s_office_cubicle.glb" as="fetch" crossorigin="anonymous" />
+    <!-- Prefetch 3D model so it starts downloading before React mounts.
+         Using prefetch (not preload) avoids blocking the parser while still
+         warming the HTTP cache for faster useGLTF resolution. -->
+    <link rel="prefetch" href="/models/low_poly_90s_office_cubicle.glb" as="fetch" crossorigin="anonymous" />
+    <link rel="preload" href="/fonts/helvetiker_regular.typeface.json" as="fetch" />
     
     <style>
       /* Reset and base styles */

@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect } from 'react';
+import React, { Suspense, useRef, useCallback, useEffect } from 'react';
 import { WindowState } from '../core/types';
 import { useDesktop } from '../core/useDesktop';
 import { getApp } from '../core/appRegistry';
@@ -255,7 +255,13 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
       </div>
 
       <div className="window-content">
-        <AppComponent />
+        <Suspense fallback={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#999', fontFamily: 'var(--font-mono)', fontSize: '14px' }}>
+            Loading…
+          </div>
+        }>
+          <AppComponent />
+        </Suspense>
       </div>
 
       {/* Resize handles */}

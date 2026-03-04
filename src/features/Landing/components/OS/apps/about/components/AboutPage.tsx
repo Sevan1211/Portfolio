@@ -18,7 +18,7 @@ export const AboutPage: React.FC = () => (
   >
     <div className="hero-section">
       <h2 className="section-title">Welcome</h2>
-      <p className="tagline">Full-Stack Developer · Problem Solver · Carpe Diem</p>
+      <p className="tagline">Software Engineer · Data Engineer · Problem Solver</p>
     </div>
 
     {/* About Me + Photo */}
@@ -29,17 +29,18 @@ export const AboutPage: React.FC = () => (
           <h3>About Me</h3>
         </div>
         <p>
-          Hey, I'm Sevan Lewis-Payne. I'm a full-stack developer and analytical
-          problem solver based in Omaha, NE. I'm currently pursuing a double
-          major in <strong>Computer Science</strong> and{' '}
+          Hey, I'm Sevan Lewis-Payne. I'm a software engineer and data engineer
+          based in Omaha, NE. I'm currently pursuing a double major in{' '}
+          <strong>Computer Science</strong> and{' '}
           <strong>Artificial Intelligence</strong> at the University of Nebraska
           Omaha, graduating in May 2027.
         </p>
         <p>
           I love breaking problems down to their core, figuring out how all the
           pieces fit together, and building toward the best solution. Whether
-          it's a responsive UI, a data pipeline, or a 3D scene running in the
-          browser, I enjoy the process of going from idea to something real.
+          it's a data pipeline in Snowflake, a full-stack web app, or a 3D
+          scene running in the browser, I enjoy the process of going from idea
+          to something real.
         </p>
         <p>
           My journey into tech started early. I was programming LEGO robots as

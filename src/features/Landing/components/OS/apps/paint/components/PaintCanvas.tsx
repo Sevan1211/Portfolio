@@ -9,7 +9,7 @@ interface PaintCanvasProps {
   brushSize: number;
   onCursorMove: (pos: { x: number; y: number } | null) => void;
   onColorPicked: (hex: string) => void;
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  canvasRef: React.RefObject<HTMLCanvasElement>;
   undoStack: React.MutableRefObject<ImageData[]>;
   redoStack: React.MutableRefObject<ImageData[]>;
   onHistoryChange: () => void;

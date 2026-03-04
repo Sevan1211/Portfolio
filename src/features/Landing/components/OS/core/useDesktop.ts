@@ -27,7 +27,13 @@ export const useDesktop = () => {
     if (existingWindow) {
       dispatch({ type: 'FOCUS_WINDOW', windowId: existingWindow.id });
     } else {
-      dispatch({ type: 'OPEN_APP', appId });
+      // Use current viewport dimensions so window sizes adapt to any screen
+      dispatch({
+        type: 'OPEN_APP',
+        appId,
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+      });
     }
   }, [dispatch, state.windows]);
 

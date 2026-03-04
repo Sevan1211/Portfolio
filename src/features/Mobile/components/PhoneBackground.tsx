@@ -1,11 +1,11 @@
 import React, { useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Text3D, Center } from '@react-three/drei';
-import * as THREE from 'three';
+import { BoxGeometry, Color, Group, InstancedMesh, Matrix4, MeshBasicMaterial, Object3D } from 'three';
 
 /* ── Particles (matches LoadingScene) ── */
 const PARTICLE_COUNT = 1200;
-const PARTICLE_COLOR = new THREE.Color('#ffffff');
+const PARTICLE_COLOR = new Color('#ffffff');
 const PARTICLE_SIZE = 0.03;
 
 const seededRandom = (seed: number): number => {
@@ -18,9 +18,9 @@ const PHI_MIN = 10 * DEG2RAD;
 const PHI_MAX = 170 * DEG2RAD;
 
 const particleMatrices = (() => {
-  const dummy = new THREE.Object3D();
+  const dummy = new Object3D();
   const matrices = new Float32Array(PARTICLE_COUNT * 16);
-  const mat = new THREE.Matrix4();
+  const mat = new Matrix4();
 
   for (let i = 0; i < PARTICLE_COUNT; i++) {
     const r1 = seededRandom(i);
@@ -39,15 +39,15 @@ const particleMatrices = (() => {
 
 /* ── Inner scene ── */
 const Spinning7: React.FC = () => {
-  const groupRef = useRef<THREE.Group>(null);
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const groupRef = useRef<Group>(null);
+  const meshRef = useRef<InstancedMesh>(null);
 
   const geometry = useMemo(
-    () => new THREE.BoxGeometry(PARTICLE_SIZE, PARTICLE_SIZE, PARTICLE_SIZE),
+    () => new BoxGeometry(PARTICLE_SIZE, PARTICLE_SIZE, PARTICLE_SIZE),
     [],
   );
   const material = useMemo(
-    () => new THREE.MeshBasicMaterial({ color: PARTICLE_COLOR }),
+    () => new MeshBasicMaterial({ color: PARTICLE_COLOR }),
     [],
   );
 
@@ -62,7 +62,7 @@ const Spinning7: React.FC = () => {
   useEffect(() => {
     const mesh = meshRef.current;
     if (!mesh) return;
-    const mat = new THREE.Matrix4();
+    const mat = new Matrix4();
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       mat.fromArray(particleMatrices, i * 16);
       mesh.setMatrixAt(i, mat);

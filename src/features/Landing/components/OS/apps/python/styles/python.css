@@ -1,0 +1,324 @@
+/* ══════════════════════════════════════
+   Python IDE – Win95-Retro Styles
+   ══════════════════════════════════════ */
+
+/* ── App shell ─────────────────────── */
+.py-app {
+  background: #c0c0c0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 12px;
+  color: #000;
+  overflow: hidden;
+}
+
+/* ── Toolbar ───────────────────────── */
+.py-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px;
+  background: #c0c0c0;
+  border-bottom: 2px solid;
+  border-bottom-color: #808080;
+  min-height: 28px;
+}
+
+.py-toolbar__btn {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #fff #000 #000 #fff;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 10px;
+  cursor: pointer;
+  color: #000;
+  white-space: nowrap;
+  min-height: 22px;
+}
+
+.py-toolbar__btn:hover:not(:disabled) {
+  background: #d4d0c8;
+}
+
+.py-toolbar__btn:active:not(:disabled) {
+  border-color: #000 #fff #fff #000;
+  padding: 3px 9px 1px 11px;
+}
+
+.py-toolbar__btn:disabled {
+  color: #808080;
+  cursor: default;
+}
+
+.py-toolbar__spacer {
+  flex: 1;
+}
+
+.py-toolbar__status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #444;
+  padding-right: 6px;
+}
+
+.py-toolbar__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid #808080;
+}
+
+.py-toolbar__dot--idle,
+.py-toolbar__dot--loading {
+  background: #c0c000;
+}
+
+.py-toolbar__dot--ready {
+  background: #00c000;
+}
+
+.py-toolbar__dot--running {
+  background: #c0c000;
+  animation: py-pulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes py-pulse {
+  from { opacity: 1; }
+  to   { opacity: 0.3; }
+}
+
+/* ── Layout (editor + output) ──────── */
+.py-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 4px;
+  gap: 4px;
+}
+
+/* ── Code Editor ───────────────────── */
+.py-editor {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #fffef8;
+}
+
+.py-editor__gutter {
+  width: 36px;
+  min-width: 36px;
+  background: #e8e8e0;
+  border-right: 1px solid #c0c0b0;
+  overflow: hidden;
+  padding: 4px 0;
+  user-select: none;
+}
+
+.py-editor__linenum {
+  height: 18px;
+  line-height: 18px;
+  text-align: right;
+  padding-right: 6px;
+  font-size: 11px;
+  color: #888;
+  font-family: 'Courier New', monospace;
+}
+
+/* Overlay container — stacks highlight + textarea */
+.py-editor__code {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shared font metrics for perfect alignment */
+.py-editor__highlight,
+.py-editor__textarea {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 4px 6px;
+  border: none;
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  tab-size: 4;
+  white-space: pre;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+/* Highlighted code (below) */
+.py-editor__highlight {
+  pointer-events: none;
+  color: #333;
+  background: transparent;
+  z-index: 1;
+}
+
+.py-hl-line {
+  min-height: 18px;
+}
+
+/* Textarea (above, transparent text) */
+.py-editor__textarea {
+  background: transparent;
+  color: transparent;
+  caret-color: #000;
+  resize: none;
+  outline: none;
+  z-index: 2;
+  -webkit-text-fill-color: transparent;
+}
+
+.py-editor__textarea::placeholder {
+  -webkit-text-fill-color: #aaa;
+  color: #aaa;
+}
+
+.py-editor__textarea::selection {
+  background: rgba(0, 0, 128, 0.2);
+  -webkit-text-fill-color: transparent;
+}
+
+.py-editor__textarea:disabled {
+  opacity: 0.6;
+}
+
+/* ── Syntax Highlighting Colors ────── */
+/* Classic IDE palette for light background */
+.py-hl-keyword   { color: #0000cc; font-weight: bold; }  /* blue — keywords */
+.py-hl-builtin   { color: #6a0dad; }                      /* purple — builtins */
+.py-hl-string    { color: #a31515; }                      /* red — strings */
+.py-hl-comment   { color: #008000; font-style: italic; }  /* green — comments */
+.py-hl-number    { color: #b5740b; }                      /* orange — numbers */
+.py-hl-func      { color: #795e26; }                      /* brown — function calls */
+.py-hl-self      { color: #c71585; font-style: italic; }  /* magenta — self */
+.py-hl-decorator { color: #6a0dad; }                      /* purple — decorators */
+.py-hl-operator  { color: #444; }                          /* dark gray — operators */
+.py-hl-punct     { color: #666; }                          /* gray — punctuation */
+
+/* ── Output Panel ──────────────────── */
+.py-output {
+  flex: 0 0 35%;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.py-output__title {
+  font-size: 11px;
+  font-weight: bold;
+  color: #000;
+  padding: 0 2px 2px;
+}
+
+.py-output__content {
+  flex: 1;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #000;
+  padding: 6px 8px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.py-output__empty {
+  color: #555;
+  font-style: italic;
+}
+
+.py-output__line {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.py-output__line--stdout {
+  color: #c0c0c0;
+}
+
+.py-output__line--stderr {
+  color: #ff6666;
+}
+
+.py-output__line--info {
+  color: #00c0c0;
+}
+
+.py-output__line--result {
+  color: #00ff00;
+}
+
+/* ── Loading Overlay ───────────────── */
+.py-loading {
+  position: absolute;
+  inset: 0;
+  background: #c0c0c0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.py-loading__box {
+  text-align: center;
+  padding: 24px 32px;
+  border: 2px solid;
+  border-color: #fff #000 #000 #fff;
+  background: #c0c0c0;
+  min-width: 240px;
+}
+
+.py-loading__icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.py-loading__text {
+  font-size: 13px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 12px;
+}
+
+.py-loading__bar-track {
+  height: 18px;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #fff;
+  padding: 2px;
+}
+
+.py-loading__bar-fill {
+  height: 100%;
+  background: #000080;
+  animation: py-loading-fill 8s linear infinite;
+}
+
+@keyframes py-loading-fill {
+  0%   { width: 0%; }
+  80%  { width: 92%; }
+  100% { width: 100%; }
+}
+
+.py-loading__hint {
+  margin-top: 8px;
+  font-size: 10px;
+  color: #666;
+}

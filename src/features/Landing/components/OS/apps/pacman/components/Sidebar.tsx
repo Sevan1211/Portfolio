@@ -11,70 +11,58 @@ export const Sidebar: React.FC<SidebarProps> = ({ state }) => {
 
   return (
     <div className="pm-sidebar">
-      {/* Score */}
-      <div className="pm-sidebar__section">
-        <div className="pm-sidebar__label">SCORE</div>
-        <div className="pm-sidebar__value pm-sidebar__value--score">
-          {String(state.score).padStart(6, '0')}
+      {/* Score panel */}
+      <div className="pm-panel">
+        <div className="pm-panel__title">Score</div>
+        <div className="pm-panel__inset">
+          <span className="pm-score">{String(state.score).padStart(6, '0')}</span>
         </div>
       </div>
 
-      {/* High Score */}
-      <div className="pm-sidebar__section">
-        <div className="pm-sidebar__label">HIGH SCORE</div>
-        <div className="pm-sidebar__value pm-sidebar__value--high">
-          {String(Math.max(highScore, state.score)).padStart(6, '0')}
+      {/* High Score panel */}
+      <div className="pm-panel">
+        <div className="pm-panel__title">Hi-Score</div>
+        <div className="pm-panel__inset">
+          <span className="pm-score pm-score--hi">
+            {String(Math.max(highScore, state.score)).padStart(6, '0')}
+          </span>
         </div>
       </div>
 
-      {/* Level */}
-      <div className="pm-sidebar__section">
-        <div className="pm-sidebar__label">LEVEL</div>
-        <div className="pm-sidebar__value">{state.level} / 4</div>
-      </div>
-
-      {/* Lives */}
-      <div className="pm-sidebar__section">
-        <div className="pm-sidebar__label">LIVES</div>
-        <div className="pm-sidebar__lives">
-          {Array.from({ length: state.lives }).map((_, i) => (
-            <span key={i} className="pm-sidebar__life">
-              {/* Pac-Man icon */}
-              <svg width="18" height="18" viewBox="0 0 20 20">
-                <path
-                  d="M10 0 A10 10 0 1 1 10 20 A10 10 0 1 1 10 0 Z"
-                  fill="#FFFF00"
-                />
-                <path
-                  d="M10 10 L20 4 L20 16 Z"
-                  fill="#000"
-                />
-              </svg>
-            </span>
-          ))}
+      {/* Level panel */}
+      <div className="pm-panel">
+        <div className="pm-panel__title">Level</div>
+        <div className="pm-panel__inset">
+          <div className="pm-level-pips">
+            {[1, 2, 3, 4].map(l => (
+              <div
+                key={l}
+                className={`pm-pip ${l <= state.level ? 'pm-pip--filled' : ''} ${l === state.level ? 'pm-pip--current' : ''}`}
+              />
+            ))}
+          </div>
+          <span className="pm-level-text">{state.level} / 4</span>
         </div>
       </div>
 
-      {/* Ghost AI */}
-      <div className="pm-sidebar__section">
-        <div className="pm-sidebar__label">GHOST AI</div>
-        <div className="pm-sidebar__value pm-sidebar__value--ai">
-          {ALGORITHM_LABELS[state.algorithm]}
+      {/* Lives panel */}
+      <div className="pm-panel">
+        <div className="pm-panel__title">Lives</div>
+        <div className="pm-panel__inset">
+          <div className="pm-lives">
+            {Array.from({ length: state.lives }).map((_, i) => (
+              <span key={i} className="pm-life">◖</span>
+            ))}
+            {state.lives === 0 && <span className="pm-life pm-life--none">—</span>}
+          </div>
         </div>
       </div>
 
-      {/* Level indicator dots */}
-      <div className="pm-sidebar__section">
-        <div className="pm-sidebar__label">PROGRESS</div>
-        <div className="pm-sidebar__levels">
-          {[1, 2, 3, 4].map(l => (
-            <div
-              key={l}
-              className={`pm-sidebar__level-dot ${l <= state.level ? 'active' : ''} ${l === state.level ? 'current' : ''}`}
-            >
-              {l}
-            </div>
-          ))}
+      {/* Ghost AI panel */}
+      <div className="pm-panel">
+        <div className="pm-panel__title">Ghost AI</div>
+        <div className="pm-panel__inset">
+          <span className="pm-ai-label">{ALGORITHM_LABELS[state.algorithm]}</span>
         </div>
       </div>
     </div>

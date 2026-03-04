@@ -3,11 +3,13 @@
    ══════════════════════════════════════ */
 
 .terminal-app {
-  --term-fg: #0f0;
-  --term-prompt: #0f0;
-  --term-accent: #0a0;
+  --term-fg: #c8ccd4;
+  --term-prompt: #61afef;
+  --term-accent: #56b6c2;
+  --term-dim: #636d83;
+  --term-error: #e06c75;
 
-  background: #0a0a0a !important;
+  background: #1e1e2e !important;
   color: var(--term-fg);
   font-family: 'Courier New', 'Consolas', monospace;
   padding: 0;
@@ -52,8 +54,9 @@
 }
 
 .terminal-line--command {
-  color: #888;
-  margin-top: 6px;
+  color: var(--term-prompt);
+  opacity: 0.7;
+  margin-top: 8px;
 }
 
 .terminal-line--output {
@@ -61,15 +64,15 @@
 }
 
 .terminal-line--error {
-  color: #ff5555;
+  color: var(--term-error);
 }
 
 /* ── Input line ────────────────────── */
 .terminal-input-line {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 4px;
+  gap: 8px;
+  margin-top: 8px;
   padding: 0;
 }
 
@@ -96,14 +99,14 @@
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
-  caret-color: var(--term-fg);
+  caret-color: var(--term-prompt);
   padding: 0;
   position: relative;
   z-index: 2;
 }
 
 .terminal-input::selection {
-  background: var(--term-fg);
+  background: var(--term-prompt);
   color: #000;
 }
 
@@ -129,7 +132,7 @@
 }
 
 .terminal-content::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: #1e1e2e;
 }
 
 .terminal-content::-webkit-scrollbar-thumb {

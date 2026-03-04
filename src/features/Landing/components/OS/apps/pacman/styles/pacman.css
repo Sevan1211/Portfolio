@@ -35,272 +35,310 @@
   max-height: 100%;
 }
 
-/* ── Sidebar ───────────────────────── */
+/* ── Sidebar (Win95 panel style) ───── */
 .pm-sidebar {
-  width: 160px;
-  min-width: 160px;
-  background: #1a1a2e;
-  border-left: 2px solid #333366;
-  padding: 16px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  color: #ccc;
-  font-size: 12px;
-}
-
-.pm-sidebar__section {
+  width: 148px;
+  min-width: 148px;
+  background: #c0c0c0;
+  border-left: 2px solid;
+  border-left-color: #fff;
+  padding: 6px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 12px;
+  color: #000;
 }
 
-.pm-sidebar__label {
-  font-size: 10px;
-  color: #888;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+/* ── Groupbox-style panel ─────────── */
+.pm-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.pm-sidebar__value {
-  font-size: 16px;
-  color: #fff;
+.pm-panel__title {
+  font-size: 11px;
   font-weight: bold;
+  color: #000;
+  padding: 0 2px 2px;
 }
 
-.pm-sidebar__value--score {
+.pm-panel__inset {
+  background: #000;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Score values ─────────────────── */
+.pm-score {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: bold;
   color: #FFFF00;
-  font-size: 20px;
+  letter-spacing: 2px;
 }
 
-.pm-sidebar__value--high {
+.pm-score--hi {
   color: #00FFFF;
 }
 
-.pm-sidebar__value--ai {
-  color: #FFB8FF;
-  font-size: 11px;
-  line-height: 1.4;
-}
-
-.pm-sidebar__lives {
+/* ── Level pips ───────────────────── */
+.pm-level-pips {
   display: flex;
   gap: 4px;
 }
 
-.pm-sidebar__life {
-  display: flex;
+.pm-pip {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #333;
+  background: #222;
 }
 
-.pm-sidebar__levels {
-  display: flex;
-  gap: 6px;
-}
-
-.pm-sidebar__level-dot {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 2px solid #444;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: bold;
-  color: #555;
-  transition: all 0.3s ease;
-}
-
-.pm-sidebar__level-dot.active {
+.pm-pip--filled {
+  background: #FFFF00;
   border-color: #FFFF00;
-  color: #FFFF00;
 }
 
-.pm-sidebar__level-dot.current {
-  background: rgba(255, 255, 0, 0.2);
-  box-shadow: 0 0 8px rgba(255, 255, 0, 0.3);
+.pm-pip--current {
+  outline: 1px solid #fff;
+  outline-offset: 1px;
+}
+
+.pm-level-text {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 2px;
+}
+
+/* ── Lives ─────────────────────────── */
+.pm-lives {
+  display: flex;
+  gap: 3px;
+  font-size: 16px;
+}
+
+.pm-life {
+  color: #FFFF00;
+  line-height: 1;
+}
+
+.pm-life--none {
+  color: #555;
+}
+
+/* ── Ghost AI label ───────────────── */
+.pm-ai-label {
+  font-size: 11px;
+  color: #FFB8FF;
+  line-height: 1.3;
 }
 
 /* ── Overlay screens ──────────────── */
 .pm-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.88);
+  background: rgba(0, 0, 0, 0.92);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
+  image-rendering: pixelated;
 }
 
 .pm-overlay__box {
   text-align: center;
   color: #fff;
-  max-width: 360px;
-  padding: 32px;
+  max-width: 340px;
+  padding: 24px;
+  border: 2px solid;
+  border-color: #fff #808080 #808080 #fff;
+  background: #c0c0c0;
 }
 
 /* ── Title ─────────────────────────── */
 .pm-title {
-  font-size: 42px;
+  font-size: 28px;
   font-weight: bold;
-  color: #FFFF00;
-  margin: 0 0 8px 0;
-  text-shadow: 2px 2px 0 #FF0000, 4px 4px 0 rgba(0,0,0,0.3);
-  letter-spacing: 4px;
+  color: #000;
+  margin: 0 0 4px 0;
+  letter-spacing: 3px;
   font-family: 'Courier New', monospace;
 }
 
 .pm-title--win {
-  color: #00FF00;
-  text-shadow: 2px 2px 0 #008800, 4px 4px 0 rgba(0,0,0,0.3);
+  color: #008000;
 }
 
 .pm-title--gameover {
-  color: #FF0000;
-  text-shadow: 2px 2px 0 #880000, 4px 4px 0 rgba(0,0,0,0.3);
+  color: #cc0000;
 }
 
 .pm-subtitle {
-  font-size: 14px;
-  color: #00FFFF;
-  margin: 0 0 24px 0;
-  letter-spacing: 2px;
+  font-size: 12px;
+  color: #000080;
+  margin: 0 0 16px 0;
+  letter-spacing: 1px;
+  font-weight: bold;
 }
 
 /* ── Level preview ─────────────────── */
 .pm-level-preview {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 24px;
+  gap: 0;
+  margin-bottom: 16px;
   text-align: left;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #fff;
+  padding: 4px;
 }
 
 .pm-level-preview__item {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-left: 3px solid #FFFF00;
+  padding: 3px 8px;
+  font-family: 'Courier New', monospace;
+}
+
+.pm-level-preview__item:nth-child(odd) {
+  background: #e8e8e8;
 }
 
 .pm-level-preview__num {
-  font-size: 18px;
+  font-size: 13px;
   font-weight: bold;
-  color: #FFFF00;
-  min-width: 20px;
+  color: #000080;
+  min-width: 16px;
 }
 
 .pm-level-preview__algo {
-  font-size: 13px;
-  color: #ccc;
+  font-size: 12px;
+  color: #000;
 }
 
 /* ── Controls info ─────────────────── */
 .pm-controls-info {
-  margin-bottom: 20px;
-  color: #888;
-  font-size: 12px;
+  margin-bottom: 12px;
+  color: #444;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
 }
 
 .pm-controls-info p {
-  margin: 4px 0;
+  margin: 2px 0;
 }
 
 /* ── Start / Restart button ────────── */
 .pm-start-btn {
-  background: transparent;
-  border: 2px solid #FFFF00;
-  color: #FFFF00;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #fff #000 #000 #fff;
+  color: #000;
   font-family: 'Courier New', monospace;
-  font-size: 18px;
+  font-size: 13px;
   font-weight: bold;
-  padding: 12px 36px;
+  padding: 6px 24px;
   cursor: pointer;
-  letter-spacing: 3px;
-  transition: all 0.2s ease;
-  animation: pm-blink 1.2s ease-in-out infinite;
+  letter-spacing: 1px;
+  min-width: 120px;
 }
 
 .pm-start-btn:hover {
-  background: #FFFF00;
-  color: #000;
-  animation: none;
+  background: #d4d0c8;
 }
 
-@keyframes pm-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+.pm-start-btn:active {
+  border-color: #000 #fff #fff #000;
+  padding: 7px 23px 5px 25px;
 }
 
 /* ── High scores on start screen ──── */
 .pm-high-scores {
-  margin-top: 24px;
+  margin-top: 16px;
   text-align: left;
 }
 
 .pm-high-scores h3 {
-  font-size: 12px;
-  color: #888;
-  letter-spacing: 2px;
-  margin: 0 0 8px 0;
-  border-bottom: 1px solid #333;
-  padding-bottom: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #000;
+  margin: 0 0 4px 0;
 }
 
 .pm-high-scores__list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #fff;
+  padding: 2px;
+  font-family: 'Courier New', monospace;
 }
 
 .pm-high-scores__row {
   display: flex;
-  gap: 12px;
-  font-size: 13px;
+  gap: 8px;
+  font-size: 12px;
+  padding: 2px 6px;
+}
+
+.pm-high-scores__row:nth-child(odd) {
+  background: #e8e8e8;
 }
 
 .pm-high-scores__rank {
-  color: #888;
-  min-width: 20px;
+  color: #444;
+  min-width: 18px;
 }
 
 .pm-high-scores__score {
-  color: #FFFF00;
+  color: #000080;
   font-weight: bold;
-  min-width: 70px;
+  min-width: 64px;
 }
 
 .pm-high-scores__level {
-  color: #00FFFF;
+  color: #008080;
 }
 
 /* ── Final score (win / game over) ── */
 .pm-final-score {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin: 24px 0;
-  padding: 20px;
-  border: 1px solid #333;
-  background: rgba(255, 255, 255, 0.03);
+  gap: 4px;
+  margin: 16px 0;
+  padding: 12px;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #fff;
 }
 
 .pm-final-score__label {
-  font-size: 12px;
-  color: #888;
-  letter-spacing: 2px;
+  font-size: 11px;
+  color: #444;
+  letter-spacing: 1px;
+  font-family: 'Courier New', monospace;
 }
 
 .pm-final-score__value {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: bold;
-  color: #FFFF00;
+  color: #000080;
+  font-family: 'Courier New', monospace;
 }
 
 .pm-final-score__badge {
-  font-size: 14px;
-  color: #00FF00;
-  animation: pm-blink 0.8s ease-in-out infinite;
+  font-size: 12px;
+  font-weight: bold;
+  color: #008000;
 }

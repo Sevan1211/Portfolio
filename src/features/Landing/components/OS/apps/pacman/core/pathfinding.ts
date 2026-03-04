@@ -8,6 +8,7 @@
 */
 
 import { Position, Direction, Tile, GhostState, PacmanState, GhostAlgorithm } from './types';
+import { GHOST_MISTAKE_RATE } from './constants';
 
 /* ── Direction helpers ─────────────── */
 const DIRECTION_VECTORS: Record<Direction, Position> = {
@@ -497,6 +498,13 @@ export function getGhostDirection(
   }
 
   // Chase mode
+  // Occasionally make a "mistake" so ghosts aren't perfectly optimal.
+  // This scales by level: DFS ghosts blunder often, A* predictive never does.
+  const mistakeRate = GHOST_MISTAKE_RATE[algorithm] ?? 0;
+  if (mistakeRate > 0 && Math.random() < mistakeRate) {
+    return randomWalk(maze, ghost);
+  }
+
   switch (algorithm) {
     case 'dfs': {
       const blinkyD = ghosts.find(g => g.name === 'blinky');

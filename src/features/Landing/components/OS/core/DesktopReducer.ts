@@ -3,9 +3,6 @@ import { DesktopState, DesktopAction, WindowState } from './types';
 import { MONITOR_WIDTH, DESKTOP_WORKSPACE_HEIGHT } from './constants';
 import { getApp } from './appRegistry';
 
-/** Scale factor applied to default window sizes in fullscreen mode */
-const FULLSCREEN_SCALE = 0.55;
-
 export const createInitialState = (fullscreen: boolean): DesktopState => ({
   windows: [],
   activeWindowId: null,
@@ -19,15 +16,25 @@ export function desktopReducer(state: DesktopState, action: DesktopAction): Desk
   switch (action.type) {
     case 'OPEN_APP': {
       const app = getApp(action.appId);
-      const scale = state.fullscreen ? FULLSCREEN_SCALE : 1;
+      const vw = action.viewportWidth;
+      const vh = action.viewportHeight;
+
+      // Compute size from proportional ratios, clamped between minSize and viewport
+      const width  = Math.round(Math.max(app.minWidth,  Math.min(vw, vw * app.defaultWidthRatio)));
+      const height = Math.round(Math.max(app.minHeight, Math.min(vh, vh * app.defaultHeightRatio)));
+
+      // Compute position, ensuring the window stays fully within the viewport
+      const x = Math.round(Math.min(app.defaultXRatio * vw, Math.max(0, vw - width)));
+      const y = Math.round(Math.min(app.defaultYRatio * vh, Math.max(0, vh - height)));
+
       const newWindow: WindowState = {
         id: `${action.appId}-${Date.now()}`,
         appId: action.appId,
         title: app.title,
-        x: Math.round(app.defaultX * scale),
-        y: Math.round(app.defaultY * scale),
-        width: Math.round(app.defaultWidth * scale),
-        height: Math.round(app.defaultHeight * scale),
+        x,
+        y,
+        width,
+        height,
         zIndex: state.nextZIndex,
         isMinimized: false,
         isMaximized: false,
@@ -64,7 +71,7 @@ export function desktopReducer(state: DesktopState, action: DesktopAction): Desk
         ...state,
         windows: state.windows.map(w =>
           w.id === action.windowId
-            ? { ...w, zIndex: state.nextZIndex }
+            ? { ...w, zIndex: state.nextZIndex, isMinimized: false }
             : w
         ),
         activeWindowId: action.windowId,

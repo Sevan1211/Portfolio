@@ -1,6 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import Landing from '@features/Landing/components/Landing';
-import { NotFound } from '@features/NotFound/NotFound';
+
+// Lazy-load the 404 page — only needed on invalid routes
+const NotFound = React.lazy(() =>
+  import('@features/NotFound/NotFound').then(m => ({ default: m.NotFound }))
+);
 
 const App: React.FC = () => {
   const path = window.location.pathname;
@@ -21,9 +25,17 @@ const App: React.FC = () => {
     };
   }, [is404]);
 
-  if (is404) return <NotFound />;
+  if (is404) {
+    return (
+      <main>
+        <Suspense fallback={null}>
+          <NotFound />
+        </Suspense>
+      </main>
+    );
+  }
 
-  return <Landing />;
+  return <main><Landing /></main>;
 };
 
 export default App;

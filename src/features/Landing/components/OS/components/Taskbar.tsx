@@ -79,7 +79,27 @@ export const Taskbar: React.FC = () => {
           className="taskbar-source"
           title="View source on GitHub"
         >
-          &lt;/&gt;
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ display: 'block' }}
+            shapeRendering="crispEdges"
+          >
+            {/* Disk body */}
+            <rect x="2" y="1" width="16" height="18" fill="#3030A0" stroke="#000" strokeWidth="1" />
+            {/* Metal slider area (top) */}
+            <rect x="5" y="1" width="10" height="7" fill="#C0C0C0" stroke="#808080" strokeWidth="0.5" />
+            {/* Slider opening */}
+            <rect x="8" y="2" width="3" height="5" fill="#3030A0" />
+            {/* Label area (bottom) */}
+            <rect x="4" y="11" width="12" height="7" fill="#fff" stroke="#808080" strokeWidth="0.5" />
+            {/* Label lines */}
+            <line x1="6" y1="13" x2="14" y2="13" stroke="#808080" strokeWidth="0.8" />
+            <line x1="6" y1="15" x2="14" y2="15" stroke="#808080" strokeWidth="0.8" />
+          </svg>
         </a>
       </div>
 

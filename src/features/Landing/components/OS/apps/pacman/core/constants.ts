@@ -31,12 +31,21 @@ export const DYING_DURATION = 90;
 /** Level-complete pause duration (frames) */
 export const LEVEL_COMPLETE_DURATION = 120;
 
-/** Ghost release timers (frames) – stagger ghost exits from the house */
+/** Ghost release timers (frames) - stagger ghost exits from the house */
 export const GHOST_RELEASE_DELAYS: Record<string, number> = {
   blinky: 0,
-  pinky: 120,   // 2s
-  inky: 300,    // 5s
-  clyde: 480,   // 8s
+  pinky: 120,    // 2s
+  inky: 240,     // 4s
+  clyde: 360,    // 6s
+};
+
+/** Chance per tile-center that a ghost ignores the algorithm and moves randomly.
+ *  Creates difficulty progression: early levels are forgiving, later levels are precise. */
+export const GHOST_MISTAKE_RATE: Record<string, number> = {
+  dfs: 0.30,
+  bfs: 0.15,
+  astar: 0.06,
+  'astar-predictive': 0,
 };
 
 /** Colors */
@@ -58,12 +67,10 @@ export const COLORS = {
   ghostPupil: '#2121DE',
   text: '#FFFFFF',
   textHighlight: '#FFFF00',
-  sidebar: '#1a1a2e',
-  sidebarBorder: '#333366',
 } as const;
 
 /** Level-to-algorithm mapping */
 export const LEVEL_ALGORITHMS = ['dfs', 'bfs', 'astar', 'astar-predictive'] as const;
 
 /** Ghost speed multiplier per level */
-export const LEVEL_SPEED_MULTIPLIER = [1.0, 1.05, 1.1, 1.2] as const;
+export const LEVEL_SPEED_MULTIPLIER = [0.85, 0.95, 1.05, 1.15] as const;

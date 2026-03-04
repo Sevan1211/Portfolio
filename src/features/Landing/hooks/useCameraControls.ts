@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import * as THREE from 'three';
+import type { Camera, PerspectiveCamera } from 'three';
 
 interface CameraConfig {
   rotationSensitivityX: number;
@@ -13,7 +13,7 @@ interface DragRotation {
   pitch: number;
 }
 
-export const useCameraControls = (config: CameraConfig, camera: THREE.Camera | null) => {
+export const useCameraControls = (config: CameraConfig, camera: Camera | null) => {
   const dragStartRef = useRef({ x: 0, y: 0, startYaw: 0, startPitch: 0 });
 
   // Smooth interpolation values
@@ -83,7 +83,7 @@ export const useCameraAnimation = () => {
     startFov: number,
     endFov: number,
     duration: number,
-    camera: THREE.PerspectiveCamera
+    camera: PerspectiveCamera
   ): boolean => {
     if (fovAnimationProgress.current >= 1) {return false;}
 

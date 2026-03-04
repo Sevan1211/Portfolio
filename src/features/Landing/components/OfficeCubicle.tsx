@@ -1,14 +1,19 @@
 import React, { useRef, useMemo } from 'react';
 import { useThree, useFrame, createPortal, ThreeEvent } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
-import * as THREE from 'three';
+import {
+  Color, FrontSide, LinearFilter, LinearMipmapLinearFilter, Mesh,
+  MeshBasicMaterial, MeshStandardMaterial, NoColorSpace, Object3D,
+  PerspectiveCamera, Raycaster, SRGBColorSpace, Scene, Texture,
+  Vector2, Vector3, WebGLRenderTarget,
+} from 'three';
 import { useSafeLayoutEffect } from '../hooks/useSafeLayoutEffect';
 import { LoadingScene } from './loading/LoadingScene';
 
 const SCREEN_MESH_NAME = 'Glowing_Screen_Screen_Emission_0';
 const CUBICLE_MODEL_PATH = '/models/low_poly_90s_office_cubicle.glb';
 
-interface R3FMesh extends THREE.Mesh {
+interface R3FMesh extends Mesh {
   onPointerOver?: (event: ThreeEvent<PointerEvent>) => void;
   onPointerOut?: (event: ThreeEvent<PointerEvent>) => void;
 }
@@ -17,7 +22,7 @@ interface OfficeCubicleProps {
   isScreenHovered: boolean;
   isZoomedIn: boolean;
   isDragging?: boolean;
-  onScreenHover: (hovered: boolean, screenPosition?: THREE.Vector3) => void;
+  onScreenHover: (hovered: boolean, screenPosition?: Vector3) => void;
   onLoaded?: () => void;
   onScreenClick?: () => void;
 }
@@ -33,7 +38,7 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
   const { scene } = useGLTF(CUBICLE_MODEL_PATH);
   const { gl, camera } = useThree();
   const clonedScene = useMemo(() => scene.clone(true), [scene]);
-  const screenMeshRef = useRef<THREE.Mesh | null>(null);
+  const screenMeshRef = useRef<Mesh | null>(null);
   const hasNotifiedLoaded = useRef(false);
   const screenPointerEventsDisabledRef = useRef(false);
   const onScreenHoverRef = useRef(onScreenHover);
@@ -41,27 +46,27 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
 
   // Offscreen scene + camera for the monitor screensaver (spinning 7 + particles)
   const screenScene = useMemo(() => {
-    const s = new THREE.Scene();
-    s.background = new THREE.Color('#1e3a8a');
+    const s = new Scene();
+    s.background = new Color('#1e3a8a');
     return s;
   }, []);
 
   const screenCamera = useMemo(() => {
-    const c = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+    const c = new PerspectiveCamera(50, 1, 0.1, 100);
     c.position.set(0, 0, 8);
     return c;
   }, []);
 
   const renderTarget = useMemo(() => {
-    const rt = new THREE.WebGLRenderTarget(256, 256);
-    rt.texture.colorSpace = THREE.SRGBColorSpace;
+    const rt = new WebGLRenderTarget(256, 256);
+    rt.texture.colorSpace = SRGBColorSpace;
     return rt;
   }, []);
 
-  // Render the offscreen screensaver scene into the render target each frame
-  // Skip when zoomed in — screen is covered by the CSS overlay, no point rendering
+  // Render the offscreen screensaver scene into the render target each frame.
+  // Always render — the 256×256 basic-material pass is negligible, and stopping
+  // on `isZoomedIn` freezes the spinning 7 mid-zoom while the monitor is still visible.
   useFrame((state) => {
-    if (isZoomedIn) return;
     state.gl.setRenderTarget(renderTarget);
     state.gl.clear();
     state.gl.render(screenScene, screenCamera);
@@ -83,10 +88,10 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
     // Use high anisotropy for sharper textures at oblique angles (nearly free on modern GPUs)
     const maxAnisotropy = Math.min(gl.capabilities.getMaxAnisotropy?.() || 16, 16);
     
-    clonedScene.traverse((child: THREE.Object3D) => {
-      if (!(child instanceof THREE.Mesh)) {return;}
+    clonedScene.traverse((child: Object3D) => {
+      if (!(child instanceof Mesh)) {return;}
       
-      const mesh = child as THREE.Mesh;
+      const mesh = child as Mesh;
 
       // Remove specific sticky notes mesh
       if (mesh.name === 'Sticky_Notes_Stick_Notes_0') {
@@ -107,13 +112,13 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
         screenMeshRef.current = mesh;
         
         // Enable raycasting for the screen
-        mesh.raycast = THREE.Mesh.prototype.raycast.bind(mesh);
+        mesh.raycast = Mesh.prototype.raycast.bind(mesh);
 
         // Use the render target texture (screensaver rendered each frame)
-        mesh.material = new THREE.MeshBasicMaterial({
+        mesh.material = new MeshBasicMaterial({
           map: renderTarget.texture,
           toneMapped: false,
-          side: THREE.FrontSide,
+          side: FrontSide,
         });
 
         // We handle hover/click with a manual raycaster instead of R3F events
@@ -122,8 +127,8 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
         materials.forEach((mat) => {
           // Upgrade to MeshStandardMaterial if it's MeshBasicMaterial
           if (mat.type === 'MeshBasicMaterial') {
-            const basicMat = mat as THREE.MeshBasicMaterial;
-            const newMat = new THREE.MeshStandardMaterial({
+            const basicMat = mat as MeshBasicMaterial;
+            const newMat = new MeshStandardMaterial({
               map: basicMat.map,
               color: basicMat.color,
               transparent: basicMat.transparent,
@@ -143,15 +148,15 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
             mat = newMat;
           }
           
-          const standardMat = mat as THREE.MeshStandardMaterial;
+          const standardMat = mat as MeshStandardMaterial;
 
           // Configure color space textures with trilinear filtering
           [standardMat.map, standardMat.emissiveMap].forEach((tex) => {
             if (tex) {
-              tex.colorSpace = THREE.SRGBColorSpace;
+              tex.colorSpace = SRGBColorSpace;
               tex.anisotropy = maxAnisotropy;
-              tex.minFilter = THREE.LinearMipmapLinearFilter;
-              tex.magFilter = THREE.LinearFilter;
+              tex.minFilter = LinearMipmapLinearFilter;
+              tex.magFilter = LinearFilter;
               tex.generateMipmaps = true;
             }
           });
@@ -159,10 +164,10 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
           // Configure linear space textures with trilinear filtering
           [standardMat.metalnessMap, standardMat.roughnessMap, standardMat.normalMap, standardMat.aoMap, standardMat.alphaMap].forEach((tex) => {
             if (tex) {
-              tex.colorSpace = THREE.NoColorSpace;
+              tex.colorSpace = NoColorSpace;
               tex.anisotropy = maxAnisotropy;
-              tex.minFilter = THREE.LinearMipmapLinearFilter;
-              tex.magFilter = THREE.LinearFilter;
+              tex.minFilter = LinearMipmapLinearFilter;
+              tex.magFilter = LinearFilter;
               tex.generateMipmaps = true;
             }
           });
@@ -181,7 +186,7 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
           }
           
           // FrontSide only — DoubleSide doubles fragment shader work
-          standardMat.side = THREE.FrontSide;
+          standardMat.side = FrontSide;
           standardMat.vertexColors = !!mesh.geometry.attributes.color;
           
           // Better default PBR values
@@ -203,15 +208,15 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
 
     return () => {
       // Dispose cloned scene geometries & materials to prevent GPU memory leaks
-      clonedScene.traverse((child: THREE.Object3D) => {
-        if (child instanceof THREE.Mesh) {
+      clonedScene.traverse((child: Object3D) => {
+        if (child instanceof Mesh) {
           child.geometry?.dispose();
           const mats = Array.isArray(child.material) ? child.material : [child.material];
           mats.forEach((m) => {
             if (m) {
               // Dispose all texture maps
               Object.values(m).forEach((val) => {
-                if (val instanceof THREE.Texture) val.dispose();
+                if (val instanceof Texture) val.dispose();
               });
               m.dispose();
             }
@@ -247,13 +252,13 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
       mesh.userData.isScreen = false;
     } else {
       // Re-enable pointer events when not zoomed
-      mesh.raycast = THREE.Mesh.prototype.raycast.bind(mesh);
+      mesh.raycast = Mesh.prototype.raycast.bind(mesh);
       mesh.userData.isScreen = true;
       
       // Re-add pointer handlers
       r3fMesh.onPointerOver = (event: ThreeEvent<PointerEvent>) => {
         event.stopPropagation();
-        const worldPosition = new THREE.Vector3();
+        const worldPosition = new Vector3();
         screenMeshRef.current?.getWorldPosition(worldPosition);
         onScreenHoverRef.current(true, worldPosition);
       };
@@ -276,8 +281,8 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
   React.useEffect(() => {
     if (!screenMeshRef.current) {return;}
 
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
+    const raycaster = new Raycaster();
+    const pointer = new Vector2();
     let frameRequested = false;
     let hovering = false;
     let rafId = 0;
@@ -311,7 +316,7 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
       if (intersects.length > 0) {
         if (!hovering) {
           hovering = true;
-          const worldPosition = new THREE.Vector3();
+          const worldPosition = new Vector3();
           screenMeshRef.current.getWorldPosition(worldPosition);
           onScreenHoverRef.current(true, worldPosition);
         }
@@ -368,5 +373,4 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
   );
 };
 
-// Preload the GLTF model for faster loading
-useGLTF.preload(CUBICLE_MODEL_PATH);
+// NOTE: useGLTF.preload is called from CubicleScene.tsx — no duplicate needed here

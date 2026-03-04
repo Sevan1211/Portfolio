@@ -47,12 +47,21 @@ export default defineConfig({
             if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {
               return 'react-vendor';
             }
-            // Keep @react-three with the component that imports it
-            if (id.includes('@react-three')) {
-              return;
+            // xterm is heavy (~200KB) and only used in the Terminal app — isolate it
+            if (id.includes('@xterm') || id.includes('xterm')) {
+              return 'xterm-vendor';
             }
-            if (id.includes('framer-motion') || id.includes('lucide-react')) {
-              return 'ui-vendor';
+            // @react-three/drei helpers — loaded with the 3D scene, separate from core three
+            if (id.includes('@react-three')) {
+              return 'r3f-vendor';
+            }
+            // framer-motion is used by OS apps — lazy-loaded with them
+            if (id.includes('framer-motion') || id.includes('popmotion')) {
+              return 'motion-vendor';
+            }
+            // lucide-react icons — small, load with OS apps
+            if (id.includes('lucide-react')) {
+              return 'icons-vendor';
             }
             // Split Three.js into its own chunk
             if (id.includes('three')) {
@@ -66,12 +75,14 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
-    chunkSizeWarningLimit: 500,
+    chunkSizeWarningLimit: 800, // three.js is ~741KB minified; expected for a 3D portfolio
     minify: 'esbuild',
     target: 'es2020',
     cssCodeSplit: true,
+    // Better tree-shaking for smaller bundles
+    modulePreload: { polyfill: false }, // Modern browsers support modulepreload natively
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'three'],
+    include: ['react', 'react-dom'],
   },
 });

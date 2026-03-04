@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from 'react';
 import monitorShadowTexture from '@shared/assets/images/landing/shadow-compressed.png';
-import monitorSmudgesTexture from '@shared/assets/images/landing/smudges.jpg';
 import { DesktopProvider } from './core/DesktopProvider';
 import { useDesktopState, useDesktop } from './core/useDesktop';
 import { Desktop } from './components/Desktop';
@@ -128,27 +127,6 @@ export const RetroOS: React.FC<RetroOSProps> = React.memo(({ isZoomedIn, fullscr
               mixBlendMode: 'multiply',
               pointerEvents: 'none',
               zIndex: 9,
-            }}
-          />
-
-          {/* Monitor smudges */}
-          <div
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundImage: `url(${monitorSmudgesTexture})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              opacity: isZoomedIn ? 0.1 : 0.03,
-              mixBlendMode: 'soft-light',
-              filter: 'brightness(1.35) contrast(1.15)',
-              pointerEvents: 'none',
-              zIndex: 10,
             }}
           />
         </>

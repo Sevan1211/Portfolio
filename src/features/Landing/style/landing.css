@@ -64,6 +64,8 @@
   inset: 0;
   z-index: 1000;
   overflow: hidden;
+  will-change: opacity;
+  contain: layout style paint;
 }
 
 /* "Click the screen" hint for first-time visitors */

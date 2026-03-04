@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useThree, useFrame, ThreeEvent } from '@react-three/fiber';
-import * as THREE from 'three';
+import { Color, Euler, Fog, Group, PerspectiveCamera, Quaternion, Vector3 } from 'three';
 import { useGLTF } from '@react-three/drei';
 import { OfficeCubicle } from './OfficeCubicle';
 import { useCameraControls, useCameraAnimation } from '../hooks/useCameraControls';
@@ -12,6 +12,9 @@ useGLTF.preload(CUBICLE_MODEL_PATH);
 interface CubicleSceneProps {
     onModelLoaded?: () => void;
     loadingComplete?: boolean;
+    /** When true, makes the 3D model visible for GPU shader pre-compilation
+     *  while the loading overlay is still opaque. Camera stays locked. */
+    warmUp?: boolean;
     onZoomChange?: (isZoomed: boolean) => void;
     /** Called once the zoom-in animation reaches completion */
     onZoomComplete?: () => void;
@@ -45,17 +48,22 @@ const CAMERA_POSITION = {
     end: { x: 0, y: 7, z: -10 },
 };
 
+// Hoisted Color instances — avoids re-creating them every time the effect runs
+const BG_COLOR_LOADED = new Color(0x000000);
+const BG_COLOR_LOADING = new Color(0x1e3a8a);
+
 export const CubicleScene: React.FC<CubicleSceneProps> = ({
     onModelLoaded,
     loadingComplete = false,
+    warmUp = false,
     onZoomChange,
     onZoomComplete,
     zoomOutTrigger,
 }) => {
-    const sceneRef = useRef<THREE.Group>(null);
+    const sceneRef = useRef<Group>(null);
     const [isScreenHovered, setIsScreenHovered] = useState(false);
     const [isZoomedIn, setIsZoomedIn] = useState(false);
-    const screenWorldPosition = useRef<THREE.Vector3 | null>(null);
+    const screenWorldPosition = useRef<Vector3 | null>(null);
 
     const baseCameraPos = useRef({ ...CAMERA_POSITION.start });
     const initialCameraSet = useRef(false);
@@ -78,20 +86,23 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
     const hasDraggedRef = useRef(false);
 
     // Store camera state at start of zoom transition
-    const zoomStartPosition = useRef<THREE.Vector3>(new THREE.Vector3());
-    const zoomStartQuaternion = useRef<THREE.Quaternion>(new THREE.Quaternion());
-    const zoomTargetQuaternion = useRef<THREE.Quaternion>(new THREE.Quaternion());
+    const zoomStartPosition = useRef<Vector3>(new Vector3());
+    const zoomStartQuaternion = useRef<Quaternion>(new Quaternion());
+    const zoomTargetQuaternion = useRef<Quaternion>(new Quaternion());
     const zoomProgress = useRef(0);
     const isTransitioning = useRef(false);  // Prevent rapid clicking issues
 
     // Zoom out animation state
     const zoomOutProgress = useRef(0);
-    const zoomOutStartPosition = useRef<THREE.Vector3>(new THREE.Vector3());
-    const zoomOutStartQuaternion = useRef<THREE.Quaternion>(new THREE.Quaternion());
-    const zoomOutTargetPosition = useRef<THREE.Vector3>(new THREE.Vector3());
-    const zoomOutTargetQuaternion = useRef<THREE.Quaternion>(new THREE.Quaternion());
+    const zoomOutStartPosition = useRef<Vector3>(new Vector3());
+    const zoomOutStartQuaternion = useRef<Quaternion>(new Quaternion());
+    const zoomOutTargetPosition = useRef<Vector3>(new Vector3());
+    const zoomOutTargetQuaternion = useRef<Quaternion>(new Quaternion());
     const zoomOutTargetYaw = useRef(0);
     const zoomOutTargetPitch = useRef(0);
+
+    // Reusable Vector3 for per-frame interpolation — avoids GC pressure inside useFrame
+    const _tempTargetVec = useRef(new Vector3());
 
     const { handleDrag, startDrag, applyRotation, resetRotation } = useCameraControls(CAMERA_CONFIG, camera);
     const { animateFOV, animatePosition, fovAnimationProgress } = useCameraAnimation();
@@ -100,11 +111,11 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
     // Start with blue to match loading scene, switch to black when loading completes
     useEffect(() => {
         if (scene && gl && camera) {
-            if (loadingComplete) {
-                scene.background = new THREE.Color(0x000000);
+            if (loadingComplete || warmUp) {
+                scene.background = BG_COLOR_LOADED;
                 gl.setClearColor(0x000000, 1);
             } else {
-                scene.background = new THREE.Color(0x1e3a8a);
+                scene.background = BG_COLOR_LOADING;
                 gl.setClearColor(0x1e3a8a, 1);
             }
             
@@ -123,7 +134,7 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
                 currentCameraPos.current = { ...CAMERA_POSITION.start };
             }
         }
-    }, [scene, gl, camera, loadingComplete]);
+    }, [scene, gl, camera, loadingComplete, warmUp]);
 
     const isZoomedInRef = useRef(false);
 
@@ -147,7 +158,7 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
             zoomOutStartQuaternion.current.copy(capturedQuaternion);
 
             // Calculate target position for zoom out (back to normal view)
-            const targetPos = new THREE.Vector3(
+            const targetPos = new Vector3(
                 baseCameraPos.current.x,
                 baseCameraPos.current.y,
                 baseCameraPos.current.z
@@ -169,8 +180,8 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
             zoomOutTargetYaw.current = targetYaw;
             zoomOutTargetPitch.current = targetPitch;
 
-            const euler = new THREE.Euler(targetPitch, targetYaw, 0, 'YXZ');
-            const tempQuaternion = new THREE.Quaternion();
+            const euler = new Euler(targetPitch, targetYaw, 0, 'YXZ');
+            const tempQuaternion = new Quaternion();
             tempQuaternion.setFromEuler(euler);
             tempQuaternion.normalize();
             zoomOutTargetQuaternion.current.copy(tempQuaternion);
@@ -320,7 +331,7 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
             zoomStartQuaternion.current.copy(camera.quaternion);
 
             // Calculate target position
-            const targetPos = new THREE.Vector3(
+            const targetPos = new Vector3(
                 screenPos.x + CAMERA_CONFIG.zoomOffsetX,
                 screenPos.y + CAMERA_CONFIG.zoomHeight + CAMERA_CONFIG.zoomOffsetY,
                 screenPos.z + CAMERA_CONFIG.zoomDistance + CAMERA_CONFIG.zoomOffsetZ
@@ -360,19 +371,32 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
         }
     }, [camera, onZoomChange]);
 
-    useFrame((_, delta) => {
+    useFrame((_, rawDelta) => {
+        // Cap delta to prevent lerp overshoots when the browser delivers a large
+        // frame gap (tab hidden, GPU busy loading GLB, etc.).  Without this the
+        // unclamped `5 * delta` position lerp can launch the camera far past its
+        // target, causing the "starts at bottom and drifts up" bug.
+        const delta = Math.min(rawDelta, 0.1);
+
         // While loading, keep camera at exact start position - no movement or rotation
         if (!loadingComplete) {
             camera.position.set(CAMERA_POSITION.start.x, CAMERA_POSITION.start.y, CAMERA_POSITION.start.z);
             // Keep rotation locked at initial values too
             camera.rotation.order = 'YXZ';
             camera.rotation.set(CAMERA_CONFIG.initialPitch, CAMERA_CONFIG.initialYaw, 0);
+
+            // During warm-up, add fog so shaders compile with the correct scene state.
+            // Without this, materials recompile fog variants when loadingComplete fires.
+            if (warmUp && !scene.fog) {
+                scene.fog = new Fog('#000000', 15, 35);
+            }
+
             return;
         }
 
         // Manage fog — attach/detach based on loading (fog doesn't respect group visibility)
         if (!scene.fog) {
-            scene.fog = new THREE.Fog('#000000', 15, 35);
+            scene.fog = new Fog('#000000', 15, 35);
         }
 
         // Apply smooth rotation ONLY when not zoomed in AND not animating zoom out
@@ -381,7 +405,7 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
             applyRotation(dragRotationRef.current, mousePosRef.current);
         }
 
-        if (loadingComplete && camera instanceof THREE.PerspectiveCamera) {
+        if (loadingComplete && camera instanceof PerspectiveCamera) {
             const isAnimating = animateFOV(
                 delta,
                 FOV_CONFIG.start,
@@ -410,14 +434,15 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
             zoomProgress.current = Math.min(zoomProgress.current + delta * 0.8, 1);
             const easeProgress = 1 - Math.pow(1 - zoomProgress.current, 3); // Ease out cubic
 
-            // Interpolate position
+            // Interpolate position (reuse _tempTargetVec to avoid per-frame allocation)
+            _tempTargetVec.current.set(
+                targetCameraPos.current.x,
+                targetCameraPos.current.y,
+                targetCameraPos.current.z
+            );
             camera.position.lerpVectors(
                 zoomStartPosition.current,
-                new THREE.Vector3(
-                    targetCameraPos.current.x,
-                    targetCameraPos.current.y,
-                    targetCameraPos.current.z
-                ),
+                _tempTargetVec.current,
                 easeProgress
             );
 
@@ -532,7 +557,7 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
             <ambientLight intensity={0.6} color="#ffffff" />
 
             {/* Scene content hidden until loading complete — fog managed in useFrame */}
-            <group visible={loadingComplete}>
+            <group visible={warmUp || loadingComplete}>
                 <group
                     onClick={(e: ThreeEvent<MouseEvent>) => {
                         // Only handle background clicks when zoomed in
@@ -555,7 +580,7 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
                             isScreenHovered={isScreenHovered}
                             isZoomedIn={isZoomedIn}
                             isDragging={isDragging}
-                            onScreenHover={useCallback((hovered: boolean, screenPosition?: THREE.Vector3) => {
+                            onScreenHover={useCallback((hovered: boolean, screenPosition?: Vector3) => {
                                 setIsScreenHovered(hovered);
                                 if (hovered && screenPosition) {
                                     screenWorldPosition.current = screenPosition;

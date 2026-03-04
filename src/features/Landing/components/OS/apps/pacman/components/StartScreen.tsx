@@ -1,5 +1,7 @@
 import React from 'react';
 import { getHighScores } from '../core/scores';
+import { LEVEL_ALGORITHMS } from '../core/constants';
+import { ALGORITHM_LABELS } from '../core/types';
 
 interface StartScreenProps {
   onStart: () => void;
@@ -17,22 +19,12 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
 
         {/* Level preview */}
         <div className="pm-level-preview">
-          <div className="pm-level-preview__item">
-            <span className="pm-level-preview__num">1</span>
-            <span className="pm-level-preview__algo">Random Walk</span>
-          </div>
-          <div className="pm-level-preview__item">
-            <span className="pm-level-preview__num">2</span>
-            <span className="pm-level-preview__algo">BFS</span>
-          </div>
-          <div className="pm-level-preview__item">
-            <span className="pm-level-preview__num">3</span>
-            <span className="pm-level-preview__algo">A* Search</span>
-          </div>
-          <div className="pm-level-preview__item">
-            <span className="pm-level-preview__num">4</span>
-            <span className="pm-level-preview__algo">A* Predictive</span>
-          </div>
+          {LEVEL_ALGORITHMS.map((algo, idx) => (
+            <div key={algo} className="pm-level-preview__item">
+              <span className="pm-level-preview__num">{idx + 1}</span>
+              <span className="pm-level-preview__algo">{ALGORITHM_LABELS[algo]}</span>
+            </div>
+          ))}
         </div>
 
         {/* Controls */}

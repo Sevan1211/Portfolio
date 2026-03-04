@@ -101,6 +101,12 @@
   min-width: 60px;
 }
 
+.retro-os--fullscreen .taskbar-source {
+  height: calc(var(--taskbar-height) - 8px);
+  padding: 0 8px;
+  font-size: 12px;
+}
+
 /* ─── Start Menu ────────────────────────────────────────────────────────────── */
 .retro-os--fullscreen .start-menu {
   width: 240px;

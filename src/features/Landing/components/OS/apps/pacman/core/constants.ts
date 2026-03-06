@@ -10,8 +10,8 @@ export const TICK_RATE = 1000 / 60;
 
 /** Movement speed (pixels per frame) */
 export const PACMAN_SPEED = 2;
-export const GHOST_SPEED_BASE = 1.6;
-export const GHOST_SPEED_FRIGHTENED = 1.0;
+export const GHOST_SPEED_BASE = 1.2;
+export const GHOST_SPEED_FRIGHTENED = .8;
 
 /** Points */
 export const SCORE_DOT = 10;

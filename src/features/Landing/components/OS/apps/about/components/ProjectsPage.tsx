@@ -9,7 +9,6 @@ interface Project {
   description: string;
   highlights: string[];
   tech: string[];
-  github: string;
 }
 
 const PROJECTS: Project[] = [
@@ -37,7 +36,6 @@ const PROJECTS: Project[] = [
       'Auth0',
       'WebSocket',
     ],
-    github: 'https://github.com/Sevan1211/PrepMe',
   },
   {
     title: 'CodeLive',
@@ -61,7 +59,6 @@ const PROJECTS: Project[] = [
       'Tailwind CSS',
       'JSON Schema',
     ],
-    github: 'https://github.com/UNO-CSCI4830/CodeLive',
   },
   {
     title: 'Elmwood Exteriors',
@@ -82,7 +79,6 @@ const PROJECTS: Project[] = [
       'React Lightbox',
       'Jest',
     ],
-    github: 'https://github.com/Sevan1211/Elmwood-Exterior-Website',
   },
 ];
 
@@ -112,14 +108,6 @@ const ProjectCard: React.FC<{ project: Project; index: number }> = ({
         <h4 className="project-title">{project.title}</h4>
         <span className="project-subtitle">{project.subtitle}</span>
       </div>
-      <a
-        href={project.github}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="project-github-link"
-      >
-        GitHub →
-      </a>
     </div>
 
     <p className="project-desc">{project.description}</p>

@@ -30,6 +30,18 @@ async function initPyodide() {
       indexURL: PYODIDE_CDN,
     });
 
+    // Patch input() — synchronous stdin is not possible in a Web Worker.
+    // Override with a helpful error so users know why it fails.
+    pyodide.runPython(`
+import builtins
+def __no_input__(prompt=''):
+    raise RuntimeError(
+        "input() is not supported in this browser IDE. "
+        "Tip: assign your values to variables instead, e.g.  name = 'Alice'"
+    )
+builtins.input = __no_input__
+`);
+
     ctx.postMessage({ type: 'status', status: 'ready' });
   } catch (err) {
     ctx.postMessage({ type: 'error', text: `Failed to load Python: ${err}` });

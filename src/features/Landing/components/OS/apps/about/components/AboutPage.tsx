@@ -81,8 +81,7 @@ export const AboutPage: React.FC = () => (
         <p>
           <strong>Rising Star Intern Award</strong> (University of Nebraska
           Omaha, Fall 2025). I received this for my work during my Summer 2025
-          internship at First National Bank. My manager said I was performing
-          on par with full-time software engineers, which meant a lot to me.
+          internship at First National Bank.
         </p>
         <p>
           <strong>Buffett Scholarship.</strong> I was awarded a full-ride

@@ -13,9 +13,9 @@ const RESUME_PATH = '/resume/Sevan-Lewis-Payne-2026-Resume.pdf';
 
 export const ContactPage: React.FC = () => (
   <motion.div
-    initial={{ opacity: 0, scale: 0.95 }}
-    animate={{ opacity: 1, scale: 1 }}
-    exit={{ opacity: 0, scale: 1.05 }}
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
     transition={{ duration: 0.3 }}
     className="content-wrapper"
   >

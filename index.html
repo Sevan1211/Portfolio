@@ -74,10 +74,12 @@
     }
     </script>
 
-    <!-- Prefetch 3D model so it starts downloading before React mounts.
-         Using prefetch (not preload) avoids blocking the parser while still
-         warming the HTTP cache for faster useGLTF resolution. -->
-    <link rel="prefetch" href="/models/low_poly_90s_office_cubicle.glb" as="fetch" crossorigin="anonymous" />
+    <!-- The 3D model is NOT prefetched here on purpose: browsers mark
+         link-prefetch requests with "Sec-Purpose: prefetch", which
+         Cloudflare's bot protection answers with a 503 - and that poisoned
+         response could then satisfy the real model fetch and strand the
+         loading screen. useGLTF.preload() in the app starts the download
+         with a normal fetch signature instead. -->
     <link rel="preload" href="/fonts/helvetiker_regular.typeface.json" as="fetch" crossorigin="anonymous" />
     
     <style>

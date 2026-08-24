@@ -6,7 +6,7 @@ interface PaintIconProps {
 }
 
 /**
- * Paint Icon — Win95-style MS Paint
+ * Paint Icon - Win95-style MS Paint
  * Palette with brush, beveled frame to match the icon set.
  */
 export const PaintIcon: React.FC<PaintIconProps> = ({

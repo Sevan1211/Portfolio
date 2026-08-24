@@ -1,6 +1,8 @@
 import React from 'react';
 import { useDesktop } from '../core/useDesktop';
 import { getAllApps } from '../core/appRegistry';
+import { ResumeIcon } from './icons/ResumeIcon';
+import { CONTACT } from '@shared/content/portfolio';
 
 export const Desktop: React.FC = () => {
   const { openApp, windows } = useDesktop();
@@ -12,7 +14,7 @@ export const Desktop: React.FC = () => {
         {apps.map((app) => {
           const IconComponent = app.icon;
           const isComponent = typeof IconComponent !== 'string';
-          const existingWindow = windows.find(w => w.appId === app.id);
+          const existingWindow = windows.find((w) => w.appId === app.id);
 
           return (
             <button
@@ -39,8 +41,20 @@ export const Desktop: React.FC = () => {
             </button>
           );
         })}
+
+        {/* Resume shortcut - a real file on the desktop, one click for recruiters */}
+        <a
+          className="desktop-icon"
+          href={CONTACT.resumePath}
+          download
+          aria-label="Download Resume (PDF)"
+        >
+          <div className="desktop-icon__image">
+            <ResumeIcon size={48} />
+          </div>
+          <span className="desktop-icon__label">Resume.pdf</span>
+        </a>
       </div>
     </div>
   );
 };
-

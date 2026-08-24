@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { PageHead } from '../../../components/win95/Win95';
 import '../styles/projects-page.css';
 
 /* ── Project data ── */
@@ -18,9 +19,9 @@ const PROJECTS: Project[] = [
     description:
       'A full-stack platform with 170+ coding challenges across frontend, backend, database, and algorithm categories. Features a cloud sandbox with real Docker containers, an AI tutor ("Nova"), multi-language code execution (Python, JS, Java, C++, C), and a gamification/XP system.',
     highlights: [
-      'Fullstack sandbox — Docker containers with terminal (xterm.js), Monaco editor & live preview',
-      'Multi-layer security — Docker isolation, Bubblewrap, Seccomp syscall filtering',
-      'Microservices architecture — React SPA, Go API, Python judge service',
+      'Fullstack sandbox: Docker containers with terminal (xterm.js), Monaco editor & live preview',
+      'Multi-layer security: Docker isolation, Bubblewrap, Seccomp syscall filtering',
+      'Microservices architecture: React SPA, Go API, Python judge service',
     ],
     tech: [
       'React 18',
@@ -64,11 +65,11 @@ const PROJECTS: Project[] = [
     title: 'Elmwood Exteriors',
     subtitle: 'Professional Business Website',
     description:
-      'A fully responsive business website for a home exterior contracting company. Acts as a 24/7 digital storefront — showcasing services, displaying project galleries with before/after photos, and capturing leads through integrated contact and estimate request forms.',
+      'A fully responsive business website for a home exterior contracting company. Acts as a 24/7 digital storefront, showcasing services, displaying project galleries with before/after photos, and capturing leads through integrated contact and estimate request forms.',
     highlights: [
-      'EmailJS integration for serverless form submissions — no backend required',
+      'EmailJS integration for serverless form submissions, no backend required',
       'Interactive lightbox gallery with multi-photo project portfolios',
-      'Pure CSS responsive design — all hand-crafted with media queries, flexbox & grid',
+      'Pure CSS responsive design, hand-crafted with media queries, flexbox & grid',
     ],
     tech: [
       'React 18',
@@ -129,16 +130,13 @@ const ProjectCard: React.FC<{ project: Project; index: number }> = ({
 /* ── Page ── */
 export const ProjectsPage: React.FC = () => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
+    initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    transition={{ duration: 0.3 }}
+    exit={{ opacity: 0, y: -6, transition: { duration: 0.12 } }}
+    transition={{ duration: 0.2 }}
     className="content-wrapper"
   >
-    <div className="hero-section">
-      <h2 className="section-title">Featured Projects</h2>
-      <p className="tagline">Things I've built & shipped</p>
-    </div>
+    <PageHead title="Featured Projects" sub="Things I've built & shipped" />
 
     <div className="projects-grid">
       {PROJECTS.map((project, i) => (

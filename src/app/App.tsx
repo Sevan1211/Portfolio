@@ -1,14 +1,20 @@
 import React, { Suspense, useEffect } from 'react';
 import Landing from '@features/Landing/components/Landing';
 
-// Lazy-load the 404 page — only needed on invalid routes
+// Lazy-load the 404 page - only needed on invalid routes
 const NotFound = React.lazy(() =>
   import('@features/NotFound/NotFound').then(m => ({ default: m.NotFound }))
 );
 
+// Lazy-load the OS for the /os full-page route
+const RetroOS = React.lazy(() =>
+  import('@features/Landing/components/OS').then(m => ({ default: m.RetroOS }))
+);
+
 const App: React.FC = () => {
   const path = window.location.pathname;
-  const is404 = path !== '/' && path !== '/index.html';
+  const isOsPage = path === '/os' || path === '/os/';
+  const is404 = !isOsPage && path !== '/' && path !== '/index.html';
 
   // On 404 page, pressing any key redirects home
   useEffect(() => {
@@ -24,6 +30,23 @@ const App: React.FC = () => {
       window.removeEventListener('click', goHome);
     };
   }, [is404]);
+
+  // The /os route renders the Retro OS as the whole page - no 3D required.
+  useEffect(() => {
+    if (!isOsPage) return;
+    const cover = document.getElementById('page-cover');
+    if (cover) cover.style.display = 'none';
+  }, [isOsPage]);
+
+  if (isOsPage) {
+    return (
+      <main style={{ position: 'relative', width: '100%', height: '100vh' }}>
+        <Suspense fallback={null}>
+          <RetroOS isZoomedIn fullscreen standalone />
+        </Suspense>
+      </main>
+    );
+  }
 
   if (is404) {
     return (

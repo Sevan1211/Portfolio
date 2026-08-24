@@ -20,24 +20,59 @@
     <meta name="theme-color" content="#1e3a8a">
 
     <!-- SEO Meta Tags -->
-    <title>Sevan Lewis-Payne | Full-Stack Software Developer</title>
-    <meta name="description" content="Sevan Lewis-Payne — Full-Stack Software Developer. Portfolio showcasing projects in React, TypeScript, Go, Python, and more." />
-    <meta name="keywords" content="Sevan Lewis-Payne, Sevan, software developer, full-stack developer, React, TypeScript, Go, Python, portfolio" />
+    <title>Sevan Lewis-Payne | Data &amp; Software Engineer</title>
+    <meta name="description" content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into." />
     <meta name="author" content="Sevan Lewis-Payne" />
     <link rel="canonical" href="https://sevanlewispayne.com" />
 
     <!-- Open Graph (social media previews) -->
-    <meta property="og:title" content="Sevan Lewis-Payne | Full-Stack Software Developer" />
-    <meta property="og:description" content="Full-Stack Software Developer — React, TypeScript, Go, Python. View my projects and experience." />
+    <meta property="og:title" content="Sevan Lewis-Payne | Data &amp; Software Engineer" />
+    <meta property="og:description" content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into." />
     <meta property="og:url" content="https://sevanlewispayne.com" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://sevanlewispayne.com/favicon-192.png" />
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Sevan Lewis-Payne | Full-Stack Software Developer" />
-    <meta name="twitter:description" content="Full-Stack Software Developer — React, TypeScript, Go, Python. View my projects and experience." />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Sevan Lewis-Payne | Data &amp; Software Engineer" />
+    <meta name="twitter:description" content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into." />
     <meta name="twitter:image" content="https://sevanlewispayne.com/favicon-192.png" />
+
+    <!-- Structured identity for search engines and AI agents -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Sevan Lewis-Payne",
+      "url": "https://sevanlewispayne.com",
+      "jobTitle": "Data & Software Engineer",
+      "email": "mailto:slewis-payne@unomaha.edu",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Omaha",
+        "addressRegion": "NE",
+        "addressCountry": "US"
+      },
+      "alumniOf": {
+        "@type": "CollegeOrUniversity",
+        "name": "University of Nebraska Omaha"
+      },
+      "sameAs": [
+        "https://github.com/Sevan1211",
+        "https://www.linkedin.com/in/sevan-lewis-payne"
+      ],
+      "knowsAbout": [
+        "Data engineering",
+        "Snowflake",
+        "dbt",
+        "Data quality testing",
+        "React",
+        "TypeScript",
+        "Python",
+        "Go"
+      ]
+    }
+    </script>
 
     <!-- Prefetch 3D model so it starts downloading before React mounts.
          Using prefetch (not preload) avoids blocking the parser while still
@@ -60,18 +95,108 @@
         width: 100%;
         height: 100%;
       }
+
+      /* Static content for crawlers, agents, and no-JS visitors. React
+         replaces it on mount, and the page cover hides it before that, so
+         browser users never see it. */
+      .static-page {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 48px 24px;
+        color: #e8eeff;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        line-height: 1.6;
+        overflow-y: auto;
+        height: 100%;
+        box-sizing: border-box;
+      }
+
+      .static-page a {
+        color: #9db8ff;
+      }
     </style>
+
+    <!-- Without JavaScript the app never mounts; drop the cover so the
+         static resume below is readable instead of a blank blue screen. -->
+    <noscript>
+      <style>
+        #page-cover { display: none; }
+        html, body { overflow: auto; }
+      </style>
+    </noscript>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Crawler-visible resume. The React app replaces this container's
+           contents on mount; keep it in sync with src/shared/content/portfolio.ts. -->
+      <main class="static-page">
+        <h1>Sevan Lewis-Payne</h1>
+        <p>Data &amp; Software Engineer · Omaha, Nebraska</p>
+        <p>
+          I build governed data platforms, secure production software, and
+          AI-enabled developer tools. This site is an interactive 3D office:
+          click the monitor and a retro desktop opens with my experience,
+          projects, a working Python IDE, and a few games. If you are a
+          crawler, an AI agent, or just in a hurry, everything important is
+          right here.
+        </p>
 
-    <!-- Blue curtain: covers everything on load. Dismissed by JS once loading canvas is painted.
-         Re-shown on beforeunload so CSS3D content can never flash during reload. -->
-    <div id="page-cover" style="position:fixed;inset:0;background:#1e3a8a;z-index:99999"></div>
+        <h2>Experience</h2>
+        <ul>
+          <li>
+            <strong>Rasmussen Air and Gas Energy</strong>, Data Engineering and
+            Analytics Intern, August 2025 to present. Primary architect of a
+            governed Snowflake and dbt data platform: medallion architecture,
+            a semantic metrics layer, 2,000+ automated data-quality tests,
+            PR-gated CI/CD, and six integrated production source systems.
+          </li>
+          <li>
+            <strong>First National Bank of Omaha</strong>, Software Engineering
+            Intern, summers 2024 and 2025. Application-security remediation and
+            React/TypeScript administrative workflows on a production
+            commercial-card platform serving 100,000+ customers.
+          </li>
+          <li>
+            <strong>University of Nebraska Omaha</strong>, IT Operations
+            Specialist, August 2025 to present. Technical support for faculty
+            and students across hardware, software, and A/V systems.
+          </li>
+        </ul>
+
+        <h2>Education</h2>
+        <p>
+          B.S. in Computer Science and Artificial Intelligence, minor in
+          Communication Studies, University of Nebraska Omaha, expected May
+          2027. Susan T. Buffett Scholar. Rising Star Intern Award, 2025.
+        </p>
+
+        <h2>Skills</h2>
+        <p>
+          Python, SQL, TypeScript, JavaScript, Go, Kotlin, Java, and C.
+          Snowflake, dbt, Fivetran, dimensional modeling, and data-quality
+          testing. React, Node.js, FastAPI, Docker, CI/CD, and Azure.
+        </p>
+
+        <h2>Links</h2>
+        <ul>
+          <li><a href="/resume/Sevan-Lewis-Payne-2026-Resume.pdf">Resume (PDF)</a></li>
+          <li><a href="https://github.com/Sevan1211">GitHub</a></li>
+          <li><a href="https://www.linkedin.com/in/sevan-lewis-payne">LinkedIn</a></li>
+          <li><a href="mailto:slewis-payne@unomaha.edu">slewis-payne@unomaha.edu</a></li>
+          <li><a href="/os">Open the desktop directly, without the 3D scene</a></li>
+        </ul>
+      </main>
+    </div>
+
+    <!-- Blue curtain: covers everything on load, then fades out once the globe
+         has painted (the rendered field is the same #1e3a8a, so the fade reads
+         as one continuous surface). Re-shown on beforeunload so CSS3D content
+         can never flash during reload. -->
+    <div id="page-cover" style="position:fixed;inset:0;background:#1e3a8a;z-index:99999;opacity:1;transition:opacity 0.45s ease"></div>
     <script>
       window.addEventListener('beforeunload', function () {
         var c = document.getElementById('page-cover');
-        if (c) c.style.display = '';
+        if (c) { c.style.display = ''; c.style.opacity = '1'; }
       });
     </script>
 

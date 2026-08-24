@@ -39,7 +39,7 @@ const GHOST_DIR_PREFERENCES: Record<string, Direction[]> = {
   clyde:  ['left', 'down', 'right', 'up'],     // fickle: favours left & down
 };
 
-/** Module-scoped direction order — set per-ghost before each pathfinding call */
+/** Module-scoped direction order - set per-ghost before each pathfinding call */
 let _dirOrder: Direction[] = ALL_DIRECTIONS;
 
 /** Check if a tile is walkable */
@@ -156,7 +156,7 @@ function randomWalk(
   const neighbors = getNeighbors(maze, ghost.pos, ghost.direction, allowReverse);
 
   if (neighbors.length === 0) {
-    // No valid non-reverse direction — allow reverse as fallback
+    // No valid non-reverse direction - allow reverse as fallback
     const withReverse = getNeighbors(maze, ghost.pos, ghost.direction, true);
     return withReverse[0]?.dir ?? ghost.direction;
   }
@@ -260,7 +260,7 @@ function bfs(
       return current.firstDir;
     }
 
-    // Expand — BFS doesn't restrict direction at expansion
+    // Expand - BFS doesn't restrict direction at expansion
     for (const dir of _dirOrder) {
       const vec = DIRECTION_VECTORS[dir];
       let nx = current.pos.x + vec.x;
@@ -282,7 +282,7 @@ function bfs(
     }
   }
 
-  // Fallback — choose best local move toward target
+  // Fallback - choose best local move toward target
   return pickBestNeighborTowardTarget(maze, start, target, currentDir);
 }
 
@@ -376,7 +376,7 @@ function astar(
     }
   }
 
-  // Fallback — choose best local move toward target
+  // Fallback - choose best local move toward target
   return pickBestNeighborTowardTarget(maze, start, target, currentDir);
 }
 
@@ -407,11 +407,11 @@ function getPersonalityTarget(
 
   switch (ghost.name) {
     case 'blinky':
-      // Red — targets Pac-Man's current tile directly
+      // Red - targets Pac-Man's current tile directly
       return pacman.pos;
 
     case 'pinky': {
-      // Pink — targets 4 tiles ahead of Pac-Man
+      // Pink - targets 4 tiles ahead of Pac-Man
       return clamp({
         x: pacman.pos.x + pacDir.x * 4,
         y: pacman.pos.y + pacDir.y * 4,
@@ -419,7 +419,7 @@ function getPersonalityTarget(
     }
 
     case 'inky': {
-      // Cyan — complex: 2 tiles ahead of Pac-Man, then double the vector from Blinky
+      // Cyan - complex: 2 tiles ahead of Pac-Man, then double the vector from Blinky
       const ahead = {
         x: pacman.pos.x + pacDir.x * 2,
         y: pacman.pos.y + pacDir.y * 2,
@@ -431,7 +431,7 @@ function getPersonalityTarget(
     }
 
     case 'clyde': {
-      // Orange — chases when far, flanks from behind when close
+      // Orange - chases when far, flanks from behind when close
       const dist = manhattan(ghost.pos, pacman.pos);
       if (dist > 4) return pacman.pos;
       // When close, target behind Pac-Man to cut off escape

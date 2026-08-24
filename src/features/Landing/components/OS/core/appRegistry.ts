@@ -5,12 +5,14 @@ import { TerminalIcon } from '../components/icons/TerminalIcon';
 import { PacmanIcon } from '../components/icons/PacmanIcon';
 import { PaintIcon } from '../components/icons/PaintIcon';
 import { PythonIcon } from '../components/icons/PythonIcon';
+import { SiteIcon } from '../components/icons/SiteIcon';
 
-// Lazy-load all app components — they are only rendered when the user opens
+// Lazy-load all app components - they are only rendered when the user opens
 // the corresponding window, so there is no reason to include them in the
 // initial bundle.  This shaves hundreds of KB off the critical path
 // (xterm for Terminal, game engine for Pac-Man, canvas logic for Paint, etc.).
 const AboutApp    = React.lazy(() => import('../apps/about/AboutApp').then(m => ({ default: m.AboutApp })));
+const SiteApp     = React.lazy(() => import('../apps/site/SiteApp').then(m => ({ default: m.SiteApp })));
 const TerminalApp = React.lazy(() => import('../apps/terminal/TerminalApp').then(m => ({ default: m.TerminalApp })));
 const PacmanApp   = React.lazy(() => import('../apps/pacman/PacmanApp').then(m => ({ default: m.PacmanApp })));
 const PaintApp    = React.lazy(() => import('../apps/paint/PaintApp').then(m => ({ default: m.PaintApp })));
@@ -28,6 +30,18 @@ export const APP_REGISTRY: Record<AppId, AppDefinition> = {
     minWidth: 620,
     minHeight: 450,
     component: AboutApp,
+  },
+  'site': {
+    id: 'site',
+    title: 'About This Site',
+    icon: SiteIcon,
+    defaultWidthRatio: 0.58,
+    defaultHeightRatio: 0.78,
+    defaultXRatio: 0.20,
+    defaultYRatio: 0.08,
+    minWidth: 440,
+    minHeight: 380,
+    component: SiteApp,
   },
   'terminal': {
     id: 'terminal',

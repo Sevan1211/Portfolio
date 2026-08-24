@@ -101,7 +101,7 @@ const Spinning7: React.FC = () => {
   );
 };
 
-/* ── Canvas wrapper — used as a background layer ── */
+/* ── Canvas wrapper - used as a background layer ── */
 export const PhoneBackground: React.FC = () => (
   <div className="mobile-bg">
     <Canvas

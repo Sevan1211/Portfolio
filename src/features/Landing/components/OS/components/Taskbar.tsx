@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useDesktop } from '../core/useDesktop';
+import { useDesktop, useDesktopState } from '../core/useDesktop';
 import { getApp } from '../core/appRegistry';
 import { StartMenu } from './StartMenu';
 
 export const Taskbar: React.FC = () => {
   const { windows, activeWindowId, focusWindow, minimizeWindow } = useDesktop();
+  const { standalone } = useDesktopState();
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [clock, setClock] = useState(new Date());
 
@@ -71,6 +72,37 @@ export const Taskbar: React.FC = () => {
         </div>
 
         <div className="taskbar-clock">{formattedClock}</div>
+
+        {!standalone && (
+          <a
+            href="/os"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="taskbar-source"
+            title="Open full screen in a new tab"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ display: 'block' }}
+              shapeRendering="crispEdges"
+            >
+              {/* Back window */}
+              <rect x="2" y="6" width="10" height="12" fill="#C0C0C0" stroke="#000" strokeWidth="1" />
+              <rect x="2" y="6" width="10" height="3" fill="#000080" />
+              {/* Front window */}
+              <rect x="8" y="2" width="10" height="10" fill="#fff" stroke="#000" strokeWidth="1" />
+              <rect x="8" y="2" width="10" height="3" fill="#000080" />
+              {/* Outward arrow */}
+              <line x1="11" y1="10" x2="15" y2="6" stroke="#000" strokeWidth="1.2" />
+              <line x1="12" y1="6" x2="15" y2="6" stroke="#000" strokeWidth="1.2" />
+              <line x1="15" y1="6" x2="15" y2="9" stroke="#000" strokeWidth="1.2" />
+            </svg>
+          </a>
+        )}
 
         <a
           href="https://github.com/Sevan1211/Portfolio"

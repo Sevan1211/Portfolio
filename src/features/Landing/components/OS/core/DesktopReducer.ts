@@ -3,11 +3,15 @@ import { DesktopState, DesktopAction, WindowState } from './types';
 import { MONITOR_WIDTH, DESKTOP_WORKSPACE_HEIGHT } from './constants';
 import { getApp } from './appRegistry';
 
-export const createInitialState = (fullscreen: boolean): DesktopState => ({
+export const createInitialState = (
+  fullscreen: boolean,
+  standalone = false,
+): DesktopState => ({
   windows: [],
   activeWindowId: null,
   nextZIndex: 1,
   fullscreen,
+  standalone,
 });
 
 export const initialState: DesktopState = createInitialState(false);
@@ -133,7 +137,7 @@ export function desktopReducer(state: DesktopState, action: DesktopAction): Desk
               height: w.previousBounds?.height ?? w.height,
             };
           } else {
-            // Maximize — use dynamic bounds if provided, fall back to monitor constants
+            // Maximize - use dynamic bounds if provided, fall back to monitor constants
             const maxWidth = action.bounds?.width ?? MONITOR_WIDTH;
             const maxHeight = action.bounds?.height ?? DESKTOP_WORKSPACE_HEIGHT;
             return {
@@ -175,7 +179,7 @@ export function desktopReducer(state: DesktopState, action: DesktopAction): Desk
         if (y + height > boundsHeight) y = Math.max(0, boundsHeight - height);
 
         if (x === w.x && y === w.y && width === w.width && height === w.height) {
-          return w; // no change — preserve reference
+          return w; // no change - preserve reference
         }
         return { ...w, x, y, width, height };
       });

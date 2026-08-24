@@ -1,597 +1,693 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { useThree, useFrame, ThreeEvent } from '@react-three/fiber';
-import { Color, Euler, Fog, Group, PerspectiveCamera, Quaternion, Vector3 } from 'three';
-import { useGLTF } from '@react-three/drei';
-import { OfficeCubicle } from './OfficeCubicle';
-import { useCameraControls, useCameraAnimation } from '../hooks/useCameraControls';
-
-// Preload the cubicle model
-const CUBICLE_MODEL_PATH = '/models/low_poly_90s_office_cubicle.glb';
-useGLTF.preload(CUBICLE_MODEL_PATH);
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import {
+  Color,
+  Euler,
+  Fog,
+  Group,
+  Matrix4,
+  Mesh,
+  PerspectiveCamera,
+  Quaternion,
+  Texture,
+  Vector3,
+} from "three";
+import { OfficeCubicle } from "./OfficeCubicle";
+import { useCameraControls } from "../hooks/useCameraControls";
+import { QUALITY } from "./deviceTier";
 
 interface CubicleSceneProps {
-    onModelLoaded?: () => void;
-    loadingComplete?: boolean;
-    /** When true, makes the 3D model visible for GPU shader pre-compilation
-     *  while the loading overlay is still opaque. Camera stays locked. */
-    warmUp?: boolean;
-    onZoomChange?: (isZoomed: boolean) => void;
-    /** Called once the zoom-in animation reaches completion */
-    onZoomComplete?: () => void;
-    /** Increment this counter to trigger a zoom-out from outside the canvas */
-    zoomOutTrigger?: number;
+  /** Camera parked at the intro start behind the opaque veil. */
+  roomStaged: boolean;
+  /** Veil is lifting; run the descent into the room. */
+  roomActive: boolean;
+  /** The full-screen OS is covering the canvas; pause all per-frame work. */
+  osOverlayOpen: boolean;
+  reducedMotion?: boolean;
+  enterMonitorTrigger?: number;
+  zoomOutTrigger?: number;
+  onModelLoaded?: () => void;
+  onRoomReady?: () => void;
+  onZoomChange?: (isZoomed: boolean) => void;
+  onZoomComplete?: () => void;
 }
 
 const CAMERA_CONFIG = {
-    rotationSensitivityX: .5,
-    rotationSensitivityY: .4,
-    initialYaw: 0.72,
-    initialPitch: -0.3,
-    zoomDistance: -8.0,
-    zoomHeight: 0.0,
-    zoomOffsetX: .8,
-    zoomOffsetY: 0.0,
-    zoomOffsetZ: 8.75,
-    lookAtOffsetX: 0.0,
-    lookAtOffsetY: 0.0,
-    lookAtOffsetZ: 0.0,
+  rotationSensitivityX: 0.5,
+  rotationSensitivityY: 0.4,
+  initialYaw: 0.72,
+  initialPitch: -0.3,
 };
 
-const FOV_CONFIG = {
-    start: 95,
-    end: 75,
-    duration: 2.0,
+const GLOBE_CAMERA_POSITION = new Vector3(0, 0, 8);
+// The original intro: a straight glide from high above down to the desk with
+// the camera rotation fixed, FOV settling 95 → 75 over 2 s. Kept verbatim -
+// only the reveal (the veil fade) around it is new.
+const ROOM_START_POSITION = new Vector3(4, 12, -7);
+const ROOM_REST_POSITION = new Vector3(0, 7, -10);
+const INTRO_DURATION_SECONDS = 2.0;
+const INTRO_FOV_START = 95;
+const INTRO_FOV_END = 75;
+const GLOBE_BACKGROUND = new Color("#1e3a8a");
+const ROOM_BACKGROUND = new Color("#000000");
+// Zoomed-in framing: how much of the viewport the screen may fill. Kept
+// well under 100% so the CRT bezel stays visibly in frame on every aspect
+// ratio - the OS should read as embedded in the monitor, not as a floating
+// full-page overlay.
+const MONITOR_FILL_WIDTH = 0.84;
+const MONITOR_FILL_HEIGHT = 0.8;
+const ROOM_START_QUATERNION = new Quaternion().setFromEuler(
+  new Euler(CAMERA_CONFIG.initialPitch, CAMERA_CONFIG.initialYaw, 0, "YXZ"),
+);
+
+const makeLookQuaternion = (position: Vector3, target: Vector3) => {
+  const camera = new PerspectiveCamera();
+  camera.position.copy(position);
+  camera.lookAt(target);
+  return camera.quaternion.clone();
 };
 
-const CAMERA_POSITION = {
-    start: { x: 4, y: 12, z: -7 },
-    end: { x: 0, y: 7, z: -10 },
+const GLOBE_CAMERA_QUATERNION = makeLookQuaternion(
+  GLOBE_CAMERA_POSITION,
+  new Vector3(),
+);
+const WIDE_MONITOR_VERTICAL_FOV = 46;
+const WIDE_MONITOR_ASPECT = 16 / 9;
+const MONITOR_HORIZONTAL_FOV =
+  2 *
+  Math.atan(
+    Math.tan((WIDE_MONITOR_VERTICAL_FOV * Math.PI) / 360) * WIDE_MONITOR_ASPECT,
+  );
+
+const getMonitorFov = (aspect: number) => {
+  const fittedFov =
+    (2 *
+      Math.atan(Math.tan(MONITOR_HORIZONTAL_FOV / 2) / Math.max(aspect, 0.5)) *
+      180) /
+    Math.PI;
+  return Math.min(64, Math.max(WIDE_MONITOR_VERTICAL_FOV, fittedFov));
 };
 
-// Hoisted Color instances — avoids re-creating them every time the effect runs
-const BG_COLOR_LOADED = new Color(0x000000);
-const BG_COLOR_LOADING = new Color(0x1e3a8a);
+const smoothStep = (value: number) => value * value * (3 - 2 * value);
 
 export const CubicleScene: React.FC<CubicleSceneProps> = ({
-    onModelLoaded,
-    loadingComplete = false,
-    warmUp = false,
-    onZoomChange,
-    onZoomComplete,
-    zoomOutTrigger,
+  roomStaged,
+  roomActive,
+  osOverlayOpen,
+  reducedMotion = false,
+  enterMonitorTrigger = 0,
+  zoomOutTrigger = 0,
+  onModelLoaded,
+  onRoomReady,
+  onZoomChange,
+  onZoomComplete,
 }) => {
-    const sceneRef = useRef<Group>(null);
-    const [isScreenHovered, setIsScreenHovered] = useState(false);
-    const [isZoomedIn, setIsZoomedIn] = useState(false);
-    const screenWorldPosition = useRef<Vector3 | null>(null);
+  const { camera: sceneCamera, gl, scene, invalidate, setDpr } = useThree();
+  // This canvas is configured with a perspective camera in LandingScene.
+  const camera = sceneCamera as PerspectiveCamera;
+  const invalidateRef = useRef(invalidate);
+  useEffect(() => {
+    invalidateRef.current = invalidate;
+  }, [invalidate]);
+  const roomGroupRef = useRef<Group>(null);
+  const [isScreenHovered, setIsScreenHovered] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isZoomedIn, setIsZoomedIn] = useState(false);
+  const isZoomedInRef = useRef(false);
+  const roomReadyRef = useRef(false);
+  const roomIntroProgressRef = useRef(-1);
+  const screenWorldPositionRef = useRef<Vector3 | null>(null);
+  const mousePositionRef = useRef({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const isMouseDownRef = useRef(false);
+  const hasDraggedRef = useRef(false);
+  const isDraggingRef = useRef(false);
+  const ignoreNextScreenClickRef = useRef(false);
+  const activeRoomRef = useRef(roomActive);
+  const lastEnterTriggerRef = useRef(enterMonitorTrigger);
+  const lastZoomOutTriggerRef = useRef(zoomOutTrigger);
+  const roomReadyNotifiedRef = useRef(false);
+  const screenMeshRef = useRef<Mesh | null>(null);
 
-    const baseCameraPos = useRef({ ...CAMERA_POSITION.start });
-    const initialCameraSet = useRef(false);
+  const dragRotationRef = useRef({
+    yaw: CAMERA_CONFIG.initialYaw,
+    pitch: CAMERA_CONFIG.initialPitch,
+  });
+  const { handleDrag, startDrag, applyRotation, resetRotation } =
+    useCameraControls(CAMERA_CONFIG, camera);
+  const handleDragRef = useRef(handleDrag);
+  const startDragRef = useRef(startDrag);
+  useEffect(() => {
+    handleDragRef.current = handleDrag;
+    startDragRef.current = startDrag;
+  }, [handleDrag, startDrag]);
 
-    const { camera, scene, gl } = useThree();
-    // Use refs for values that change on every mouse move to avoid triggering
-    // React re-renders 60+ times/sec, which causes CSS3D DOM thrashing & glitching.
-    const mousePosRef = useRef({ x: 0, y: 0 });
-    const isDraggingRef = useRef(false);
-    const [isDragging, setIsDragging] = useState(false);
-    const dragRotationRef = useRef({
-        yaw: CAMERA_CONFIG.initialYaw,
-        pitch: CAMERA_CONFIG.initialPitch
+  const introPositionRef = useRef(new Vector3());
+  const roomStagedRef = useRef(false);
+  const shadowWarmupFramesRef = useRef(0);
+  const shadowFrozenRef = useRef(false);
+  const frameSamplesRef = useRef<number[]>([]);
+  const dprStepRef = useRef(0);
+  /** Latest pointer position, consumed once per rendered frame. */
+  const pendingPointerRef = useRef<{ x: number; y: number } | null>(null);
+  /** Resolution the scene renders at when the camera is still. */
+  const baseDprRef = useRef(QUALITY.maxDpr);
+  /** True while the drag renders at reduced resolution. */
+  const motionDprActiveRef = useRef(false);
+  /** Adaptive step-downs collected mid-motion, applied only once settled. */
+  const pendingDprStepRef = useRef(0);
+  const setDprRef = useRef(setDpr);
+  setDprRef.current = setDpr;
+
+  const monitorZoomProgressRef = useRef(-1);
+  const monitorZoomOutProgressRef = useRef(-1);
+  const monitorZoomStartPositionRef = useRef(new Vector3());
+  const monitorZoomStartQuaternionRef = useRef(new Quaternion());
+  const monitorZoomStartFovRef = useRef(75);
+  const monitorZoomTargetFovRef = useRef(WIDE_MONITOR_VERTICAL_FOV);
+  const monitorZoomTargetPositionRef = useRef(new Vector3());
+  const monitorZoomTargetQuaternionRef = useRef(new Quaternion());
+  const returnCameraPositionRef = useRef(ROOM_REST_POSITION.clone());
+  const returnCameraQuaternionRef = useRef(ROOM_START_QUATERNION.clone());
+  const returnCameraFovRef = useRef(75);
+  const monitorReadyNotifiedRef = useRef(false);
+  const monitorTransitionRef = useRef(false);
+
+  useEffect(() => {
+    camera.position.copy(GLOBE_CAMERA_POSITION);
+    camera.quaternion.copy(GLOBE_CAMERA_QUATERNION);
+    camera.fov = 50;
+    camera.updateProjectionMatrix();
+    scene.background = GLOBE_BACKGROUND;
+    scene.fog = new Fog("#000000", 15, 35);
+
+    return () => {
+      scene.fog = null;
+      gl.shadowMap.autoUpdate = true;
+    };
+  }, [camera, gl, scene]);
+
+  // Behind the opaque veil: park the camera at the top of the descent, then
+  // force every shader and texture in the room onto the GPU before anything
+  // is visible. Without this, each prop compiles its program and uploads its
+  // textures the first time it scrolls into view - which lands as a frame
+  // hitch mid-drag. Paying it once here is invisible; paying it later isn't.
+  useEffect(() => {
+    if (!roomStaged || roomStagedRef.current) return;
+    roomStagedRef.current = true;
+    camera.position.copy(ROOM_START_POSITION);
+    camera.quaternion.copy(ROOM_START_QUATERNION);
+    camera.fov = INTRO_FOV_START;
+    camera.updateProjectionMatrix();
+    scene.background = ROOM_BACKGROUND;
+
+    gl.compile(scene, camera);
+    const uploaded = new Set<Texture>();
+    scene.traverse((object) => {
+      if (!(object instanceof Mesh)) return;
+      const materials = Array.isArray(object.material)
+        ? object.material
+        : [object.material];
+      materials.forEach((material) => {
+        if (!material) return;
+        Object.values(material).forEach((value) => {
+          if (!(value instanceof Texture) || uploaded.has(value)) return;
+          uploaded.add(value);
+          gl.initTexture(value);
+        });
+      });
     });
 
-    const targetCameraPos = useRef({ ...CAMERA_POSITION.start });
-    const currentCameraPos = useRef({ ...CAMERA_POSITION.start });
-    const dragStartRef = useRef({ x: 0, y: 0 });
-    const isMouseDownRef = useRef(false);
-    const hasDraggedRef = useRef(false);
-
-    // Store camera state at start of zoom transition
-    const zoomStartPosition = useRef<Vector3>(new Vector3());
-    const zoomStartQuaternion = useRef<Quaternion>(new Quaternion());
-    const zoomTargetQuaternion = useRef<Quaternion>(new Quaternion());
-    const zoomProgress = useRef(0);
-    const isTransitioning = useRef(false);  // Prevent rapid clicking issues
-
-    // Zoom out animation state
-    const zoomOutProgress = useRef(0);
-    const zoomOutStartPosition = useRef<Vector3>(new Vector3());
-    const zoomOutStartQuaternion = useRef<Quaternion>(new Quaternion());
-    const zoomOutTargetPosition = useRef<Vector3>(new Vector3());
-    const zoomOutTargetQuaternion = useRef<Quaternion>(new Quaternion());
-    const zoomOutTargetYaw = useRef(0);
-    const zoomOutTargetPitch = useRef(0);
-
-    // Reusable Vector3 for per-frame interpolation — avoids GC pressure inside useFrame
-    const _tempTargetVec = useRef(new Vector3());
-
-    const { handleDrag, startDrag, applyRotation, resetRotation } = useCameraControls(CAMERA_CONFIG, camera);
-    const { animateFOV, animatePosition, fovAnimationProgress } = useCameraAnimation();
-
-    // Initialize camera and background
-    // Start with blue to match loading scene, switch to black when loading completes
-    useEffect(() => {
-        if (scene && gl && camera) {
-            if (loadingComplete || warmUp) {
-                scene.background = BG_COLOR_LOADED;
-                gl.setClearColor(0x000000, 1);
-            } else {
-                scene.background = BG_COLOR_LOADING;
-                gl.setClearColor(0x1e3a8a, 1);
-            }
-            
-            // Initialize camera position and sync refs on mount
-            if (!initialCameraSet.current) {
-                initialCameraSet.current = true;
-                camera.position.set(CAMERA_POSITION.start.x, CAMERA_POSITION.start.y, CAMERA_POSITION.start.z);
-                
-                // Use Euler rotation consistently (matches applyRotation in useCameraControls)
-                camera.rotation.order = 'YXZ';
-                camera.rotation.set(CAMERA_CONFIG.initialPitch, CAMERA_CONFIG.initialYaw, 0);
-                
-                // Sync all position refs
-                baseCameraPos.current = { ...CAMERA_POSITION.start };
-                targetCameraPos.current = { ...CAMERA_POSITION.start };
-                currentCameraPos.current = { ...CAMERA_POSITION.start };
-            }
-        }
-    }, [scene, gl, camera, loadingComplete, warmUp]);
-
-    const isZoomedInRef = useRef(false);
-
-    /**
-     * Performs the actual zoom-out animation.
-     * Separated from handleBackgroundClick so the external Escape trigger
-     * can call it directly, bypassing the isTransitioning guard that may
-     * still be active from the zoom-in setTimeout.
-     */
-    const performZoomOut = useCallback(() => {
-            isTransitioning.current = true;
-            isZoomedInRef.current = false; // Immediate update for useFrame
-
-            // Capture camera state immediately
-            const capturedPosition = camera.position.clone();
-            const capturedQuaternion = camera.quaternion.clone();
-            capturedQuaternion.normalize();
-
-            // Store captured state for zoom out animation
-            zoomOutStartPosition.current.copy(capturedPosition);
-            zoomOutStartQuaternion.current.copy(capturedQuaternion);
-
-            // Calculate target position for zoom out (back to normal view)
-            const targetPos = new Vector3(
-                baseCameraPos.current.x,
-                baseCameraPos.current.y,
-                baseCameraPos.current.z
-            );
-            zoomOutTargetPosition.current.copy(targetPos);
-
-            // Calculate target rotation for zoom out
-            // We animate to the base rotation (dragRotation) WITH parallax
-            // This ensures a consistent target. The controls will smooth in the parallax when they take over.
-            const mp = mousePosRef.current;
-            const dr = dragRotationRef.current;
-            const hoverYaw = mp.x * 0.02;
-            const hoverPitch = -mp.y * 0.015;
-
-            const targetYaw = dr.yaw + hoverYaw;
-            const targetPitch = dr.pitch + hoverPitch;
-
-            // Store for control sync
-            zoomOutTargetYaw.current = targetYaw;
-            zoomOutTargetPitch.current = targetPitch;
-
-            const euler = new Euler(targetPitch, targetYaw, 0, 'YXZ');
-            const tempQuaternion = new Quaternion();
-            tempQuaternion.setFromEuler(euler);
-            tempQuaternion.normalize();
-            zoomOutTargetQuaternion.current.copy(tempQuaternion);
-
-            // Initialize animation state
-            zoomOutProgress.current = 0.001;
-            zoomCompletedRef.current = false;
-            zoomProgress.current = 0;
-
-            targetCameraPos.current = { ...baseCameraPos.current };
-
-            // Update React state
-            setIsZoomedIn(false);
-            onZoomChange?.(false);
-
-            setTimeout(() => {
-                isTransitioning.current = false;
-            }, 1000);
-    }, [onZoomChange, camera]);
-
-    // Handle background click - triggers zoom out
-    const handleBackgroundClick = useCallback(() => {
-        if (isZoomedInRef.current && !isTransitioning.current) {
-            performZoomOut();
-        }
-    }, [performZoomOut]);
-
-    // Stable refs for camera control functions so the event listener effect
-    // never needs to re-attach (handleDrag/startDrag are recreated each render).
-    const handleDragRef = useRef(handleDrag);
-    const startDragRef = useRef(startDrag);
-    useEffect(() => {
-        handleDragRef.current = handleDrag;
-        startDragRef.current = startDrag;
-    });
-
-    useEffect(() => {
-        const handleMouseMove = (event: MouseEvent) => {
-            const x = (event.clientX / window.innerWidth) * 2 - 1;
-            const y = -(event.clientY / window.innerHeight) * 2 + 1;
-            mousePosRef.current = { x, y };
-
-            // Check if mouse is down and has moved enough to be considered a drag
-            if (isMouseDownRef.current && !hasDraggedRef.current) {
-                const deltaX = event.clientX - dragStartRef.current.x;
-                const deltaY = event.clientY - dragStartRef.current.y;
-                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-                // Only consider it a drag if moved more than 5 pixels
-                if (distance > 5) {
-                    hasDraggedRef.current = true;
-                    isDraggingRef.current = true;
-                    setIsDragging(true);
-                }
-            }
-
-            if (isDraggingRef.current) {
-                const deltaX = event.clientX - dragStartRef.current.x;
-                const deltaY = event.clientY - dragStartRef.current.y;
-                dragRotationRef.current = handleDragRef.current(deltaX, deltaY);
-            }
-        };
-
-        const handleMouseDown = (event: MouseEvent) => {
-            // Don't allow dragging when zoomed in or transitioning
-            if (!isZoomedInRef.current && !isTransitioning.current) {
-                isMouseDownRef.current = true;
-                hasDraggedRef.current = false;
-                dragStartRef.current = { x: event.clientX, y: event.clientY };
-                startDragRef.current(event.clientX, event.clientY, dragRotationRef.current);
-            }
-        };
-
-        const handleMouseUp = () => {
-            isMouseDownRef.current = false;
-            hasDraggedRef.current = false;
-            isDraggingRef.current = false;
-            setIsDragging(false);
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mousedown', handleMouseDown);
-        window.addEventListener('mouseup', handleMouseUp);
-
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mousedown', handleMouseDown);
-            window.removeEventListener('mouseup', handleMouseUp);
-        };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Stable — all values read via refs, never re-attaches
-
-    // Change cursor when zoomed in to indicate no dragging
-    useEffect(() => {
-        document.body.style.cursor = isZoomedIn ? 'default' : 'auto';
-        return () => { document.body.style.cursor = 'auto'; };
-    }, [isZoomedIn]);
-
-    // Stable ref so the zoomOutTrigger effect below never has a stale closure
-    const handleBackgroundClickRef = useRef(handleBackgroundClick);
-    const performZoomOutRef = useRef(performZoomOut);
-    useEffect(() => {
-        handleBackgroundClickRef.current = handleBackgroundClick;
-        performZoomOutRef.current = performZoomOut;
-    }, [handleBackgroundClick, performZoomOut]);
-
-    // External zoom-out trigger — incremented by LandingScene when user presses Escape in full-screen OS.
-    // Calls performZoomOut directly to bypass the isTransitioning guard that may still be
-    // active from the zoom-in's 1000ms setTimeout, preventing the camera snap-back bug.
-    useEffect(() => {
-        if (zoomOutTrigger && zoomOutTrigger > 0) {
-            // Force-clear transitioning state so the animation can proceed
-            isTransitioning.current = false;
-            performZoomOutRef.current();
-        }
-    }, [zoomOutTrigger]);
-
-    // Removed useEffect - rotation now applied in useFrame for smooth 60fps updates
-
-    useEffect(() => {
-        dragRotationRef.current = {
-            yaw: CAMERA_CONFIG.initialYaw,
-            pitch: CAMERA_CONFIG.initialPitch
-        };
-    }, []);
-
-    // Track zoom completion to know when desktop should be interactive
-    const zoomCompletedRef = useRef(false);
-
-    useEffect(() => {
-        if (!isZoomedIn) {
-            zoomCompletedRef.current = false;
-            zoomProgress.current = 0;
-        }
-    }, [isZoomedIn]);
-
-    // Handle screen click - triggers zoom in
-    const handleScreenClick = useCallback(() => {
-        if (!isZoomedInRef.current && !isDraggingRef.current && !isTransitioning.current && screenWorldPosition.current) {
-            // Trigger zoom in on click (not on hover)
-            isTransitioning.current = true;
-            isZoomedInRef.current = true; // Immediate update
-            const screenPos = screenWorldPosition.current;
-
-            // Capture current camera state immediately
-            zoomStartPosition.current.copy(camera.position);
-            zoomStartQuaternion.current.copy(camera.quaternion);
-
-            // Calculate target position
-            const targetPos = new Vector3(
-                screenPos.x + CAMERA_CONFIG.zoomOffsetX,
-                screenPos.y + CAMERA_CONFIG.zoomHeight + CAMERA_CONFIG.zoomOffsetY,
-                screenPos.z + CAMERA_CONFIG.zoomDistance + CAMERA_CONFIG.zoomOffsetZ
-            );
-
-            // Calculate target rotation (look at screen)
-            const tempCamera = camera.clone();
-            tempCamera.position.set(
-                targetPos.x,
-                targetPos.y,
-                targetPos.z
-            );
-            tempCamera.lookAt(
-                screenPos.x + CAMERA_CONFIG.lookAtOffsetX,
-                screenPos.y + CAMERA_CONFIG.lookAtOffsetY,
-                screenPos.z + CAMERA_CONFIG.lookAtOffsetZ
-            );
-            zoomTargetQuaternion.current.copy(tempCamera.quaternion);
-
-            targetCameraPos.current = {
-                x: targetPos.x,
-                y: targetPos.y,
-                z: targetPos.z
-            };
-
-            zoomProgress.current = 0;
-            zoomOutProgress.current = -1;
-
-            setIsZoomedIn(true);
-            zoomCompletedRef.current = false;
-            onZoomChange?.(true);
-
-            // Reset transition flag after animation
-            setTimeout(() => {
-                isTransitioning.current = false;
-            }, 1000);
-        }
-    }, [camera, onZoomChange]);
-
-    useFrame((_, rawDelta) => {
-        // Cap delta to prevent lerp overshoots when the browser delivers a large
-        // frame gap (tab hidden, GPU busy loading GLB, etc.).  Without this the
-        // unclamped `5 * delta` position lerp can launch the camera far past its
-        // target, causing the "starts at bottom and drifts up" bug.
-        const delta = Math.min(rawDelta, 0.1);
-
-        // While loading, keep camera at exact start position - no movement or rotation
-        if (!loadingComplete) {
-            camera.position.set(CAMERA_POSITION.start.x, CAMERA_POSITION.start.y, CAMERA_POSITION.start.z);
-            // Keep rotation locked at initial values too
-            camera.rotation.order = 'YXZ';
-            camera.rotation.set(CAMERA_CONFIG.initialPitch, CAMERA_CONFIG.initialYaw, 0);
-
-            // During warm-up, add fog so shaders compile with the correct scene state.
-            // Without this, materials recompile fog variants when loadingComplete fires.
-            if (warmUp && !scene.fog) {
-                scene.fog = new Fog('#000000', 15, 35);
-            }
-
-            return;
-        }
-
-        // Manage fog — attach/detach based on loading (fog doesn't respect group visibility)
-        if (!scene.fog) {
-            scene.fog = new Fog('#000000', 15, 35);
-        }
-
-        // Apply smooth rotation ONLY when not zoomed in AND not animating zoom out
-        // This prevents fighting between the controls and the animation
-        if (!isZoomedInRef.current && camera && zoomOutProgress.current <= 0) {
-            applyRotation(dragRotationRef.current, mousePosRef.current);
-        }
-
-        if (loadingComplete && camera instanceof PerspectiveCamera) {
-            const isAnimating = animateFOV(
-                delta,
-                FOV_CONFIG.start,
-                FOV_CONFIG.end,
-                FOV_CONFIG.duration,
-                camera
-            );
-
-            if (isAnimating) {
-                const easeProgress = 1 - Math.pow(1 - fovAnimationProgress.current, 3);
-                baseCameraPos.current = animatePosition(
-                    easeProgress,
-                    CAMERA_POSITION.start,
-                    CAMERA_POSITION.end
-                );
-
-                if (!isScreenHovered) {
-                    targetCameraPos.current = { ...baseCameraPos.current };
-                }
-            }
-        }
-
-        // Smooth zoom transition
-        if (isZoomedInRef.current && zoomProgress.current < 1) {
-            // Zoom IN animation — matched to zoom-out speed for consistency
-            zoomProgress.current = Math.min(zoomProgress.current + delta * 0.8, 1);
-            const easeProgress = 1 - Math.pow(1 - zoomProgress.current, 3); // Ease out cubic
-
-            // Interpolate position (reuse _tempTargetVec to avoid per-frame allocation)
-            _tempTargetVec.current.set(
-                targetCameraPos.current.x,
-                targetCameraPos.current.y,
-                targetCameraPos.current.z
-            );
-            camera.position.lerpVectors(
-                zoomStartPosition.current,
-                _tempTargetVec.current,
-                easeProgress
-            );
-
-            // Interpolate rotation (slerp for smooth rotation)
-            camera.quaternion.slerpQuaternions(
-                zoomStartQuaternion.current,
-                zoomTargetQuaternion.current,
-                easeProgress
-            );
-
-            currentCameraPos.current.x = camera.position.x;
-            currentCameraPos.current.y = camera.position.y;
-            currentCameraPos.current.z = camera.position.z;
-
-            // Trigger overlay near the end of zoom so it fades in as camera settles
-            if (zoomProgress.current >= 0.8 && !zoomCompletedRef.current) {
-                zoomCompletedRef.current = true;
-                onZoomComplete?.();
-            }
-        } else if (!isZoomedInRef.current && zoomOutProgress.current < 1 && zoomOutProgress.current > 0) {
-            // Zoom OUT animation — ease-in-out so camera barely moves while overlay fades
-            zoomOutProgress.current = Math.min(zoomOutProgress.current + delta * 0.8, 1);
-
-            // Ease-in-out cubic: slow start → fast middle → slow end
-            // This keeps the camera nearly still while the overlay fades out,
-            // then the user sees the full sweep back to the original position.
-            const t = zoomOutProgress.current;
-            const easeProgress = t < 0.5
-                ? 4 * t * t * t
-                : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-            // Interpolate position back to normal view using eased progress
-            camera.position.lerpVectors(
-                zoomOutStartPosition.current,
-                zoomOutTargetPosition.current,
-                easeProgress
-            );
-
-            // Interpolate rotation back to normal view with smooth slerp using eased progress
-            camera.quaternion.slerpQuaternions(
-                zoomOutStartQuaternion.current,
-                zoomOutTargetQuaternion.current,
-                easeProgress
-            );
-
-            currentCameraPos.current.x = camera.position.x;
-            currentCameraPos.current.y = camera.position.y;
-            currentCameraPos.current.z = camera.position.z;
-
-            // When zoom out completes, ensure final state is exact
-            if (zoomOutProgress.current >= 1) {
-                zoomOutProgress.current = -1; // Mark as completed
-                // Snap to exact target position and rotation to prevent drift
-                camera.position.copy(zoomOutTargetPosition.current);
-                camera.quaternion.copy(zoomOutTargetQuaternion.current);
-                currentCameraPos.current.x = camera.position.x;
-                currentCameraPos.current.y = camera.position.y;
-                currentCameraPos.current.z = camera.position.z;
-
-                // Sync the controls with the current rotation
-                resetRotation(zoomOutTargetYaw.current, zoomOutTargetPitch.current);
-            }
-        } else if (!isZoomedInRef.current) {
-            // Normal camera movement when not zoomed
-            const lerpFactor = 5 * delta;
-            currentCameraPos.current.x += (targetCameraPos.current.x - currentCameraPos.current.x) * lerpFactor;
-            currentCameraPos.current.y += (targetCameraPos.current.y - currentCameraPos.current.y) * lerpFactor;
-            currentCameraPos.current.z += (targetCameraPos.current.z - currentCameraPos.current.z) * lerpFactor;
-
-            camera.position.set(
-                currentCameraPos.current.x,
-                currentCameraPos.current.y,
-                currentCameraPos.current.z
-            );
-        }
-    });
-
-    return (
-        <>
-            {/* Lights always present — they don't render without visible geometry */}
-            {/* Main directional light (key light) - warm overhead */}
-            <directionalLight
-                position={[10, 15, -15]}
-                intensity={2.2}
-                color="#fff5e6"
-                castShadow
-                shadow-mapSize-width={512}
-                shadow-mapSize-height={512}
-                shadow-camera-left={-15}
-                shadow-camera-right={15}
-                shadow-camera-top={15}
-                shadow-camera-bottom={-15}
-                shadow-camera-far={30}
-                shadow-bias={-0.0002}
-            />
-
-            {/* Fill light - soft blue from opposite side */}
-            <directionalLight
-                position={[-8, 8, 10]}
-                intensity={0.8}
-                color="#b3d9ff"
-            />
-
-            {/* Rim light - subtle highlight from behind */}
-            <directionalLight
-                position={[0, 5, -25]}
-                intensity={0.5}
-                color="#ffeaa7"
-            />
-
-            {/* Ambient light - base illumination (boosted to compensate for removed hemisphere light) */}
-            <ambientLight intensity={0.6} color="#ffffff" />
-
-            {/* Scene content hidden until loading complete — fog managed in useFrame */}
-            <group visible={warmUp || loadingComplete}>
-                <group
-                    onClick={(e: ThreeEvent<MouseEvent>) => {
-                        // Only handle background clicks when zoomed in
-                        // Don't interfere with screen clicks when zoomed out
-                        if (isZoomedIn) {
-                            // Check if we clicked on the screen mesh specifically
-                            const isScreenClick = e.object?.userData?.isScreen === true;
-
-                            if (!isScreenClick) {
-                                // Clicked on background/other objects while zoomed in - zoom out
-                                e.stopPropagation();
-                                handleBackgroundClick();
-                            }
-                        }
-                        // When not zoomed in, let screen clicks pass through to OfficeCubicle
-                    }}
-                >
-                    <group ref={sceneRef}>
-                        <OfficeCubicle
-                            isScreenHovered={isScreenHovered}
-                            isZoomedIn={isZoomedIn}
-                            isDragging={isDragging}
-                            onScreenHover={useCallback((hovered: boolean, screenPosition?: Vector3) => {
-                                setIsScreenHovered(hovered);
-                                if (hovered && screenPosition) {
-                                    screenWorldPosition.current = screenPosition;
-                                }
-                            }, [])}
-                            onScreenClick={handleScreenClick}
-                            {...(onModelLoaded ? { onLoaded: onModelLoaded } : {})}
-                        />
-                    </group>
-                </group>
-            </group>
-        </>
+    invalidate();
+  }, [camera, gl, invalidate, roomStaged, scene]);
+
+  useEffect(() => {
+    if (!roomActive || activeRoomRef.current) {
+      activeRoomRef.current = roomActive;
+      return;
+    }
+
+    activeRoomRef.current = true;
+    roomIntroProgressRef.current = 0;
+    roomReadyRef.current = false;
+    roomReadyNotifiedRef.current = false;
+    dragRotationRef.current = {
+      yaw: CAMERA_CONFIG.initialYaw,
+      pitch: CAMERA_CONFIG.initialPitch,
+    };
+    resetRotation(CAMERA_CONFIG.initialYaw, CAMERA_CONFIG.initialPitch);
+    // Demand frameloop: the descent needs a first frame to start itself.
+    invalidate();
+  }, [invalidate, resetRotation, roomActive]);
+
+  const startMonitorZoom = useCallback(() => {
+    const screenMesh = screenMeshRef.current;
+    if (
+      !roomReadyRef.current ||
+      !screenMesh ||
+      isZoomedInRef.current ||
+      monitorTransitionRef.current
+    ) {
+      return;
+    }
+
+    monitorTransitionRef.current = true;
+    isZoomedInRef.current = true;
+    setIsZoomedIn(true);
+    onZoomChange?.(true);
+
+    monitorZoomStartPositionRef.current.copy(camera.position);
+    monitorZoomStartQuaternionRef.current.copy(camera.quaternion);
+    monitorZoomStartFovRef.current = camera.fov;
+    returnCameraPositionRef.current.copy(camera.position);
+    returnCameraQuaternionRef.current.copy(camera.quaternion);
+    returnCameraFovRef.current = camera.fov;
+
+    // Perfectly aligned framing: park the camera on the screen plane's own
+    // normal with the plane's up axis, at the distance where the screen fills
+    // most of the viewport. The DOM then renders as a true axis-aligned
+    // rectangle - no keystone, no skew.
+    screenMesh.updateWorldMatrix(true, false);
+    const screenCenter = new Vector3();
+    screenMesh.getWorldPosition(screenCenter);
+    const worldQuaternion = new Quaternion();
+    screenMesh.getWorldQuaternion(worldQuaternion);
+
+    const normal = new Vector3(0, 0, 1)
+      .applyQuaternion(worldQuaternion)
+      .normalize();
+    const towardCamera = new Vector3().subVectors(
+      camera.position,
+      screenCenter,
     );
+    if (normal.dot(towardCamera) < 0) normal.negate();
+    const up = new Vector3(0, 1, 0).applyQuaternion(worldQuaternion).normalize();
+
+    if (!screenMesh.geometry.boundingBox) {
+      screenMesh.geometry.computeBoundingBox();
+    }
+    const bounds = screenMesh.geometry.boundingBox;
+    const worldScale = new Vector3();
+    screenMesh.getWorldScale(worldScale);
+    const screenWidth = bounds
+      ? Math.abs((bounds.max.x - bounds.min.x) * worldScale.x)
+      : 2.55;
+    const screenHeight = bounds
+      ? Math.abs((bounds.max.y - bounds.min.y) * worldScale.y)
+      : 1.98;
+
+    const fov = getMonitorFov(camera.aspect);
+    monitorZoomTargetFovRef.current = fov;
+    const tanHalfFov = Math.tan((fov * Math.PI) / 360);
+    const distanceForHeight =
+      screenHeight / (2 * MONITOR_FILL_HEIGHT * tanHalfFov);
+    const distanceForWidth =
+      screenWidth / (2 * MONITOR_FILL_WIDTH * tanHalfFov * camera.aspect);
+    const distance = Math.max(distanceForHeight, distanceForWidth, 0.6);
+
+    monitorZoomTargetPositionRef.current
+      .copy(screenCenter)
+      .addScaledVector(normal, distance);
+    const lookMatrix = new Matrix4().lookAt(
+      monitorZoomTargetPositionRef.current,
+      screenCenter,
+      up,
+    );
+    monitorZoomTargetQuaternionRef.current.setFromRotationMatrix(lookMatrix);
+    monitorZoomProgressRef.current = 0;
+    monitorZoomOutProgressRef.current = -1;
+    monitorReadyNotifiedRef.current = false;
+    invalidate();
+  }, [camera, invalidate, onZoomChange]);
+
+  const leaveMonitor = useCallback(() => {
+    if (!isZoomedInRef.current || monitorZoomOutProgressRef.current >= 0) return;
+
+    // The overlay fades out on the DOM side while the camera pulls back, so
+    // the two read as one motion.
+    monitorTransitionRef.current = true;
+    isZoomedInRef.current = false;
+    setIsZoomedIn(false);
+    onZoomChange?.(false);
+    monitorZoomOutProgressRef.current = 0;
+    monitorZoomProgressRef.current = -1;
+    invalidate();
+  }, [invalidate, onZoomChange]);
+
+  useEffect(() => {
+    if (enterMonitorTrigger <= lastEnterTriggerRef.current) return;
+    lastEnterTriggerRef.current = enterMonitorTrigger;
+    startMonitorZoom();
+  }, [enterMonitorTrigger, startMonitorZoom]);
+
+  useEffect(() => {
+    if (zoomOutTrigger <= lastZoomOutTriggerRef.current) return;
+    lastZoomOutTriggerRef.current = zoomOutTrigger;
+    leaveMonitor();
+  }, [leaveMonitor, zoomOutTrigger]);
+
+  useEffect(() => {
+    // Pointer events only record state; all camera work happens inside the
+    // render loop. Mice report at up to 1000 Hz - doing anything per event
+    // wastes CPU, and driving the camera from a second rAF chain (the old
+    // approach) rendered input one frame late and beat against the frame
+    // loop. One consumer, one clock: the frame loop reads the freshest
+    // pointer at the top of each frame.
+    const onMouseMove = (event: MouseEvent) => {
+      mousePositionRef.current = {
+        x: (event.clientX / window.innerWidth) * 2 - 1,
+        y: -(event.clientY / window.innerHeight) * 2 + 1,
+      };
+
+      if (
+        !isMouseDownRef.current ||
+        !roomReadyRef.current ||
+        isZoomedInRef.current
+      )
+        return;
+
+      pendingPointerRef.current = { x: event.clientX, y: event.clientY };
+    };
+
+    const onMouseDown = (event: MouseEvent) => {
+      if (
+        !roomReadyRef.current ||
+        isZoomedInRef.current ||
+        monitorTransitionRef.current
+      )
+        return;
+      isMouseDownRef.current = true;
+      hasDraggedRef.current = false;
+      pendingPointerRef.current = null;
+      dragStartRef.current = { x: event.clientX, y: event.clientY };
+      startDragRef.current(
+        event.clientX,
+        event.clientY,
+        dragRotationRef.current,
+      );
+      // While the button is held the frame loop self-sustains (it keeps
+      // invalidating); this first invalidate starts it.
+      invalidateRef.current();
+    };
+
+    const onMouseUp = () => {
+      if (hasDraggedRef.current) {
+        ignoreNextScreenClickRef.current = true;
+        requestAnimationFrame(() => {
+          ignoreNextScreenClickRef.current = false;
+        });
+      }
+      isMouseDownRef.current = false;
+      hasDraggedRef.current = false;
+      isDraggingRef.current = false;
+      pendingPointerRef.current = null;
+      setIsDragging(false);
+    };
+
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    document.body.style.cursor = isZoomedIn ? "default" : "auto";
+    return () => {
+      document.body.style.cursor = "auto";
+    };
+  }, [isZoomedIn]);
+
+  const onScreenHover = useCallback((hovered: boolean, position?: Vector3) => {
+    setIsScreenHovered(hovered);
+    if (position) screenWorldPositionRef.current = position;
+  }, []);
+
+  const onScreenReady = useCallback((position: Vector3, mesh?: Mesh) => {
+    screenWorldPositionRef.current = position;
+    if (mesh) screenMeshRef.current = mesh;
+  }, []);
+
+  const onScreenClick = useCallback(() => {
+    if (ignoreNextScreenClickRef.current) return;
+    startMonitorZoom();
+  }, [startMonitorZoom]);
+
+  useFrame((_state, rawDelta) => {
+    const delta = Math.min(rawDelta, 0.1);
+    const roomGroup = roomGroupRef.current;
+    if (roomGroup) roomGroup.visible = roomStagedRef.current;
+
+    // Runtime safety net for devices the static tier misjudges (core count
+    // says nothing about the GPU). Only sampled during continuous motion -
+    // the idle loop is deliberately capped at 30fps and would read as a
+    // false failure. Steps down at most twice and never back up, so the
+    // resolution can't oscillate. Crucially, a step is only RECORDED here;
+    // it is applied when the camera settles - resizing the framebuffer in
+    // the middle of a drag is itself a visible hitch.
+    const inMotion =
+      isDraggingRef.current ||
+      monitorTransitionRef.current ||
+      (roomIntroProgressRef.current >= 0 && roomIntroProgressRef.current < 1);
+    if (!inMotion) {
+      frameSamplesRef.current.length = 0;
+    } else if (
+      dprStepRef.current + pendingDprStepRef.current < 2 &&
+      rawDelta < 0.1
+    ) {
+      const samples = frameSamplesRef.current;
+      samples.push(rawDelta);
+      if (samples.length >= 45) {
+        const median = [...samples].sort((a, b) => a - b)[22] ?? 0;
+        samples.length = 0;
+        if (median > 0.027) {
+          pendingDprStepRef.current += 1;
+        }
+      }
+    }
+
+    // Nothing in the room ever moves, so the shadow map only needs to be
+    // rendered once. Let a few staged frames draw it, then freeze the pass -
+    // full 1024² quality at zero per-frame cost.
+    if (roomStagedRef.current && !shadowFrozenRef.current) {
+      shadowWarmupFramesRef.current += 1;
+      if (shadowWarmupFramesRef.current >= 3) {
+        shadowFrozenRef.current = true;
+        gl.shadowMap.autoUpdate = false;
+      }
+    }
+
+    // Before the veil lifts the camera just holds its pose (globe view, or
+    // the staged intro start) - no per-frame work needed.
+    if (!roomActive) return;
+
+    scene.background = ROOM_BACKGROUND;
+    if (roomIntroProgressRef.current >= 0 && roomIntroProgressRef.current < 1) {
+      roomIntroProgressRef.current = reducedMotion
+        ? 1
+        : Math.min(
+            1,
+            roomIntroProgressRef.current + delta / INTRO_DURATION_SECONDS,
+          );
+      const introEase = 1 - Math.pow(1 - roomIntroProgressRef.current, 3);
+
+      introPositionRef.current.lerpVectors(
+        ROOM_START_POSITION,
+        ROOM_REST_POSITION,
+        introEase,
+      );
+      camera.position.copy(introPositionRef.current);
+      camera.quaternion.copy(ROOM_START_QUATERNION);
+      camera.fov =
+        INTRO_FOV_START + (INTRO_FOV_END - INTRO_FOV_START) * introEase;
+      camera.updateProjectionMatrix();
+
+      if (roomIntroProgressRef.current >= 1) {
+        roomReadyRef.current = true;
+        roomReadyNotifiedRef.current = true;
+        onRoomReady?.();
+      } else {
+        invalidate();
+      }
+      return;
+    }
+
+    if (isZoomedInRef.current && monitorZoomProgressRef.current >= 0) {
+      monitorZoomProgressRef.current = reducedMotion
+        ? 1
+        : Math.min(1, monitorZoomProgressRef.current + delta / 0.9);
+      const zoomEase = 1 - Math.pow(1 - monitorZoomProgressRef.current, 3);
+      camera.position.lerpVectors(
+        monitorZoomStartPositionRef.current,
+        monitorZoomTargetPositionRef.current,
+        zoomEase,
+      );
+      camera.quaternion.slerpQuaternions(
+        monitorZoomStartQuaternionRef.current,
+        monitorZoomTargetQuaternionRef.current,
+        zoomEase,
+      );
+      camera.fov =
+        monitorZoomStartFovRef.current +
+        (monitorZoomTargetFovRef.current - monitorZoomStartFovRef.current) *
+          zoomEase;
+      camera.updateProjectionMatrix();
+
+      // Hand off to the full-screen OS a touch before the camera settles, so
+      // its fade-in overlaps the last of the zoom rather than following it.
+      if (
+        monitorZoomProgressRef.current >= 0.9 &&
+        !monitorReadyNotifiedRef.current
+      ) {
+        monitorReadyNotifiedRef.current = true;
+        onZoomComplete?.();
+      }
+      if (monitorZoomProgressRef.current >= 1) {
+        monitorTransitionRef.current = false;
+      } else {
+        invalidate();
+      }
+      return;
+    }
+
+    if (!isZoomedInRef.current && monitorZoomOutProgressRef.current >= 0) {
+      monitorZoomOutProgressRef.current = reducedMotion
+        ? 1
+        : Math.min(1, monitorZoomOutProgressRef.current + delta / 0.7);
+      const zoomEase = smoothStep(monitorZoomOutProgressRef.current);
+      camera.position.lerpVectors(
+        monitorZoomTargetPositionRef.current,
+        returnCameraPositionRef.current,
+        zoomEase,
+      );
+      camera.quaternion.slerpQuaternions(
+        monitorZoomTargetQuaternionRef.current,
+        returnCameraQuaternionRef.current,
+        zoomEase,
+      );
+      camera.fov =
+        monitorZoomTargetFovRef.current +
+        (returnCameraFovRef.current - monitorZoomTargetFovRef.current) *
+          zoomEase;
+      camera.updateProjectionMatrix();
+
+      if (monitorZoomOutProgressRef.current >= 1) {
+        monitorZoomOutProgressRef.current = -1;
+        monitorTransitionRef.current = false;
+        resetRotation(
+          dragRotationRef.current.yaw,
+          dragRotationRef.current.pitch,
+        );
+      } else {
+        invalidate();
+      }
+      return;
+    }
+
+    if (!isZoomedInRef.current && roomReadyRef.current) {
+      // Consume this frame's pointer input (freshest event wins).
+      const pending = pendingPointerRef.current;
+      if (pending && isMouseDownRef.current) {
+        pendingPointerRef.current = null;
+        const deltaX = pending.x - dragStartRef.current.x;
+        const deltaY = pending.y - dragStartRef.current.y;
+        if (!hasDraggedRef.current && Math.hypot(deltaX, deltaY) > 5) {
+          hasDraggedRef.current = true;
+          isDraggingRef.current = true;
+          setIsDragging(true);
+          // Motion resolution: while the camera is being driven, render at
+          // ~75% DPR. Fewer pixels guarantee frame-time headroom, and the
+          // reduction is invisible while everything is moving. Full
+          // resolution comes back the moment the camera settles. Engaging
+          // here (not on mousedown) keeps plain clicks resize-free.
+          if (!motionDprActiveRef.current) {
+            motionDprActiveRef.current = true;
+            setDprRef.current(
+              Math.max(0.75, Math.round(baseDprRef.current * 0.75 * 100) / 100),
+            );
+          }
+        }
+        if (isDraggingRef.current) {
+          dragRotationRef.current = handleDragRef.current(deltaX, deltaY);
+        }
+      }
+
+      const converging = applyRotation(
+        dragRotationRef.current,
+        mousePositionRef.current,
+        delta,
+      );
+
+      if (isMouseDownRef.current || converging) {
+        // Held or still easing: keep the loop alive at display refresh.
+        invalidate();
+      } else if (motionDprActiveRef.current) {
+        // Camera settled: fold in any adaptive step the drag revealed, then
+        // return to full resolution. Both land on a static image, where a
+        // resize can't be felt.
+        motionDprActiveRef.current = false;
+        if (pendingDprStepRef.current > 0) {
+          dprStepRef.current += pendingDprStepRef.current;
+          pendingDprStepRef.current = 0;
+          baseDprRef.current = Math.max(
+            1,
+            QUALITY.maxDpr - dprStepRef.current * 0.35,
+          );
+        }
+        setDprRef.current(baseDprRef.current);
+        invalidate();
+      }
+    }
+  });
+
+  return (
+    <>
+      <directionalLight
+        position={[10, 15, -15]}
+        intensity={2.1}
+        color="#fff5e6"
+        castShadow
+        // Renders once (the pass is frozen after warm-up), so a large map
+        // and soft filtering are free. normalBias removes the diagonal
+        // self-shadowing stripes on surfaces the light grazes.
+        shadow-mapSize-width={QUALITY.shadowMapSize}
+        shadow-mapSize-height={QUALITY.shadowMapSize}
+        shadow-camera-left={-15}
+        shadow-camera-right={15}
+        shadow-camera-top={15}
+        shadow-camera-bottom={-15}
+        shadow-camera-far={30}
+        shadow-bias={-0.0001}
+        shadow-normalBias={0.035}
+      />
+      <directionalLight
+        position={[-8, 8, 10]}
+        intensity={0.7}
+        color="#b3d9ff"
+      />
+      <directionalLight
+        position={[0, 5, -25]}
+        intensity={0.45}
+        color="#ffeaa7"
+      />
+      <ambientLight intensity={0.56} color="#ffffff" />
+
+      <group ref={roomGroupRef} visible={false}>
+        <OfficeCubicle
+          isScreenHovered={isScreenHovered}
+          isDragging={isDragging}
+          monitorActive={isZoomedIn}
+          osOverlayOpen={osOverlayOpen}
+          reducedMotion={reducedMotion}
+          onScreenHover={onScreenHover}
+          onScreenReady={onScreenReady}
+          {...(onModelLoaded ? { onLoaded: onModelLoaded } : {})}
+          onScreenClick={onScreenClick}
+        />
+      </group>
+    </>
+  );
 };

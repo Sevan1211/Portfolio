@@ -5,25 +5,21 @@ import { ToolType } from '../core/types';
 interface StatusBarProps {
   tool: ToolType;
   cursorPos: { x: number; y: number } | null;
-  canvasSize: { width: number; height: number };
+  docSize: { width: number; height: number } | null;
 }
 
 export const StatusBar: React.FC<StatusBarProps> = ({
   tool,
   cursorPos,
-  canvasSize,
+  docSize,
 }) => (
   <div className="paint-status">
-    <span className="paint-status__tool">
-      {TOOL_META[tool]?.label ?? tool}
-    </span>
+    <span className="paint-status__hint">{TOOL_META[tool].hint}</span>
     <span className="paint-status__pos">
-      {cursorPos
-        ? `${cursorPos.x}, ${cursorPos.y}px`
-        : '—'}
+      {cursorPos ? `${cursorPos.x}, ${cursorPos.y}` : ''}
     </span>
     <span className="paint-status__size">
-      {canvasSize.width} × {canvasSize.height}px
+      {docSize ? `${docSize.width} × ${docSize.height}px` : ''}
     </span>
   </div>
 );

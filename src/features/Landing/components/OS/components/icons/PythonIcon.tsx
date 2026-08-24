@@ -6,7 +6,7 @@ interface PythonIconProps {
 }
 
 /**
- * Python IDE Icon — Win95-style beveled frame with the Python logo
+ * Python IDE Icon - Win95-style beveled frame with the Python logo
  * rendered as two bold interlocking L-shapes (blue top-left, yellow bottom-right).
  */
 export const PythonIcon: React.FC<PythonIconProps> = ({

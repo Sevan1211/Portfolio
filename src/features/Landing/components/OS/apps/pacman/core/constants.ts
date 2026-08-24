@@ -28,6 +28,9 @@ export const CHASE_DURATION = 1500; // 25s (long pursuit)
 /** Dying animation duration (frames) */
 export const DYING_DURATION = 90;
 
+/** READY! countdown before each life / level (frames) */
+export const READY_DURATION = 90;
+
 /** Level-complete pause duration (frames) */
 export const LEVEL_COMPLETE_DURATION = 120;
 

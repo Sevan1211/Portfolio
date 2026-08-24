@@ -7,9 +7,54 @@
   flex-direction: column;
   padding: 0;
   color: #0c0c0c;
-  font-family: 'MS Sans Serif', 'Segoe UI', sans-serif;
+  font-family: "MS Sans Serif", "Segoe UI", sans-serif;
   transition: opacity 0.3s ease;
   background: #008080;
+}
+
+/* The OS lives on the modeled monitor, so controls stay legible at a compact
+ * desktop density without pretending to be a second full-screen page. */
+.retro-os--monitor {
+  --taskbar-height: 52px;
+}
+
+.retro-os--monitor .desktop {
+  padding: 12px;
+}
+
+.retro-os--monitor .desktop-icons {
+  gap: 10px;
+}
+
+.retro-os--monitor .desktop-icon {
+  width: 76px;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.retro-os--monitor .desktop-icon__image {
+  width: 48px;
+  height: 48px;
+}
+
+.retro-os--monitor .desktop-icon__emoji {
+  font-size: 30px;
+}
+
+.retro-os--monitor .window-titlebar {
+  min-height: 30px;
+  padding: 5px 7px;
+  font-size: 14px;
+}
+
+.retro-os--monitor .window-controls {
+  gap: 3px;
+}
+
+.retro-os--monitor .window-btn {
+  width: 24px;
+  height: 22px;
+  font-size: 16px;
 }
 
 .retro-os-workspace {
@@ -38,7 +83,7 @@
   overflow: auto;
   background: #fff;
   color: #000;
-  font-family: 'Segoe UI', 'MS Sans Serif', sans-serif;
+  font-family: "Segoe UI", "MS Sans Serif", sans-serif;
 }
 
 .retro-os *,
@@ -68,4 +113,3 @@
 .retro-os ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #cfcfcf 0%, #a8a8a8 100%);
 }
-

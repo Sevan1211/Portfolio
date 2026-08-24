@@ -3,7 +3,7 @@ import '../style/landing.css';
 import LandingScene from './LandingScene';
 import { useIsMobile } from '@shared/hooks/useIsMobile';
 
-// Lazy-load mobile path — desktop users never download this code
+// Lazy-load mobile path - desktop users never download this code
 const MobileLanding = React.lazy(() =>
   import('../../Mobile/MobileLanding').then(m => ({ default: m.MobileLanding }))
 );

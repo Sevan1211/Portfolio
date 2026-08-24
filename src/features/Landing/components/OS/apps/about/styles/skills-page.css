@@ -1,0 +1,20 @@
+/* ══════════════════════════════════════
+   Skills Page - capability group boxes
+   ══════════════════════════════════════ */
+
+.about-app .skill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 4px 16px;
+}
+
+.about-app .skill-gbox {
+  margin-bottom: 16px;
+}
+
+.about-app .skill-blurb {
+  margin: 0 0 11px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-dim);
+}

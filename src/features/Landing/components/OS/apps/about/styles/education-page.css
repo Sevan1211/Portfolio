@@ -1,0 +1,112 @@
+/* ══════════════════════════════════════
+   Education Page - degree, awards, coursework
+   ══════════════════════════════════════ */
+
+.about-app .edu-degree {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.about-app .edu-minor {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--ink-dim);
+}
+
+.about-app .edu-when {
+  margin-left: 0;
+  margin-top: 9px;
+}
+
+/* ── Awards ── */
+.about-app .award-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.about-app .award-list {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.about-app .award-entry-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 4px;
+}
+
+.about-app .award-icon {
+  color: #8a6d00;
+  flex-shrink: 0;
+}
+
+.about-app .award-entry-head h4 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.about-app .award-entry p {
+  margin: 0 0 0 22px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+
+.about-app .award-photo-well {
+  width: 150px;
+  flex-shrink: 0;
+  padding: 3px;
+  background: var(--face);
+  box-shadow: var(--bevel-well);
+}
+
+.about-app .award-photo-well img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.about-app .award-photo-caption {
+  display: block;
+  padding: 5px 2px 2px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--ink-dim);
+}
+
+/* ── Coursework ── */
+.about-app .course-sub {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.about-app .course-sub--progress {
+  margin-top: 16px;
+  color: var(--navy);
+}
+
+@media (max-width: 640px) {
+  .about-app .award-row {
+    flex-direction: column;
+  }
+
+  .about-app .award-photo-well {
+    align-self: center;
+  }
+}

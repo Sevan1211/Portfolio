@@ -6,7 +6,7 @@ interface PacmanIconProps {
 }
 
 /**
- * Pac-Man Icon — Win95-style game icon
+ * Pac-Man Icon - Win95-style game icon
  * Pac-Man character on a dark arcade-blue tile with beveled frame.
  */
 export const PacmanIcon: React.FC<PacmanIconProps> = ({

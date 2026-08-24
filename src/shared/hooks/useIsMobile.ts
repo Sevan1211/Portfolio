@@ -13,7 +13,7 @@ const IS_MOBILE = typeof window !== 'undefined' && detectMobileDevice();
 export const useIsMobile = (): boolean => IS_MOBILE;
 
 function detectMobileDevice(): boolean {
-  // 1. Primary input is a coarse pointer (finger) — most reliable signal
+  // 1. Primary input is a coarse pointer (finger) - most reliable signal
   if (window.matchMedia('(pointer: coarse)').matches) {
     return true;
   }

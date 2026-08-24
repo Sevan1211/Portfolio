@@ -1,15 +1,18 @@
-import React, { Suspense, useRef, useCallback, useEffect } from 'react';
-import { WindowState } from '../core/types';
-import { useDesktop } from '../core/useDesktop';
-import { getApp } from '../core/appRegistry';
-import { MONITOR_WIDTH, DESKTOP_WORKSPACE_HEIGHT } from '../core/constants';
+import React, { Suspense, useRef, useCallback, useEffect } from "react";
+import { WindowState } from "../core/types";
+import { useDesktop } from "../core/useDesktop";
+import { getApp } from "../core/appRegistry";
+import { MONITOR_WIDTH, DESKTOP_WORKSPACE_HEIGHT } from "../core/constants";
 
 interface WindowFrameProps {
   windowState: WindowState;
   isActive: boolean;
 }
 
-export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive }) => {
+export const WindowFrame: React.FC<WindowFrameProps> = ({
+  windowState,
+  isActive,
+}) => {
   const {
     closeWindow,
     focusWindow,
@@ -45,43 +48,68 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
   const app = getApp(windowState.appId);
   const AppComponent = app.component;
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) {return;} // Only left click
-    focusWindow(windowState.id);
-  }, [focusWindow, windowState.id]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button !== 0) {
+        return;
+      } // Only left click
+      focusWindow(windowState.id);
+    },
+    [focusWindow, windowState.id],
+  );
 
-  const handleTitleBarMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) {return;}
-    e.stopPropagation();
-    
-    if (windowState.isMaximized) {return;} // Don't drag when maximized
+  const handleTitleBarMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button !== 0) {
+        return;
+      }
+      e.stopPropagation();
 
-    dragStateRef.current = {
-      isDragging: true,
-      startX: e.clientX,
-      startY: e.clientY,
-      initialX: windowState.x,
-      initialY: windowState.y,
-    };
-  }, [windowState.x, windowState.y, windowState.isMaximized]);
+      if (windowState.isMaximized) {
+        return;
+      } // Don't drag when maximized
 
-  const handleResizeMouseDown = useCallback((direction: string) => (e: React.MouseEvent) => {
-    if (e.button !== 0) {return;}
-    e.stopPropagation();
-    
-    if (windowState.isMaximized) {return;} // Don't resize when maximized
+      dragStateRef.current = {
+        isDragging: true,
+        startX: e.clientX,
+        startY: e.clientY,
+        initialX: windowState.x,
+        initialY: windowState.y,
+      };
+    },
+    [windowState.x, windowState.y, windowState.isMaximized],
+  );
 
-    resizeStateRef.current = {
-      isResizing: true,
-      direction,
-      startX: e.clientX,
-      startY: e.clientY,
-      initialWidth: windowState.width,
-      initialHeight: windowState.height,
-      initialX: windowState.x,
-      initialY: windowState.y,
-    };
-  }, [windowState.width, windowState.height, windowState.x, windowState.y, windowState.isMaximized]);
+  const handleResizeMouseDown = useCallback(
+    (direction: string) => (e: React.MouseEvent) => {
+      if (e.button !== 0) {
+        return;
+      }
+      e.stopPropagation();
+
+      if (windowState.isMaximized) {
+        return;
+      } // Don't resize when maximized
+
+      resizeStateRef.current = {
+        isResizing: true,
+        direction,
+        startX: e.clientX,
+        startY: e.clientY,
+        initialWidth: windowState.width,
+        initialHeight: windowState.height,
+        initialX: windowState.x,
+        initialY: windowState.y,
+      };
+    },
+    [
+      windowState.width,
+      windowState.height,
+      windowState.x,
+      windowState.y,
+      windowState.isMaximized,
+    ],
+  );
 
   // Stable refs for dispatch actions so the effect never re-attaches
   const moveWindowRef = useRef(moveWindow);
@@ -94,24 +122,28 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
       if (dragStateRef.current?.isDragging) {
         const deltaX = e.clientX - dragStateRef.current.startX;
         const deltaY = e.clientY - dragStateRef.current.startY;
-        
+
         const workspace = windowRef.current?.parentElement;
         const boundsWidth = workspace?.clientWidth ?? MONITOR_WIDTH;
-        const boundsHeight = workspace?.clientHeight ?? DESKTOP_WORKSPACE_HEIGHT;
+        const boundsHeight =
+          workspace?.clientHeight ?? DESKTOP_WORKSPACE_HEIGHT;
         const ws = windowStateRef.current;
 
         const newX = Math.max(
           0,
-          Math.min(boundsWidth - ws.width, dragStateRef.current.initialX + deltaX)
+          Math.min(
+            boundsWidth - ws.width,
+            dragStateRef.current.initialX + deltaX,
+          ),
         );
         const newY = Math.max(
           0,
           Math.min(
             boundsHeight - ws.height,
-            dragStateRef.current.initialY + deltaY
-          )
+            dragStateRef.current.initialY + deltaY,
+          ),
         );
-        
+
         moveWindowRef.current(ws.id, newX, newY);
       }
 
@@ -125,19 +157,19 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
         let newX = state.initialX;
         let newY = state.initialY;
 
-        if (state.direction.includes('e')) {
+        if (state.direction.includes("e")) {
           newWidth = Math.max(app.minWidth, state.initialWidth + deltaX);
         }
-        if (state.direction.includes('w')) {
+        if (state.direction.includes("w")) {
           newWidth = Math.max(app.minWidth, state.initialWidth - deltaX);
           if (newWidth > app.minWidth) {
             newX = state.initialX + deltaX;
           }
         }
-        if (state.direction.includes('s')) {
+        if (state.direction.includes("s")) {
           newHeight = Math.max(app.minHeight, state.initialHeight + deltaY);
         }
-        if (state.direction.includes('n')) {
+        if (state.direction.includes("n")) {
           newHeight = Math.max(app.minHeight, state.initialHeight - deltaY);
           if (newHeight > app.minHeight) {
             newY = state.initialY + deltaY;
@@ -164,7 +196,8 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
         // Clamp to screen bounds
         const workspace = windowRef.current?.parentElement;
         const boundsWidth = workspace?.clientWidth ?? MONITOR_WIDTH;
-        const boundsHeight = workspace?.clientHeight ?? DESKTOP_WORKSPACE_HEIGHT;
+        const boundsHeight =
+          workspace?.clientHeight ?? DESKTOP_WORKSPACE_HEIGHT;
         newWidth = Math.min(newWidth, boundsWidth - newX);
         newHeight = Math.min(newHeight, boundsHeight - newY);
 
@@ -181,35 +214,35 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
       resizeStateRef.current = null;
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [app.minWidth, app.minHeight]); // Stable — window state read via refs
+  }, [app.minWidth, app.minHeight]); // Stable - window state read via refs
 
   const style: React.CSSProperties = {
-    position: 'absolute',
+    position: "absolute",
     left: windowState.x,
     top: windowState.y,
     width: windowState.width,
     height: windowState.height,
     zIndex: windowState.zIndex,
-    display: windowState.isMinimized ? 'none' : 'flex',
+    display: windowState.isMinimized ? "none" : "flex",
   };
 
   return (
     <div
       ref={windowRef}
-      className={`window-frame ${isActive ? 'window-active' : ''}`}
+      className={`window-frame ${isActive ? "window-active" : ""}`}
       style={style}
       onMouseDown={handleMouseDown}
     >
       <div className="window-titlebar" onMouseDown={handleTitleBarMouseDown}>
         <div className="window-titlebar__icon">
-          {typeof app.icon !== 'string' ? (
+          {typeof app.icon !== "string" ? (
             <app.icon size={18} color="#ffffff" />
           ) : (
             <span>{app.icon}</span>
@@ -219,6 +252,7 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
         <div className="window-controls">
           <button
             className="window-btn window-btn--minimize"
+            aria-label={`Minimize ${windowState.title}`}
             onClick={(e) => {
               e.stopPropagation();
               minimizeWindow(windowState.id);
@@ -229,20 +263,25 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
           </button>
           <button
             className="window-btn window-btn--maximize"
+            aria-label={`${windowState.isMaximized ? "Restore" : "Maximize"} ${windowState.title}`}
             onClick={(e) => {
               e.stopPropagation();
               const workspace = windowRef.current?.parentElement;
               const bounds = workspace
-                ? { width: workspace.clientWidth, height: workspace.clientHeight }
+                ? {
+                    width: workspace.clientWidth,
+                    height: workspace.clientHeight,
+                  }
                 : undefined;
               toggleMaximizeWindow(windowState.id, bounds);
             }}
             title="Maximize"
           >
-            {windowState.isMaximized ? '❐' : '□'}
+            {windowState.isMaximized ? "❐" : "□"}
           </button>
           <button
             className="window-btn window-btn--close"
+            aria-label={`Close ${windowState.title}`}
             onClick={(e) => {
               e.stopPropagation();
               closeWindow(windowState.id);
@@ -255,11 +294,24 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
       </div>
 
       <div className="window-content">
-        <Suspense fallback={
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#999', fontFamily: 'var(--font-mono)', fontSize: '14px' }}>
-            Loading…
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                height: "100%",
+                color: "#999",
+                fontFamily: "var(--font-mono)",
+                fontSize: "14px",
+              }}
+            >
+              Loading…
+            </div>
+          }
+        >
           <AppComponent />
         </Suspense>
       </div>
@@ -267,17 +319,40 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ windowState, isActive 
       {/* Resize handles */}
       {!windowState.isMaximized && (
         <>
-          <div className="resize-handle resize-n" onMouseDown={handleResizeMouseDown('n')} />
-          <div className="resize-handle resize-s" onMouseDown={handleResizeMouseDown('s')} />
-          <div className="resize-handle resize-e" onMouseDown={handleResizeMouseDown('e')} />
-          <div className="resize-handle resize-w" onMouseDown={handleResizeMouseDown('w')} />
-          <div className="resize-handle resize-ne" onMouseDown={handleResizeMouseDown('ne')} />
-          <div className="resize-handle resize-nw" onMouseDown={handleResizeMouseDown('nw')} />
-          <div className="resize-handle resize-se" onMouseDown={handleResizeMouseDown('se')} />
-          <div className="resize-handle resize-sw" onMouseDown={handleResizeMouseDown('sw')} />
+          <div
+            className="resize-handle resize-n"
+            onMouseDown={handleResizeMouseDown("n")}
+          />
+          <div
+            className="resize-handle resize-s"
+            onMouseDown={handleResizeMouseDown("s")}
+          />
+          <div
+            className="resize-handle resize-e"
+            onMouseDown={handleResizeMouseDown("e")}
+          />
+          <div
+            className="resize-handle resize-w"
+            onMouseDown={handleResizeMouseDown("w")}
+          />
+          <div
+            className="resize-handle resize-ne"
+            onMouseDown={handleResizeMouseDown("ne")}
+          />
+          <div
+            className="resize-handle resize-nw"
+            onMouseDown={handleResizeMouseDown("nw")}
+          />
+          <div
+            className="resize-handle resize-se"
+            onMouseDown={handleResizeMouseDown("se")}
+          />
+          <div
+            className="resize-handle resize-sw"
+            onMouseDown={handleResizeMouseDown("sw")}
+          />
         </>
       )}
     </div>
   );
 };
-

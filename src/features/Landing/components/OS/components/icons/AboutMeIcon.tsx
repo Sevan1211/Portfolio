@@ -6,7 +6,7 @@ interface AboutMeIconProps {
 }
 
 /**
- * About Me Icon — Win95-style "My Profile" folder/document
+ * About Me Icon - Win95-style "My Profile" folder/document
  * Matches the retro desktop icon aesthetic.
  */
 export const AboutMeIcon: React.FC<AboutMeIconProps> = ({

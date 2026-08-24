@@ -1,5 +1,5 @@
 /**
- * RetroIcons — Win95-style monochrome SVG icons
+ * RetroIcons - Win95-style monochrome SVG icons
  *
  * Simple, pixel-ish, low-detail icons that match the retro OS aesthetic.
  * All icons accept `size` (default 18) and `className` props.
@@ -132,6 +132,24 @@ export const RetroKeyboard: React.FC<IconProps> = ({ size = 18, className }) => 
   </svg>
 );
 
+/* ── Info badge (msgbox "i") ───────── */
+export const RetroInfo: React.FC<IconProps> = ({ size = 18, className }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 16 16">
+    <circle cx="8" cy="8" r="7.5" fill="currentColor" />
+    <rect x="7" y="3.4" width="2" height="2.2" fill="#fff" />
+    <rect x="7" y="6.8" width="2" height="5.8" fill="#fff" />
+  </svg>
+);
+
+/* ── Lightbulb (tip of the day) ────── */
+export const RetroBulb: React.FC<IconProps> = ({ size = 18, className }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 16 16" fill="currentColor">
+    <path d="M8 0a5 5 0 00-2.9 9.07c.55.4.9 1 .9 1.68V11h4v-.25c0-.68.35-1.28.9-1.68A5 5 0 008 0z" />
+    <rect x="6" y="12" width="4" height="1.3" rx="0.3" />
+    <rect x="6.6" y="14.2" width="2.8" height="1.3" rx="0.3" />
+  </svg>
+);
+
 /* ── Sparkle / Star small ──────────── */
 export const RetroSparkle: React.FC<IconProps> = ({ size = 18, className }) => (
   <svg className={className} width={size} height={size} viewBox="0 0 16 16" fill="currentColor">
@@ -181,6 +199,24 @@ export const RetroRect: React.FC<IconProps> = ({ size = 18, className }) => (
 export const RetroEllipse: React.FC<IconProps> = ({ size = 18, className }) => (
   <svg className={className} width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
     <ellipse cx="8" cy="8" rx="7" ry="5" />
+  </svg>
+);
+
+export const RetroSpray: React.FC<IconProps> = ({ size = 18, className }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 16 16" fill="currentColor">
+    <rect x="3" y="6" width="7" height="9.5" rx="1" />
+    <rect x="4.8" y="3.5" width="3.4" height="2" rx="0.4" />
+    <rect x="5.6" y="1.8" width="1.8" height="1.4" rx="0.3" />
+    <rect x="11.5" y="2" width="1.2" height="1.2" />
+    <rect x="13.5" y="3.5" width="1.2" height="1.2" />
+    <rect x="12" y="5.5" width="1.2" height="1.2" />
+    <rect x="14" y="7" width="1.2" height="1.2" />
+  </svg>
+);
+
+export const RetroRoundRect: React.FC<IconProps> = ({ size = 18, className }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <rect x="1.5" y="3.5" width="13" height="9" rx="3.2" />
   </svg>
 );
 

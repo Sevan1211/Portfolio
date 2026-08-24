@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "build:analyze": "npm run build && open dist/stats.html",
-    "preview": "vite preview",
+    "preview": "npm run build && wrangler dev",
     "type-check": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
     "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
@@ -15,7 +15,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "generate:globe-data": "node scripts/generate-land-nodes.mjs",
-    "test": "vitest"
+    "test": "vitest",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
@@ -32,6 +33,7 @@
     "three": "^0.160.1"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.26.1",
     "@types/node": "^24.9.2",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
@@ -54,6 +56,7 @@
     "typescript": "^5.9.3",
     "vite": "^7.1.12",
     "vitest": "^0.34.6",
-    "world-atlas": "^2.0.2"
+    "world-atlas": "^2.0.2",
+    "wrangler": "^4.71.0"
   }
 }

@@ -3,18 +3,17 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 export default defineConfig({
   envPrefix: ['VITE_'],
-  plugins: [
-    react(),
-    // Bundle analyzer - generates stats.html in dist/
-    visualizer({
-      open: false,
-      gzipSize: true,
-      brotliSize: true,
-      filename: 'stats.html',
-    }),
-  ],
+  plugins: [react(), // Bundle analyzer - generates stats.html in dist/
+  visualizer({
+    open: false,
+    gzipSize: true,
+    brotliSize: true,
+    filename: 'stats.html',
+  }), cloudflare()],
   resolve: {
     alias: {
       '@app': path.resolve(__dirname, 'src/app'),

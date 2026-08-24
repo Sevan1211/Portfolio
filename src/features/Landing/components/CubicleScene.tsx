@@ -12,7 +12,8 @@ import {
   Texture,
   Vector3,
 } from "three";
-import { OfficeCubicle } from "./OfficeCubicle";
+import { CUBICLE_MODEL_PATH, OfficeCubicle } from "./OfficeCubicle";
+import { ModelRetryBoundary } from "./ModelRetryBoundary";
 import { useCameraControls } from "../hooks/useCameraControls";
 import { QUALITY } from "./deviceTier";
 
@@ -676,17 +677,19 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
       <ambientLight intensity={0.56} color="#ffffff" />
 
       <group ref={roomGroupRef} visible={false}>
-        <OfficeCubicle
-          isScreenHovered={isScreenHovered}
-          isDragging={isDragging}
-          monitorActive={isZoomedIn}
-          osOverlayOpen={osOverlayOpen}
-          reducedMotion={reducedMotion}
-          onScreenHover={onScreenHover}
-          onScreenReady={onScreenReady}
-          {...(onModelLoaded ? { onLoaded: onModelLoaded } : {})}
-          onScreenClick={onScreenClick}
-        />
+        <ModelRetryBoundary modelPath={CUBICLE_MODEL_PATH}>
+          <OfficeCubicle
+            isScreenHovered={isScreenHovered}
+            isDragging={isDragging}
+            monitorActive={isZoomedIn}
+            osOverlayOpen={osOverlayOpen}
+            reducedMotion={reducedMotion}
+            onScreenHover={onScreenHover}
+            onScreenReady={onScreenReady}
+            {...(onModelLoaded ? { onLoaded: onModelLoaded } : {})}
+            onScreenClick={onScreenClick}
+          />
+        </ModelRetryBoundary>
       </group>
     </>
   );

@@ -57,7 +57,12 @@ const ROOM_INTERIOR_POINT = new Vector3(0, 7, -10);
 const STEAM_MESH_NAME = "Steam_Steam_0";
 // The wall poster whose artwork we replace with our generated wanted poster.
 const POSTER_MESH_NAME = "Terminator_Poster_Terminator_Poster_0";
-const CUBICLE_MODEL_PATH = "/models/low_poly_90s_office_cubicle.glb";
+export const CUBICLE_MODEL_PATH = "/models/low_poly_90s_office_cubicle.glb";
+
+// Start the model download as soon as this chunk evaluates - a plain fetch,
+// unlike a <link rel="prefetch">, carries no "Sec-Purpose: prefetch" header
+// for Cloudflare's bot protection to 503.
+useGLTF.preload(CUBICLE_MODEL_PATH);
 
 interface OfficeCubicleProps {
   isScreenHovered: boolean;

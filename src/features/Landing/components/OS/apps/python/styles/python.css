@@ -1,16 +1,19 @@
 /* ══════════════════════════════════════
-   Python IDE – Win95-Retro Styles
+   Python IDE - on the w95 design system
+
+   Gray chrome from the shared tokens; the output console uses the same
+   DOS palette as the Terminal app (gray on black, cyan info, light-red
+   errors) so the two console surfaces feel related.
    ══════════════════════════════════════ */
 
 /* ── App shell ─────────────────────── */
 .py-app {
-  background: #c0c0c0;
+  background: var(--face);
   padding: 0;
   display: flex;
   flex-direction: column;
-  font-family: 'Courier New', 'Consolas', monospace;
   font-size: 12px;
-  color: #000;
+  color: var(--ink);
   overflow: hidden;
 }
 
@@ -19,88 +22,96 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 4px;
-  background: #c0c0c0;
-  border-bottom: 2px solid;
-  border-bottom-color: #808080;
-  min-height: 28px;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--sh);
+  box-shadow: 0 1px 0 var(--hi);
+  flex-shrink: 0;
 }
 
-.py-toolbar__btn {
-  background: #c0c0c0;
-  border: 2px solid;
-  border-color: #fff #000 #000 #fff;
-  font-family: 'Courier New', monospace;
-  font-size: 11px;
-  font-weight: bold;
-  padding: 2px 10px;
+.py-btn {
+  height: 24px;
+  padding: 0 12px;
+  background: var(--face);
+  border: none;
+  box-shadow: var(--bevel-thin-up);
+  font: inherit;
+  font-size: 11.5px;
+  color: var(--ink);
   cursor: pointer;
-  color: #000;
   white-space: nowrap;
-  min-height: 22px;
 }
 
-.py-toolbar__btn:hover:not(:disabled) {
-  background: #d4d0c8;
+.py-btn:active:not(:disabled),
+.py-btn--pressed {
+  box-shadow: inset 1px 1px 0 var(--sh), inset -1px -1px 0 var(--hi);
 }
 
-.py-toolbar__btn:active:not(:disabled) {
-  border-color: #000 #fff #fff #000;
-  padding: 3px 9px 1px 11px;
+.py-btn--pressed {
+  background: repeating-conic-gradient(var(--hi) 0% 25%, var(--face) 0% 50%);
+  background-size: 2px 2px;
 }
 
-.py-toolbar__btn:disabled {
-  color: #808080;
+.py-btn:disabled {
+  color: var(--sh);
+  text-shadow: 1px 1px 0 var(--hi);
   cursor: default;
 }
 
-.py-toolbar__spacer {
-  flex: 1;
+.py-btn--run {
+  font-weight: 700;
+  box-shadow: var(--bevel-up);
+  padding: 0 14px;
 }
 
-.py-toolbar__status {
+.py-btn--run:active:not(:disabled) {
+  box-shadow: var(--bevel-down);
+}
+
+.py-toolbar__sep {
+  width: 0;
+  align-self: stretch;
+  margin: 2px 4px;
+  border-left: 1px solid var(--sh);
+  border-right: 1px solid var(--hi);
+}
+
+.py-toolbar__examples {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: #444;
-  padding-right: 6px;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--ink);
 }
 
-.py-toolbar__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  border: 1px solid #808080;
+.py-select {
+  height: 22px;
+  min-width: 110px;
+  background: var(--well);
+  box-shadow: var(--bevel-well);
+  border: none;
+  font: inherit;
+  font-size: 11.5px;
+  color: var(--ink);
+  padding: 0 4px;
+  cursor: pointer;
 }
 
-.py-toolbar__dot--idle,
-.py-toolbar__dot--loading {
-  background: #c0c000;
-}
-
-.py-toolbar__dot--ready {
-  background: #00c000;
-}
-
-.py-toolbar__dot--running {
-  background: #c0c000;
-  animation: py-pulse 0.6s ease-in-out infinite alternate;
-}
-
-@keyframes py-pulse {
-  from { opacity: 1; }
-  to   { opacity: 0.3; }
-}
-
-/* ── Layout (editor + output) ──────── */
+/* ── Layout (editor + stdin + output) ── */
 .py-layout {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 4px;
-  gap: 4px;
+  padding: 6px;
+  gap: 6px;
+}
+
+/* Shared small panel label */
+.py-panel-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  padding: 0 2px 3px;
 }
 
 /* ── Code Editor ───────────────────── */
@@ -108,16 +119,16 @@
   flex: 1;
   display: flex;
   min-height: 0;
-  border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
   background: #fffef8;
+  box-shadow: var(--bevel-well);
+  padding: 2px;
 }
 
 .py-editor__gutter {
-  width: 36px;
-  min-width: 36px;
-  background: #e8e8e0;
-  border-right: 1px solid #c0c0b0;
+  width: 38px;
+  min-width: 38px;
+  background: var(--lt);
+  border-right: 1px solid var(--face);
   overflow: hidden;
   padding: 4px 0;
   user-select: none;
@@ -129,15 +140,16 @@
   text-align: right;
   padding-right: 6px;
   font-size: 11px;
-  color: #888;
-  font-family: 'Courier New', monospace;
+  color: var(--sh);
+  font-family: var(--font-mono);
 }
 
-/* Overlay container — stacks highlight + textarea */
+/* Overlay container - stacks highlight + textarea */
 .py-editor__code {
   flex: 1;
   position: relative;
   overflow: hidden;
+  background: #fffef8;
 }
 
 /* Shared font metrics for perfect alignment */
@@ -151,9 +163,9 @@
   margin: 0;
   padding: 4px 6px;
   border: none;
-  font-family: 'Courier New', 'Consolas', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 18px;
   tab-size: 4;
   white-space: pre;
@@ -200,53 +212,65 @@
 
 /* ── Syntax Highlighting Colors ────── */
 /* Classic IDE palette for light background */
-.py-hl-keyword   { color: #0000cc; font-weight: bold; }  /* blue — keywords */
-.py-hl-builtin   { color: #6a0dad; }                      /* purple — builtins */
-.py-hl-string    { color: #a31515; }                      /* red — strings */
-.py-hl-comment   { color: #008000; font-style: italic; }  /* green — comments */
-.py-hl-number    { color: #b5740b; }                      /* orange — numbers */
-.py-hl-func      { color: #795e26; }                      /* brown — function calls */
-.py-hl-self      { color: #c71585; font-style: italic; }  /* magenta — self */
-.py-hl-decorator { color: #6a0dad; }                      /* purple — decorators */
-.py-hl-operator  { color: #444; }                          /* dark gray — operators */
-.py-hl-punct     { color: #666; }                          /* gray — punctuation */
+.py-hl-keyword   { color: #0000cc; font-weight: bold; }  /* blue - keywords */
+.py-hl-builtin   { color: #6a0dad; }                      /* purple - builtins */
+.py-hl-string    { color: #a31515; }                      /* red - strings */
+.py-hl-comment   { color: #008000; font-style: italic; }  /* green - comments */
+.py-hl-number    { color: #b5740b; }                      /* orange - numbers */
+.py-hl-func      { color: #795e26; }                      /* brown - function calls */
+.py-hl-self      { color: #c71585; font-style: italic; }  /* magenta - self */
+.py-hl-decorator { color: #6a0dad; }                      /* purple - decorators */
+.py-hl-operator  { color: #444; }                          /* dark gray - operators */
+.py-hl-punct     { color: #666; }                          /* gray - punctuation */
+
+/* ── Stdin panel ───────────────────── */
+.py-stdin {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.py-stdin__textarea {
+  height: 56px;
+  resize: none;
+  outline: none;
+  border: none;
+  background: var(--well);
+  box-shadow: var(--bevel-well);
+  padding: 5px 8px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
 
 /* ── Output Panel ──────────────────── */
 .py-output {
-  flex: 0 0 35%;
-  min-height: 80px;
+  flex: 0 0 34%;
+  min-height: 84px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.py-output__title {
-  font-size: 11px;
-  font-weight: bold;
-  color: #000;
-  padding: 0 2px 2px;
-}
-
 .py-output__content {
   flex: 1;
-  border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
   background: #000;
-  padding: 6px 8px;
+  box-shadow: var(--bevel-well);
+  padding: 6px 9px;
   overflow-y: auto;
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
   line-height: 1.5;
 }
 
 .py-output__empty {
-  color: #555;
-  font-style: italic;
+  color: #7a7a7a;
 }
 
 .py-output__line {
   white-space: pre-wrap;
-  word-break: break-all;
+  word-break: break-word;
 }
 
 .py-output__line--stdout {
@@ -254,22 +278,100 @@
 }
 
 .py-output__line--stderr {
-  color: #ff6666;
+  color: #ff5555;
 }
 
 .py-output__line--info {
-  color: #00c0c0;
+  color: #55ffff;
 }
 
 .py-output__line--result {
-  color: #00ff00;
+  color: #55ff55;
+}
+
+/* Dark scrollbar inside the console */
+.py-output__content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.py-output__content::-webkit-scrollbar-track {
+  background: #000;
+}
+
+.py-output__content::-webkit-scrollbar-thumb {
+  background: #4a4a4a;
+  border-radius: 0;
+}
+
+.py-output__content {
+  scrollbar-width: thin;
+  scrollbar-color: #4a4a4a #000;
+}
+
+/* ── Status bar ────────────────────── */
+.py-status {
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  height: 24px;
+  padding: 3px 4px 2px;
+  border-top: 1px solid var(--hi);
+  font-size: 11px;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.py-status__seg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border: 1px solid;
+  border-color: var(--sh) var(--hi) var(--hi) var(--sh);
+  white-space: nowrap;
+}
+
+.py-status__seg--state {
+  min-width: 118px;
+}
+
+.py-status__seg--cursor {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.py-status__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--sh);
+  flex-shrink: 0;
+}
+
+.py-status__dot--idle,
+.py-status__dot--loading {
+  background: #c0c000;
+}
+
+.py-status__dot--ready {
+  background: #12b312;
+}
+
+.py-status__dot--running {
+  background: #c0c000;
+  animation: py-pulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes py-pulse {
+  from { opacity: 1; }
+  to   { opacity: 0.3; }
 }
 
 /* ── Loading Overlay ───────────────── */
 .py-loading {
   position: absolute;
   inset: 0;
-  background: #c0c0c0;
+  background: var(--face);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -278,47 +380,61 @@
 
 .py-loading__box {
   text-align: center;
-  padding: 24px 32px;
-  border: 2px solid;
-  border-color: #fff #000 #000 #fff;
-  background: #c0c0c0;
-  min-width: 240px;
+  padding: 22px 30px;
+  background: var(--face);
+  box-shadow: var(--bevel-up);
+  min-width: 280px;
+  max-width: 90%;
 }
 
 .py-loading__icon {
-  font-size: 32px;
+  font-size: 30px;
   margin-bottom: 8px;
 }
 
 .py-loading__text {
   font-size: 13px;
-  font-weight: bold;
-  color: #000;
+  font-weight: 700;
+  color: var(--ink);
   margin-bottom: 12px;
 }
 
+/* The classic Win95 segmented-blocks marquee */
 .py-loading__bar-track {
   height: 18px;
-  border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  background: #fff;
-  padding: 2px;
+  background: var(--well);
+  box-shadow: var(--bevel-well);
+  padding: 3px;
+  overflow: hidden;
 }
 
 .py-loading__bar-fill {
   height: 100%;
-  background: #000080;
-  animation: py-loading-fill 8s linear infinite;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--navy) 0 12px,
+    transparent 12px 16px
+  );
+  animation: py-blocks 1s linear infinite;
 }
 
-@keyframes py-loading-fill {
-  0%   { width: 0%; }
-  80%  { width: 92%; }
-  100% { width: 100%; }
+@keyframes py-blocks {
+  from { background-position-x: 0; }
+  to   { background-position-x: 16px; }
 }
 
 .py-loading__hint {
-  margin-top: 8px;
-  font-size: 10px;
-  color: #666;
+  margin-top: 9px;
+  font-size: 10.5px;
+  color: var(--ink-dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .py-loading__bar-fill {
+    animation: none;
+  }
+
+  .py-status__dot--running {
+    animation: none;
+  }
 }

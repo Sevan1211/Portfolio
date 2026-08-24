@@ -16,6 +16,9 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
         {/* Title */}
         <h1 className="pm-title">PAC-MAN</h1>
         <p className="pm-subtitle">Ghost AI Challenge</p>
+        <p className="pm-blurb">
+          Every level swaps the search algorithm the ghosts hunt you with.
+        </p>
 
         {/* Level preview */}
         <div className="pm-level-preview">
@@ -29,7 +32,8 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
 
         {/* Controls */}
         <div className="pm-controls-info">
-          <p>Arrow Keys or WASD to move</p>
+          <p>Arrow Keys or WASD to move · P to pause</p>
+          <p>Eat a power pellet, then chain ghosts: 200 → 400 → 800 → 1600</p>
         </div>
 
         {/* Start button */}

@@ -1,151 +1,180 @@
-/* ══════════════════════════════════════
-   About App – Shell (layout, sidebar, statusbar, shared primitives)
-   ══════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   About App - shell (layout, sidebar, statusbar)
 
-/* Root container */
+   The Win95 idioms (tokens, group boxes, chips, wells, fact rows)
+   come from the shared design system in OS/styles/win95.css; the
+   app root carries both `about-app` and `w95-ui`. This file only
+   holds layout that is specific to the About app.
+   ══════════════════════════════════════════════════════════════ */
+
 .about-app {
-  padding: 0;
-  font-family: 'Segoe UI', 'MS Sans Serif', sans-serif;
-  background: #c0c0c0;
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  color: #000;
+  background: var(--face);
+  color: var(--ink);
+  padding: 0;
 }
 
-.about-shell {
+.about-app .about-shell {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #c0c0c0;
+  background: var(--face);
 }
 
 /* ── Layout ── */
-.about-layout {
+.about-app .about-layout {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
 /* ── Sidebar ── */
-.about-sidebar {
-  width: 260px;
-  background: #d4d0c8;
-  border-right: 2px solid #fff;
+.about-app .about-sidebar {
+  width: 188px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  gap: 24px;
+  padding: 10px 8px;
+  background: var(--face);
+  border-right: 1px solid var(--sh);
+}
+
+.about-app .nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.about-app .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.about-app .nav-item:hover {
+  box-shadow: var(--bevel-thin-up);
+}
+
+/* Active tab = the Win95 selection bar */
+.about-app .nav-item.active {
+  background: var(--navy);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.about-app .nav-item:focus-visible {
+  outline: 1px dotted var(--ink);
+  outline-offset: -3px;
+}
+
+.about-app .nav-item.active:focus-visible {
+  outline-color: #fff;
+}
+
+.about-app .nav-item-icon {
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
 }
 
-.nav-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: all 0.1s;
-  color: #000;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.nav-item:hover {
-  background: #e0e0e0;
-  border-color: #fff #808080 #808080 #fff;
-}
-
-.nav-item.active {
-  background: #cacad8;
-  color: #000080;
-  border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  box-shadow: inset 1px 1px 0 #000;
-}
-
-.nav-item-icon {
-  width: 20px;
-  height: 20px;
-}
-
-.sidebar-widget {
+/* Separator + resume CTA pinned to the sidebar bottom */
+.about-app .sidebar-sep {
   margin-top: auto;
-  background: #ffffe0;
-  border: 1px solid #000;
-  padding: 12px;
-  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
-  font-size: 14px;
-  color: #000;
+  margin-bottom: 10px;
+  height: 0;
+  border-top: 1px solid var(--sh);
+  border-bottom: 1px solid var(--hi);
 }
 
-.widget-title {
-  font-weight: bold;
-  border-bottom: 1px solid #000;
-  margin-bottom: 8px;
-  padding-bottom: 4px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.about-app .sidebar-resume {
+  display: block;
+  margin: 0 2px 2px;
+  padding: 8px 10px;
+  text-align: center;
+  text-decoration: none;
+  background: var(--face);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  /* Raised bevel + outer black ring = the "default button" treatment */
+  box-shadow: 0 0 0 1px var(--dk), var(--bevel-up);
+}
+
+.about-app .sidebar-resume:active {
+  box-shadow: 0 0 0 1px var(--dk), var(--bevel-down);
+  padding: 9px 9px 7px 11px;
+}
+
+.about-app .sidebar-resume:focus-visible {
+  outline: 1px dotted var(--ink);
+  outline-offset: -5px;
 }
 
 /* ── Content area ── */
-.about-content {
+.about-app .about-content {
   flex: 1;
-  background: #cacad8;
-  border-left: 2px solid #808080;
   overflow-y: auto;
-  padding: 40px;
   position: relative;
-  color: #111;
+  padding: 22px 26px;
+  background: var(--face);
+  border-left: 1px solid var(--hi);
+  color: var(--ink);
 }
 
-.content-wrapper {
-  max-width: 900px;
+.about-app .content-wrapper {
+  max-width: 840px;
   margin: 0 auto;
 }
 
 /* ── Status bar ── */
-.about-statusbar {
-  height: 36px;
-  background: #c0c0c0;
-  border-top: 2px solid #fff;
+.about-app .about-statusbar {
+  height: 26px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  padding: 3px 4px 2px;
+  background: var(--face);
+  border-top: 1px solid var(--hi);
+  font-size: 11.5px;
+}
+
+.about-app .status-segment {
   display: flex;
   align-items: center;
-  padding: 0 12px;
-  gap: 16px;
-  font-size: 14px;
+  gap: 6px;
+  padding: 0 9px;
+  color: var(--ink);
+  border: 1px solid;
+  border-color: var(--sh) var(--hi) var(--hi) var(--sh);
+}
+
+.about-app .status-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #12b312;
+  box-shadow: 0 0 3px #12b312;
   flex-shrink: 0;
 }
 
-.status-segment {
-  border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  padding: 4px 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #000;
-}
-
-.status-led {
-  width: 8px;
-  height: 8px;
-  background: #00ff00;
-  border-radius: 50%;
-  box-shadow: 0 0 4px #00ff00;
-}
-
 /* ── CRT scanline overlay ── */
-.crt-overlay {
+.about-app .crt-overlay {
   pointer-events: none;
   position: absolute;
   inset: 0;
@@ -155,55 +184,44 @@
   opacity: 0.1;
 }
 
-/* ── Shared typography ── */
-.hero-section {
-  margin-bottom: 32px;
-  text-align: center;
-  color: #000;
-}
+/* ── Narrow-window fallback (resized app window / small screens) ── */
+@media (max-width: 760px) {
+  .about-app .about-sidebar {
+    width: 52px;
+    padding: 8px 4px;
+  }
 
-.hero-section .section-title {
-  margin-bottom: 8px;
-  border-bottom: none;
-}
+  .about-app .nav-item {
+    justify-content: center;
+    padding: 8px 0;
+  }
 
-.section-title {
-  font-size: 48px;
-  color: #000080;
-  margin-bottom: 24px;
-  font-weight: 800;
-  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
-  border-bottom: 4px double #000080;
-  padding-bottom: 16px;
-}
+  .about-app .nav-item span {
+    display: none;
+  }
 
-.tagline {
-  font-size: 20px;
-  font-style: italic;
-  color: #333;
-  margin-bottom: 32px;
-  padding-left: 16px;
-}
+  .about-app .nav-item-icon {
+    width: 17px;
+    height: 17px;
+  }
 
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  color: #000080;
-}
+  .about-app .sidebar-resume {
+    font-size: 0;
+    padding: 8px 4px;
+  }
 
-.section-header h3 {
-  font-size: 24px;
-  font-weight: bold;
-  margin: 0;
-  color: #000080;
-}
+  .about-app .sidebar-resume::before {
+    content: 'PDF';
+    font-size: 11px;
+    font-weight: 700;
+  }
 
-.subsection-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin: 32px 0 16px;
-  border-bottom: 2px solid #808080;
-  color: #000080;
+  .about-app .about-content {
+    padding: 18px 14px;
+  }
+
+  /* Only the availability segment fits honestly at this width */
+  .about-app .status-segment:not(:first-child) {
+    display: none;
+  }
 }

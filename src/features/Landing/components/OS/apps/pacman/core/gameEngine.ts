@@ -2,7 +2,7 @@
    Pac-Man – Game Engine
    ══════════════════════════════════════
    Pure-function game state transitions.
-   No React — just data in, data out.
+   No React - just data in, data out.
 */
 
 import {
@@ -13,7 +13,7 @@ import {
   TILE_SIZE, PACMAN_SPEED, GHOST_SPEED_BASE, GHOST_SPEED_FRIGHTENED,
   SCORE_DOT, SCORE_POWER_PELLET, SCORE_GHOST,
   FRIGHTENED_DURATION, SCATTER_DURATION, CHASE_DURATION,
-  DYING_DURATION, LEVEL_COMPLETE_DURATION,
+  DYING_DURATION, LEVEL_COMPLETE_DURATION, READY_DURATION,
   LEVEL_ALGORITHMS, LEVEL_SPEED_MULTIPLIER,
   GHOST_RELEASE_DELAYS,
 } from './constants';
@@ -138,7 +138,7 @@ export function initLevel(level: number, score: number, lives: number): GameStat
   };
 
   return {
-    phase: 'playing',
+    phase: 'ready',
     level,
     score,
     lives,
@@ -152,7 +152,16 @@ export function initLevel(level: number, score: number, lives: number): GameStat
     frameCount: 0,
     dyingTimer: 0,
     levelCompleteTimer: 0,
+    readyTimer: READY_DURATION,
+    ghostChain: 0,
   };
+}
+
+/** Toggle pause; a no-op in every phase that isn't playing or paused. */
+export function togglePause(state: GameState): GameState {
+  if (state.phase === 'playing') return { ...state, phase: 'paused' };
+  if (state.phase === 'paused') return { ...state, phase: 'playing' };
+  return state;
 }
 
 export function initGame(): GameState {
@@ -181,6 +190,12 @@ function canMove(maze: Tile[][], pos: Position, dir: Direction, width: number): 
 export function tick(state: GameState, inputDir: Direction | null): GameState {
   if (state.phase !== 'playing') {
     // Handle timers for non-playing phases
+    if (state.phase === 'ready') {
+      if (state.readyTimer <= 0) {
+        return { ...state, phase: 'playing' };
+      }
+      return { ...state, readyTimer: state.readyTimer - 1 };
+    }
     if (state.phase === 'dying') {
       if (state.dyingTimer <= 0) {
         if (state.lives <= 0) {
@@ -277,7 +292,7 @@ function movePacman(s: GameState): GameState {
 
     // Check if we can continue in current direction
     if (!canMove(s.maze, pac.pos, pac.direction, s.mazeWidth)) {
-      // Can't move — stay at center
+      // Can't move - stay at center
       return { ...s, pacman: pac };
     }
   }
@@ -306,7 +321,7 @@ function movePacman(s: GameState): GameState {
         && isWalkable(s.maze, newGridX, newGridY, s.mazeWidth)) {
       pac.pos = { x: newGridX, y: newGridY };
     } else {
-      // Hit a wall — snap back to current tile center
+      // Hit a wall - snap back to current tile center
       px = centerX;
       py = centerY;
     }
@@ -346,6 +361,8 @@ function eatDots(s: GameState): GameState {
       score: s.score + SCORE_POWER_PELLET,
       dotsRemaining: s.dotsRemaining - 1,
       ghosts,
+      // Each pellet restarts the 200→400→800→1600 ghost chain
+      ghostChain: 0,
     };
   }
 
@@ -481,7 +498,7 @@ function moveGhosts(s: GameState): GameState {
       if (validDirs.includes(chosenDir)) {
         ghost.direction = chosenDir;
       } else {
-        // Pathfinding returned an invalid direction — pick a stable fallback order:
+        // Pathfinding returned an invalid direction - pick a stable fallback order:
         // forward, left, right, reverse (reduces axis-locked oscillation)
         const fallbackDirs: Direction[] = [ghost.direction, LEFT_TURN[ghost.direction], RIGHT_TURN[ghost.direction], OPPOSITE_DIR[ghost.direction]];
         const valid = fallbackDirs.find(d => validDirs.includes(d));
@@ -499,7 +516,7 @@ function moveGhosts(s: GameState): GameState {
     // Check if we can actually move in the current direction
     // (prevents initial direction from pushing ghost into a wall)
     if (!canGhostMove(s.maze, ghost.pos, ghost.direction, s.mazeWidth, s.mazeHeight)) {
-      // Don't move — wait for next center evaluation
+      // Don't move - wait for next center evaluation
       ghost.pixelPos = { x: centerX, y: centerY };
       return ghost;
     }
@@ -554,7 +571,7 @@ function checkCollisions(s: GameState): GameState {
 
     if (dist < TILE_SIZE * 0.8) {
       if (ghost.mode === 'frightened') {
-        // Eat ghost — respawn inside the ghost house
+        // Eat ghost - respawn inside the ghost house
         // Stay in house until at least the frightened period ends
         const respawnPos = getGhostHomeSlot(ghostHomeInfo.house, ghostHomeInfo.entrance, ghost.name);
         const newGhosts = [...s.ghosts];
@@ -571,7 +588,14 @@ function checkCollisions(s: GameState): GameState {
           direction: 'up',
           frightenedTimer: 0,
         };
-        return { ...s, ghosts: newGhosts, score: s.score + SCORE_GHOST };
+        // Classic doubling: 200, 400, 800, 1600 per pellet chain
+        const reward = SCORE_GHOST * (1 << Math.min(s.ghostChain, 3));
+        return {
+          ...s,
+          ghosts: newGhosts,
+          score: s.score + reward,
+          ghostChain: s.ghostChain + 1,
+        };
       } else {
         // Pac-Man dies
         return {

@@ -2,7 +2,13 @@
  * Window Manager Type Definitions
  */
 
-export type AppId = 'about' | 'terminal' | 'pacman' | 'paint' | 'python';
+export type AppId =
+  | 'about'
+  | 'terminal'
+  | 'pacman'
+  | 'paint'
+  | 'python'
+  | 'site';
 
 export interface AppDefinition {
   id: AppId;
@@ -45,6 +51,12 @@ export interface DesktopState {
   activeWindowId: string | null;
   nextZIndex: number;
   fullscreen: boolean;
+  /**
+   * True on the /os full-page route, where there is no 3D scene behind the
+   * OS. Controls the exits: the overlay gets Shut Down (leave to the office)
+   * and a pop-out button; the standalone page gets Shut Down → back to '/'.
+   */
+  standalone: boolean;
 }
 
 export type DesktopAction =

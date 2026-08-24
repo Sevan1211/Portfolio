@@ -27,12 +27,15 @@ export const useDesktop = () => {
     if (existingWindow) {
       dispatch({ type: 'FOCUS_WINDOW', windowId: existingWindow.id });
     } else {
-      // Use current viewport dimensions so window sizes adapt to any screen
+      // Size windows against the OS workspace, not the browser viewport -
+      // on the monitor the workspace is a fixed 1280×940 CSS layout no
+      // matter how large or small the browser window is.
+      const workspace = document.querySelector('.retro-os-workspace');
       dispatch({
         type: 'OPEN_APP',
         appId,
-        viewportWidth: window.innerWidth,
-        viewportHeight: window.innerHeight,
+        viewportWidth: workspace?.clientWidth || window.innerWidth,
+        viewportHeight: workspace?.clientHeight || window.innerHeight,
       });
     }
   }, [dispatch, state.windows]);

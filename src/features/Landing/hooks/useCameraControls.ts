@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import type { Camera, PerspectiveCamera } from 'three';
+import { useRef } from "react";
+import type { Camera, PerspectiveCamera } from "three";
 
 interface CameraConfig {
   rotationSensitivityX: number;
@@ -13,23 +13,36 @@ interface DragRotation {
   pitch: number;
 }
 
-export const useCameraControls = (config: CameraConfig, camera: Camera | null) => {
+export const useCameraControls = (
+  config: CameraConfig,
+  camera: Camera | null,
+) => {
   const dragStartRef = useRef({ x: 0, y: 0, startYaw: 0, startPitch: 0 });
 
   // Smooth interpolation values
-  const currentRotationRef = useRef({ yaw: config.initialYaw, pitch: config.initialPitch });
-  const targetRotationRef = useRef({ yaw: config.initialYaw, pitch: config.initialPitch });
+  const currentRotationRef = useRef({
+    yaw: config.initialYaw,
+    pitch: config.initialPitch,
+  });
+  const targetRotationRef = useRef({
+    yaw: config.initialYaw,
+    pitch: config.initialPitch,
+  });
 
-  const handleDrag = (
-    deltaX: number,
-    deltaY: number
-  ): DragRotation => {
-    const newYaw = dragStartRef.current.startYaw +
+  // Both axes use the same "grab the room" convention: the scene follows the
+  // pointer, so dragging downward tilts the view up.
+  const handleDrag = (deltaX: number, deltaY: number): DragRotation => {
+    const newYaw =
+      dragStartRef.current.startYaw +
       (deltaX / window.innerWidth) * Math.PI * config.rotationSensitivityX;
-    const newPitch = dragStartRef.current.startPitch -
+    const newPitch =
+      dragStartRef.current.startPitch +
       (deltaY / window.innerHeight) * Math.PI * config.rotationSensitivityY;
 
-    const clampedPitch = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, newPitch));
+    const clampedPitch = Math.max(
+      -Math.PI / 2.5,
+      Math.min(Math.PI / 2.5, newPitch),
+    );
 
     return { yaw: newYaw, pitch: clampedPitch };
   };
@@ -43,8 +56,14 @@ export const useCameraControls = (config: CameraConfig, camera: Camera | null) =
     };
   };
 
-  const applyRotation = (rotation: DragRotation, mousePos: { x: number; y: number }) => {
-    if (!camera) {return;}
+  const applyRotation = (
+    rotation: DragRotation,
+    mousePos: { x: number; y: number },
+    delta = 1 / 60,
+  ): boolean => {
+    if (!camera) {
+      return false;
+    }
 
     // Subtle mouse parallax effect (reduced from 0.05/0.03)
     const hoverYaw = mousePos.x * 0.02;
@@ -54,16 +73,29 @@ export const useCameraControls = (config: CameraConfig, camera: Camera | null) =
     targetRotationRef.current.yaw = rotation.yaw + hoverYaw;
     targetRotationRef.current.pitch = rotation.pitch + hoverPitch;
 
-    // Smooth lerp to target (0.08 = smooth, higher = snappier)
-    const lerpFactor = 0.08;
-    currentRotationRef.current.yaw += (targetRotationRef.current.yaw - currentRotationRef.current.yaw) * lerpFactor;
-    currentRotationRef.current.pitch += (targetRotationRef.current.pitch - currentRotationRef.current.pitch) * lerpFactor;
+    // Frame-rate-independent smoothing: converges like 0.08/frame at 60fps
+    // whether the display runs at 30Hz or 144Hz.
+    const lerpFactor = 1 - Math.pow(1 - 0.08, delta * 60);
+    currentRotationRef.current.yaw +=
+      (targetRotationRef.current.yaw - currentRotationRef.current.yaw) *
+      lerpFactor;
+    currentRotationRef.current.pitch +=
+      (targetRotationRef.current.pitch - currentRotationRef.current.pitch) *
+      lerpFactor;
 
     // Apply smoothed rotation
-    camera.rotation.order = 'YXZ';
+    camera.rotation.order = "YXZ";
     camera.rotation.y = currentRotationRef.current.yaw;
     camera.rotation.x = currentRotationRef.current.pitch;
     camera.rotation.z = 0;
+
+    return (
+      Math.abs(targetRotationRef.current.yaw - currentRotationRef.current.yaw) >
+        0.0005 ||
+      Math.abs(
+        targetRotationRef.current.pitch - currentRotationRef.current.pitch,
+      ) > 0.0005
+    );
   };
 
   const resetRotation = (yaw: number, pitch: number) => {
@@ -83,9 +115,11 @@ export const useCameraAnimation = () => {
     startFov: number,
     endFov: number,
     duration: number,
-    camera: PerspectiveCamera
+    camera: PerspectiveCamera,
   ): boolean => {
-    if (fovAnimationProgress.current >= 1) {return false;}
+    if (fovAnimationProgress.current >= 1) {
+      return false;
+    }
 
     // On first call, ensure we start from 0 (handles HMR/remount)
     if (!hasStarted.current) {
@@ -95,7 +129,10 @@ export const useCameraAnimation = () => {
       camera.updateProjectionMatrix();
     }
 
-    fovAnimationProgress.current = Math.min(1, fovAnimationProgress.current + delta / duration);
+    fovAnimationProgress.current = Math.min(
+      1,
+      fovAnimationProgress.current + delta / duration,
+    );
 
     const easeProgress = 1 - Math.pow(1 - fovAnimationProgress.current, 3);
     const currentFov = startFov + (endFov - startFov) * easeProgress;
@@ -109,7 +146,7 @@ export const useCameraAnimation = () => {
   const animatePosition = (
     easeProgress: number,
     startPos: { x: number; y: number; z: number },
-    endPos: { x: number; y: number; z: number }
+    endPos: { x: number; y: number; z: number },
   ): { x: number; y: number; z: number } => {
     return {
       x: startPos.x + (endPos.x - startPos.x) * easeProgress,

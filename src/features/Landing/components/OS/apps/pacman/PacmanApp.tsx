@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { GameState, Direction } from './core/types';
-import { initGame, initLevel, tick } from './core/gameEngine';
+import { initGame, initLevel, tick, togglePause } from './core/gameEngine';
 import { saveScore } from './core/scores';
 import { TICK_RATE } from './core/constants';
 import { GameCanvas } from './components/GameCanvas';
@@ -10,8 +10,24 @@ import { WinScreen } from './components/WinScreen';
 import { GameOverScreen } from './components/GameOverScreen';
 import './styles/index.css';
 
+const KEY_MAP: Record<string, Direction> = {
+  ArrowUp: 'up',
+  ArrowDown: 'down',
+  ArrowLeft: 'left',
+  ArrowRight: 'right',
+  w: 'up',
+  W: 'up',
+  s: 'down',
+  S: 'down',
+  a: 'left',
+  A: 'left',
+  d: 'right',
+  D: 'right',
+};
+
 export const PacmanApp: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(initGame);
+  const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<Direction | null>(null);
   const loopRef = useRef<number | null>(null);
   const savedRef = useRef(false);
@@ -43,9 +59,48 @@ export const PacmanApp: React.FC = () => {
     return () => stopLoop();
   }, [stopLoop]);
 
-  /* ── Handle input ───────────────── */
-  const handleInput = useCallback((dir: Direction) => {
-    inputRef.current = dir;
+  /* ── Input: scoped to the app, like a real Win95 program ── */
+  const focusGame = useCallback(() => {
+    containerRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  useEffect(() => {
+    focusGame();
+  }, [focusGame]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const dir = KEY_MAP[e.key];
+    if (dir) {
+      e.preventDefault();
+      inputRef.current = dir;
+      return;
+    }
+    if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
+      setGameState(togglePause);
+    }
+  }, []);
+
+  /* Focus leaving the app (another window, the titlebar) pauses the game
+     instead of letting it play on unseen. */
+  const handleBlur = useCallback((e: React.FocusEvent) => {
+    if (containerRef.current?.contains(e.relatedTarget as Node)) return;
+    setGameState(prev =>
+      prev.phase === 'playing' ? { ...prev, phase: 'paused' } : prev,
+    );
+  }, []);
+
+  /* A hidden browser tab must not keep eating lives either. */
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden) {
+        setGameState(prev =>
+          prev.phase === 'playing' ? { ...prev, phase: 'paused' } : prev,
+        );
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
   }, []);
 
   /* ── Handle start ───────────────── */
@@ -54,7 +109,8 @@ export const PacmanApp: React.FC = () => {
     const state = initLevel(1, 0, 3);
     setGameState(state);
     startLoop();
-  }, [startLoop]);
+    focusGame();
+  }, [startLoop, focusGame]);
 
   /* ── Handle restart ─────────────── */
   const handleRestart = useCallback(() => {
@@ -62,7 +118,8 @@ export const PacmanApp: React.FC = () => {
     savedRef.current = false;
     const state = initGame();
     setGameState(state);
-  }, [stopLoop]);
+    focusGame();
+  }, [stopLoop, focusGame]);
 
   /* ── Save score on game end ─────── */
   useEffect(() => {
@@ -79,7 +136,14 @@ export const PacmanApp: React.FC = () => {
 
   /* ── Render ─────────────────────── */
   return (
-    <div className="app-content pm-app">
+    <div
+      ref={containerRef}
+      className="app-content pm-app w95-ui"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      onBlur={handleBlur}
+      onPointerDown={focusGame}
+    >
       {gameState.phase === 'start' && (
         <StartScreen onStart={handleStart} />
       )}
@@ -98,7 +162,7 @@ export const PacmanApp: React.FC = () => {
 
       <div className="pm-layout">
         <div className="pm-game-area">
-          <GameCanvas state={gameState} onInput={handleInput} />
+          <GameCanvas state={gameState} />
         </div>
         <Sidebar state={gameState} />
       </div>

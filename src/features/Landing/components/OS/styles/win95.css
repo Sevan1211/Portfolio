@@ -1,0 +1,288 @@
+/* ══════════════════════════════════════════════════════════════
+   Win95 design system - shared primitives for OS apps
+
+   Any app can opt in by adding `w95-ui` to its root element:
+   tokens, etched group boxes, keycap chips, sunken wells,
+   dotted-leader fact rows, page headers, and push buttons.
+
+   App-specific layout stays in each app's own stylesheet; only the
+   period idioms live here so every app speaks the same dialect.
+   ══════════════════════════════════════════════════════════════ */
+
+.w95-ui {
+  /* Win95 system palette */
+  --face: #c0c0c0;
+  --hi: #ffffff;
+  --lt: #dfdfdf;
+  --sh: #808080;
+  --dk: #0a0a0a;
+  --navy: #000080;
+  --well: #ffffff;
+  --ink: #000000;
+  --ink-dim: #4a4a4a;
+
+  /* Bevel recipes (98.css-style two-ring borders) */
+  --bevel-up: inset -1px -1px var(--dk), inset 1px 1px var(--hi),
+    inset -2px -2px var(--sh), inset 2px 2px var(--lt);
+  --bevel-down: inset -1px -1px var(--hi), inset 1px 1px var(--dk),
+    inset -2px -2px var(--lt), inset 2px 2px var(--sh);
+  --bevel-thin-up: inset -1px -1px var(--sh), inset 1px 1px var(--hi);
+  --bevel-well: inset -1px -1px var(--hi), inset 1px 1px var(--sh),
+    inset -2px -2px var(--lt), inset 2px 2px var(--dk);
+
+  --font-ui: Tahoma, 'Segoe UI', Geneva, Verdana, sans-serif;
+  --font-mono: Consolas, 'Courier New', monospace;
+
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+/* ── Page header: left-aligned title over an etched rule ── */
+.w95-ui .ab-page-head {
+  margin-bottom: 18px;
+}
+
+.w95-ui .ab-page-head-title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.2;
+}
+
+.w95-ui .ab-page-head-sub {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+/* ── Etched horizontal rule ── */
+.w95-ui .ab-rule {
+  height: 0;
+  border-top: 1px solid var(--sh);
+  border-bottom: 1px solid var(--hi);
+}
+
+.w95-ui .ab-page-head .ab-rule {
+  margin-top: 10px;
+}
+
+.w95-ui .ab-rule--inset {
+  margin: 14px 0;
+}
+
+/* ── Etched group box with legend label ── */
+.w95-ui .ab-gbox {
+  position: relative;
+  margin-bottom: 20px;
+  padding: 18px 15px 14px;
+  border: 1px solid var(--sh);
+  box-shadow: inset 1px 1px 0 var(--hi), 1px 1px 0 var(--hi);
+}
+
+.w95-ui .ab-gbox-label {
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  padding: 0 6px;
+  background: var(--face);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 16px;
+  white-space: nowrap;
+  max-width: calc(100% - 24px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Sunken white well ── */
+.w95-ui .ab-well {
+  background: var(--well);
+  box-shadow: var(--bevel-well);
+  padding: 11px 13px;
+}
+
+/* ── Keycap chip - a tiny raised button that isn't one ── */
+.w95-ui .ab-chip {
+  display: inline-block;
+  padding: 3px 9px 4px;
+  background: var(--face);
+  box-shadow: var(--bevel-up);
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a1a1a;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.w95-ui .ab-chip--mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 3px 10px 4px;
+}
+
+.w95-ui .ab-chip--current {
+  color: #0a5c0a;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 7px;
+}
+
+.w95-ui .ab-chip--progress {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.w95-ui .ab-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 5px;
+}
+
+/* ── Dotted-leader fact rows ── */
+.w95-ui .ab-fact {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.w95-ui .ab-fact-label {
+  color: var(--ink-dim);
+  flex-shrink: 0;
+}
+
+.w95-ui .ab-fact-dots {
+  flex: 1;
+  min-width: 16px;
+  border-bottom: 1px dotted #969696;
+  transform: translateY(-3px);
+}
+
+.w95-ui .ab-fact-value {
+  color: var(--ink);
+  font-weight: 600;
+  text-align: right;
+  max-width: 70%;
+}
+
+.w95-ui .ab-fact-value--mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.w95-ui .ab-fact-value--link {
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.w95-ui .ab-fact-value--link:hover {
+  text-decoration: underline;
+}
+
+.w95-ui .ab-fact-value--link:focus-visible {
+  outline: 1px dotted var(--ink);
+  outline-offset: 1px;
+}
+
+/* ── Body prose ── */
+.w95-ui .ab-p {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.w95-ui .ab-p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Raised push button ── */
+.w95-ui .ab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  background: var(--face);
+  box-shadow: var(--bevel-up);
+  border: none;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.w95-ui .ab-btn:active {
+  box-shadow: var(--bevel-down);
+  padding: 8px 15px 6px 17px;
+}
+
+.w95-ui .ab-btn:focus-visible {
+  outline: 1px dotted var(--ink);
+  outline-offset: -5px;
+}
+
+.w95-ui .ab-btn svg {
+  flex-shrink: 0;
+}
+
+/* ── Icon + sentence tip row ── */
+.w95-ui .tip-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.w95-ui .tip-icon {
+  color: #8a6d00;
+  flex-shrink: 0;
+}
+
+.w95-ui .tip-row p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+/* ── Authentic Win95 scrollbar with dithered track (webkit) ── */
+.w95-ui .w95-scroll::-webkit-scrollbar,
+.w95-ui.w95-scroll::-webkit-scrollbar {
+  width: 16px;
+  background: transparent;
+}
+
+.w95-ui .w95-scroll::-webkit-scrollbar-track,
+.w95-ui.w95-scroll::-webkit-scrollbar-track {
+  background: var(--lt);
+  background-image: repeating-conic-gradient(
+    var(--hi) 0% 25%,
+    var(--face) 0% 50%
+  );
+  background-size: 2px 2px;
+}
+
+.w95-ui .w95-scroll::-webkit-scrollbar-thumb,
+.w95-ui.w95-scroll::-webkit-scrollbar-thumb {
+  background: var(--face);
+  border-radius: 0;
+  border: none;
+  box-shadow: var(--bevel-up);
+}
+
+.w95-ui .w95-scroll::-webkit-scrollbar-thumb:hover,
+.w95-ui.w95-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--face);
+}
+
+.w95-ui .w95-scroll,
+.w95-ui.w95-scroll {
+  scrollbar-width: auto;
+  scrollbar-color: var(--face) var(--lt);
+}

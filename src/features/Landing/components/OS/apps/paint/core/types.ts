@@ -5,22 +5,19 @@
 export type ToolType =
   | 'pencil'
   | 'brush'
+  | 'spray'
   | 'eraser'
+  | 'fill'
+  | 'picker'
   | 'line'
   | 'rect'
-  | 'ellipse'
-  | 'fill'
-  | 'picker';
+  | 'roundrect'
+  | 'ellipse';
+
+/** How closed shapes are painted: outline, outline + background fill, or solid. */
+export type ShapeFillMode = 'stroke' | 'both' | 'fill';
 
 export interface Point {
   x: number;
   y: number;
-}
-
-export interface PaintState {
-  tool: ToolType;
-  color: string;
-  brushSize: number;
-  isDrawing: boolean;
-  lastPoint: Point | null;
 }

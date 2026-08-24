@@ -1,5 +1,6 @@
 /* Main OS Styles - Import all style modules */
 @import './base.css';
+@import './win95.css';
 @import './desktop.css';
 @import './window.css';
 @import './taskbar.css';

@@ -14,6 +14,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "generate:globe-data": "node scripts/generate-land-nodes.mjs",
     "test": "vitest"
   },
   "dependencies": {
@@ -39,6 +40,7 @@
     "@typescript-eslint/parser": "^8.46.2",
     "@vitejs/plugin-react": "^5.1.0",
     "autoprefixer": "^10.4.21",
+    "d3-geo": "^3.1.1",
     "eslint": "^8.53.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.33.2",
@@ -48,8 +50,10 @@
     "prettier": "^3.0.3",
     "rollup-plugin-visualizer": "^6.0.5",
     "tailwindcss": "^3.4.18",
+    "topojson-client": "^3.1.0",
     "typescript": "^5.9.3",
     "vite": "^7.1.12",
-    "vitest": "^0.34.6"
+    "vitest": "^0.34.6",
+    "world-atlas": "^2.0.2"
   }
 }

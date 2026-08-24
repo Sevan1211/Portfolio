@@ -19,10 +19,10 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ lines }) => {
 
   return (
     <div className="py-output">
-      <div className="py-output__title">Output</div>
+      <div className="py-panel-label">Output</div>
       <div className="py-output__content">
         {lines.length === 0 && (
-          <div className="py-output__empty">No output yet.</div>
+          <div className="py-output__empty">No output yet. Press Run (Ctrl+Enter).</div>
         )}
         {lines.map((line, i) => (
           <div key={i} className={`py-output__line py-output__line--${line.type}`}>

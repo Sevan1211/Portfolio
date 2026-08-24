@@ -1,0 +1,99 @@
+/* ══════════════════════════════════════
+   About This Site - layout on the shared w95 design system
+   ══════════════════════════════════════ */
+
+.site-app {
+  background: var(--face);
+  color: var(--ink);
+  padding: 0;
+}
+
+.site-app .site-scroll {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 22px 26px 26px;
+}
+
+.site-app .site-intro {
+  margin-bottom: 20px;
+}
+
+/* Model attribution (CC BY 4.0: title, author, source, license) */
+.site-app .site-credit {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+
+.site-app .site-credit a {
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.site-app .site-credit a:hover {
+  text-decoration: underline;
+}
+
+.site-app .site-repo-btn {
+  margin-top: 12px;
+}
+
+/* ── Architecture diagram ── */
+.site-app .site-diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 2px 0 14px;
+}
+
+.site-app .dg-face {
+  fill: var(--face);
+  stroke: var(--sh);
+  stroke-width: 1;
+}
+
+.site-app .dg-hi {
+  fill: none;
+  stroke: var(--hi);
+  stroke-width: 1;
+}
+
+.site-app .dg-title {
+  fill: var(--navy);
+}
+
+.site-app .dg-title-text {
+  fill: #fff;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.site-app .dg-line {
+  fill: #111;
+  font-family: var(--font-ui);
+  font-size: 9.5px;
+}
+
+.site-app .dg-note {
+  fill: #4a4a4a;
+  font-family: var(--font-ui);
+  font-size: 8.5px;
+}
+
+.site-app .dg-wire {
+  fill: none;
+  stroke: #404040;
+  stroke-width: 1.2;
+}
+
+.site-app .dg-arrow {
+  fill: #404040;
+}
+
+.site-app .dg-well {
+  fill: var(--well);
+  stroke: var(--sh);
+  stroke-width: 1;
+}

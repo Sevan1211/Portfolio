@@ -24,7 +24,9 @@ export default defineConfig({
     dedupe: ['react', 'react-dom']
   },
   server: {
-    port: 3000,
+    // Respect an externally assigned port (e.g. tooling that sets PORT);
+    // default to 3000 for plain `npm run dev`.
+    port: Number(process.env.PORT) || 3000,
     host: true,
     watch: {
       usePolling: true,

@@ -1,143 +1,75 @@
 /* ══════════════════════════════════════
-   Paint App – Retro MS Paint Styles
+   Paint - MS Paint layout on the w95 design system
+
+   Tool box left, colors bottom, fixed document in a scrollable gray
+   workspace. All chrome uses the shared bevel recipes.
    ══════════════════════════════════════ */
 
 /* ── App shell ─────────────────────── */
 .paint-app {
   display: flex;
   flex-direction: column;
-  background: #c0c0c0;
-  color: #000;
-  font-family: 'MS Sans Serif', 'Segoe UI', sans-serif;
+  background: var(--face);
+  color: var(--ink);
   font-size: 12px;
   overflow: hidden;
   user-select: none;
+  outline: none;
 }
 
-/* ── Toolbar ───────────────────────── */
-.paint-toolbar {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 6px 8px;
-  background: #c0c0c0;
-  border-bottom: 2px solid #808080;
-  flex-wrap: wrap;
-}
-
-.paint-toolbar__section {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.paint-toolbar__label {
-  font-size: 10px;
-  color: #555;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding-left: 2px;
-}
-
-.paint-toolbar__tools {
-  display: flex;
-  gap: 2px;
-  flex-wrap: wrap;
-  max-width: 160px;
-}
-
-.paint-toolbar__btn {
-  width: 32px;
-  height: 32px;
+/* ── Action bar (menu-bar stand-in) ── */
+.paint-actionbar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: #c0c0c0;
-  border: 2px outset #dfdfdf;
-  cursor: pointer;
-  color: #000;
-  padding: 0;
-}
-
-.paint-toolbar__btn:hover {
-  background: #d4d4d4;
-}
-
-.paint-toolbar__btn:active,
-.paint-toolbar__btn--active {
-  border-style: inset;
-  background: #a0a0a0;
-}
-
-/* ── Brush sizes ───────────────────── */
-.paint-toolbar__sizes {
-  display: flex;
-  gap: 2px;
-}
-
-.paint-toolbar__size-btn {
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #c0c0c0;
-  border: 2px outset #dfdfdf;
-  cursor: pointer;
-  padding: 0;
-}
-
-.paint-toolbar__size-btn:hover {
-  background: #d4d4d4;
-}
-
-.paint-toolbar__size-btn:active,
-.paint-toolbar__size-btn--active {
-  border-style: inset;
-  background: #a0a0a0;
-}
-
-.paint-toolbar__size-dot {
-  display: block;
-  border-radius: 50%;
-  background: #000;
-}
-
-/* ── Action buttons ────────────────── */
-.paint-toolbar__actions {
-  display: flex;
   gap: 4px;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--sh);
+  box-shadow: 0 1px 0 var(--hi);
+  flex-shrink: 0;
 }
 
-.paint-toolbar__action-btn {
-  height: 26px;
-  padding: 0 10px;
-  background: #c0c0c0;
-  border: 2px outset #dfdfdf;
+.paint-action-btn {
+  height: 24px;
+  padding: 0 12px;
+  background: var(--face);
+  border: none;
+  box-shadow: var(--bevel-thin-up);
+  font: inherit;
+  font-size: 11.5px;
+  color: var(--ink);
   cursor: pointer;
-  font-family: inherit;
-  font-size: 11px;
-  color: #000;
 }
 
-.paint-toolbar__action-btn:hover {
-  background: #d4d4d4;
+.paint-action-btn:active:not(:disabled) {
+  box-shadow: inset 1px 1px 0 var(--sh), inset -1px -1px 0 var(--hi);
 }
 
-.paint-toolbar__action-btn:active {
-  border-style: inset;
-}
-
-.paint-toolbar__action-btn:disabled {
-  color: #808080;
+.paint-action-btn:disabled {
+  color: var(--sh);
+  text-shadow: 1px 1px 0 var(--hi);
   cursor: default;
 }
 
-.paint-toolbar__action-btn--save {
-  font-weight: bold;
+.paint-action-btn--save {
+  margin-left: auto;
+  font-weight: 700;
+  box-shadow: var(--bevel-up);
+  padding: 0 14px;
 }
 
-/* ── Body (palette + canvas) ───────── */
+.paint-action-btn--save:active {
+  box-shadow: var(--bevel-down);
+}
+
+.paint-actionbar__sep {
+  width: 0;
+  align-self: stretch;
+  margin: 2px 4px;
+  border-left: 1px solid var(--sh);
+  border-right: 1px solid var(--hi);
+}
+
+/* ── Body: tool box + workspace ────── */
 .paint-body {
   flex: 1;
   display: flex;
@@ -145,74 +77,153 @@
   overflow: hidden;
 }
 
-/* ── Color palette ─────────────────── */
-.paint-palette {
-  width: 56px;
-  min-width: 56px;
-  background: #c0c0c0;
-  border-right: 2px solid #808080;
-  padding: 6px 4px;
+/* ── Tool box (left) ───────────────── */
+.paint-toolbox {
+  width: 66px;
+  flex-shrink: 0;
+  padding: 6px 5px;
+  border-right: 1px solid var(--sh);
+  box-shadow: inset -1px 0 0 var(--hi);
   display: flex;
   flex-direction: column;
   gap: 8px;
-  align-items: center;
   overflow-y: auto;
 }
 
-.paint-palette__preview {
-  display: flex;
-  align-items: center;
+.paint-toolbox__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 26px);
+  gap: 2px;
   justify-content: center;
 }
 
-.paint-palette__current {
-  width: 32px;
-  height: 32px;
-  border: 2px inset #808080;
-}
-
-.paint-palette__grid {
-  display: grid;
-  grid-template-columns: repeat(2, 18px);
-  gap: 2px;
-}
-
-.paint-palette__swatch {
-  width: 18px;
-  height: 18px;
-  border: 1px solid #808080;
+.paint-tool-btn {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--face);
+  border: none;
+  box-shadow: var(--bevel-thin-up);
+  color: var(--ink);
   cursor: pointer;
   padding: 0;
 }
 
-.paint-palette__swatch:hover {
-  border-color: #000;
-  transform: scale(1.15);
-  z-index: 1;
+.paint-tool-btn--active {
+  box-shadow: inset 1px 1px 0 var(--sh), inset -1px -1px 0 var(--hi);
+  background: repeating-conic-gradient(var(--hi) 0% 25%, var(--face) 0% 50%);
+  background-size: 2px 2px;
 }
 
-.paint-palette__swatch--active {
-  border: 2px solid #000;
-  box-shadow: 0 0 0 1px #fff;
+.paint-tool-btn:active {
+  box-shadow: inset 1px 1px 0 var(--sh), inset -1px -1px 0 var(--hi);
 }
 
-/* ── Canvas area ───────────────────── */
-.paint-canvas-container {
+/* ── Options well ──────────────────── */
+.paint-options {
+  min-height: 88px;
+  padding: 5px 4px;
+  background: var(--face);
+  box-shadow: var(--bevel-well);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.paint-options__sizes,
+.paint-options__fills {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.paint-size-btn,
+.paint-fill-btn {
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.paint-size-btn--active,
+.paint-fill-btn--active {
+  background: var(--navy);
+}
+
+.paint-size-bar {
+  display: block;
+  width: 100%;
+  min-height: 1px;
+  background: var(--ink);
+}
+
+.paint-size-btn--active .paint-size-bar {
+  background: #fff;
+}
+
+.paint-fill-btn {
+  height: 15px;
+}
+
+.paint-fill-glyph {
+  display: block;
+  width: 26px;
+  height: 9px;
+}
+
+.paint-fill-glyph--stroke {
+  border: 1.5px solid var(--ink);
+}
+
+.paint-fill-glyph--both {
+  border: 1.5px solid var(--ink);
+  background: var(--sh);
+}
+
+.paint-fill-glyph--fill {
+  background: var(--ink);
+}
+
+.paint-fill-btn--active .paint-fill-glyph--stroke,
+.paint-fill-btn--active .paint-fill-glyph--both {
+  border-color: #fff;
+}
+
+.paint-fill-btn--active .paint-fill-glyph--fill {
+  background: #fff;
+}
+
+.paint-fill-btn--active .paint-fill-glyph--both {
+  background: #9a9ab8;
+}
+
+/* ── Workspace + document ──────────── */
+.paint-workspace {
   flex: 1;
-  position: relative;
-  background: #808080;
-  overflow: hidden;
   min-width: 0;
   min-height: 0;
+  overflow: auto;
+  background: var(--sh);
+  box-shadow: inset 1px 1px 0 var(--dk), inset -1px -1px 0 var(--lt);
+  padding: 12px;
+}
+
+.paint-doc {
+  position: relative;
+  background: #fff;
+  box-shadow: 1px 1px 0 var(--dk), 3px 3px 0 rgba(0, 0, 0, 0.25);
 }
 
 .paint-canvas {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
   display: block;
-  image-rendering: auto;
 }
 
 .paint-canvas--preview {
@@ -225,35 +236,115 @@
   inset: 0;
   z-index: 2;
   touch-action: none;
+  cursor: crosshair;
+}
+
+/* ── Color bar (bottom) ────────────── */
+.paint-colorbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-top: 1px solid var(--hi);
+  box-shadow: inset 0 1px 0 var(--sh);
+  flex-shrink: 0;
+}
+
+/* Overlapping FG/BG indicator, straight out of MS Paint */
+.paint-colorbar__pair {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  background: var(--face);
+  box-shadow: var(--bevel-well);
+}
+
+.paint-colorbar__swatch {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--sh);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.paint-colorbar__swatch--fg {
+  top: 5px;
+  left: 5px;
+  z-index: 1;
+}
+
+.paint-colorbar__swatch--bg {
+  bottom: 5px;
+  right: 5px;
+}
+
+.paint-colorbar__grid {
+  display: grid;
+  grid-template-columns: repeat(14, 17px);
+  grid-auto-rows: 17px;
+  gap: 2px;
+}
+
+.paint-swatch {
+  width: 17px;
+  height: 17px;
+  border: 1px solid;
+  border-color: var(--sh) var(--hi) var(--hi) var(--sh);
+  cursor: pointer;
+  padding: 0;
+}
+
+.paint-swatch--fg {
+  outline: 1px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.paint-swatch--bg {
+  box-shadow: 0 0 0 1px var(--hi), 0 0 0 2px var(--sh);
 }
 
 /* ── Status bar ────────────────────── */
 .paint-status {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  align-items: stretch;
+  gap: 3px;
   height: 24px;
-  padding: 0 8px;
-  background: #c0c0c0;
-  border-top: 2px solid #808080;
+  padding: 3px 4px 2px;
+  border-top: 1px solid var(--hi);
   font-size: 11px;
-  color: #000;
+  color: var(--ink);
+  flex-shrink: 0;
 }
 
-.paint-status__tool {
-  min-width: 100px;
-  padding: 0 6px;
-  border-right: 1px solid #808080;
+.paint-status__hint,
+.paint-status__pos,
+.paint-status__size {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  border: 1px solid;
+  border-color: var(--sh) var(--hi) var(--hi) var(--sh);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paint-status__hint {
+  flex: 1;
+  min-width: 0;
+  display: block;
+  line-height: 17px;
 }
 
 .paint-status__pos {
-  min-width: 80px;
-  padding: 0 6px;
-  border-right: 1px solid #808080;
+  min-width: 74px;
+  justify-content: flex-end;
   font-variant-numeric: tabular-nums;
 }
 
 .paint-status__size {
-  padding: 0 6px;
+  min-width: 88px;
+  justify-content: flex-end;
   font-variant-numeric: tabular-nums;
 }

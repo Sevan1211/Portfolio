@@ -1,5 +1,9 @@
 import React from 'react';
-import { GameState, ALGORITHM_LABELS } from '../core/types';
+import {
+  GameState,
+  ALGORITHM_LABELS,
+  ALGORITHM_DESCRIPTIONS,
+} from '../core/types';
 import { getTopScore } from '../core/scores';
 
 interface SidebarProps {
@@ -53,17 +57,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ state }) => {
             {Array.from({ length: state.lives }).map((_, i) => (
               <span key={i} className="pm-life">◖</span>
             ))}
-            {state.lives === 0 && <span className="pm-life pm-life--none">—</span>}
+            {state.lives === 0 && <span className="pm-life pm-life--none">-</span>}
           </div>
         </div>
       </div>
 
-      {/* Ghost AI panel */}
+      {/* Ghost AI panel - the ghosts run real pathfinding, so say so */}
       <div className="pm-panel">
         <div className="pm-panel__title">Ghost AI</div>
         <div className="pm-panel__inset">
           <span className="pm-ai-label">{ALGORITHM_LABELS[state.algorithm]}</span>
+          <p className="pm-ai-desc">
+            {ALGORITHM_DESCRIPTIONS[state.algorithm]}
+          </p>
         </div>
+      </div>
+
+      <div className="pm-hint">
+        {state.phase === 'paused' ? 'P = resume' : 'P = pause'}
       </div>
     </div>
   );

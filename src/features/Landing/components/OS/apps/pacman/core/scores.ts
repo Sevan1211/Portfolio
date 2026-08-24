@@ -40,7 +40,7 @@ export function saveScore(score: number, level: number): HighScore[] {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
   } catch {
-    // Storage full or unavailable — silently fail
+    // Storage full or unavailable - silently fail
   }
 
   return trimmed;

@@ -34,8 +34,11 @@ export function renderFrame(
   ctx.fillStyle = COLORS.background;
   ctx.fillRect(0, 0, w, h);
 
-  // Maze
-  drawMaze(ctx, maze, mazeWidth, mazeHeight);
+  // Maze - walls flash white while the level-complete pause runs
+  const flash =
+    state.phase === 'level-complete' &&
+    Math.floor(state.levelCompleteTimer / 15) % 2 === 0;
+  drawMaze(ctx, maze, mazeWidth, mazeHeight, flash);
 
   if (state.phase === 'dying') {
     // Draw dying Pac-Man animation
@@ -44,7 +47,6 @@ export function renderFrame(
   }
 
   if (state.phase === 'level-complete') {
-    // Flash maze walls
     drawPacman(ctx, state);
     return;
   }
@@ -59,6 +61,37 @@ export function renderFrame(
 
   // Pac-Man
   drawPacman(ctx, state);
+
+  if (state.phase === 'ready') {
+    drawCenteredText(ctx, state, 'READY!', COLORS.textHighlight);
+  } else if (state.phase === 'paused') {
+    // Dim the field so the freeze reads as deliberate
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.fillRect(0, 0, w, h);
+    drawCenteredText(ctx, state, 'PAUSED', COLORS.textHighlight);
+    drawCenteredText(ctx, state, 'press P to resume', COLORS.text, 22);
+  }
+}
+
+/** Arcade-style announcement text near Pac-Man's start row. */
+function drawCenteredText(
+  ctx: CanvasRenderingContext2D,
+  state: GameState,
+  text: string,
+  color: string,
+  offsetY = 0,
+): void {
+  ctx.save();
+  ctx.font = `bold ${offsetY ? 11 : 15}px 'Courier New', monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = color;
+  ctx.fillText(
+    text,
+    (state.mazeWidth * TILE_SIZE) / 2,
+    state.pacman.pixelPos.y - TILE_SIZE * 1.6 + offsetY,
+  );
+  ctx.restore();
 }
 
 /* ── Maze walls ────────────────────── */
@@ -67,8 +100,9 @@ function drawMaze(
   maze: Tile[][],
   width: number,
   height: number,
+  flash = false,
 ): void {
-  ctx.strokeStyle = COLORS.wallStroke;
+  ctx.strokeStyle = flash ? '#FFFFFF' : COLORS.wallStroke;
   ctx.lineWidth = 2;
 
   for (let y = 0; y < height; y++) {

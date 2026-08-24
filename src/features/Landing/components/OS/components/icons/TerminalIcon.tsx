@@ -6,7 +6,7 @@ interface TerminalIconProps {
 }
 
 /**
- * Terminal Icon — Win95-style MS-DOS Prompt
+ * Terminal Icon - Win95-style MS-DOS Prompt
  * Black screen with C:\> text in a beveled gray window frame.
  */
 export const TerminalIcon: React.FC<TerminalIconProps> = ({

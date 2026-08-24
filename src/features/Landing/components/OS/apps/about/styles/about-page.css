@@ -1,74 +1,99 @@
 /* ══════════════════════════════════════
-   About Page – Bio, photo & awards
+   About Page - ID-card profile header, summary, bio, tip box
    ══════════════════════════════════════ */
 
-/* Photo + text row */
-.about-me-row {
+/* Raised panel - the one raised element on the page, so it leads */
+.about-app .profile-card {
   display: flex;
-  gap: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
   align-items: stretch;
-  margin-bottom: 32px;
-}
-
-.about-me-row .about-me-section {
-  flex: 1;
-  margin-bottom: 0;
-}
-
-/* Bio / Awards panel */
-.about-me-section {
-  background: #e6e6ea;
-  border: 2px solid #808080;
-  padding: 20px;
-  margin-bottom: 32px;
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
-  color: #111;
-}
-
-.about-me-section p {
-  color: #111;
-  margin-bottom: 16px;
-  line-height: 1.6;
-  font-size: 16px;
-}
-
-/* Photo card */
-.profile-photo-card {
-  width: 220px;
-  flex-shrink: 0;
-  background: #e6e6ea;
-  border: 2px solid;
-  border-color: #fff #808080 #808080 #fff;
+  margin-bottom: 22px;
   padding: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+  background: var(--face);
+  box-shadow: var(--bevel-up);
 }
 
-.profile-photo-frame {
+.about-app .profile-photo-well {
+  width: 138px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 3px;
+  background: var(--face);
+  box-shadow: var(--bevel-well);
+}
+
+.about-app .profile-photo-well img {
+  display: block;
   width: 100%;
   aspect-ratio: 1;
-  overflow: hidden;
-  border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  background: #000;
-}
-
-.profile-photo {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
-  display: block;
 }
 
-.profile-photo-label {
-  margin-top: 10px;
-  font-size: 14px;
+.about-app .profile-id {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  padding: 2px 4px 0 2px;
+}
+
+.about-app .profile-name {
+  margin: 0;
+  font-size: 24px;
   font-weight: 700;
-  color: #000080;
-  text-align: center;
-  letter-spacing: 0.02em;
+  color: var(--ink);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
 }
 
+.about-app .profile-title {
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+}
 
+.about-app .profile-facts {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Summary (the restyled positioning statement) ── */
+.about-app .summary-well {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.about-app .summary-icon {
+  color: var(--navy);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.about-app .summary-well p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+/* Stack the profile card when the window gets narrow */
+@media (max-width: 640px) {
+  .about-app .profile-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .about-app .profile-id {
+    width: 100%;
+  }
+
+  .about-app .profile-facts {
+    text-align: left;
+  }
+}

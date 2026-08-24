@@ -1,24 +1,29 @@
 /* ══════════════════════════════════════
-   Terminal App
+   Terminal - MS-DOS Prompt look
+
+   Light gray on pure black, the same #c0c0c0 as the OS chrome.
+   Bright white for what you type, DOS light red for errors, bright
+   cyan for the ANSI-art banner. No glow - DOS was crisp.
    ══════════════════════════════════════ */
 
 .terminal-app {
-  --term-fg: #c8ccd4;
-  --term-prompt: #61afef;
-  --term-accent: #56b6c2;
-  --term-dim: #636d83;
-  --term-error: #e06c75;
+  --term-fg: #c0c0c0;
+  --term-bright: #ffffff;
+  --term-banner: #55ffff;
+  --term-dim: #7a7a7a;
+  --term-error: #ff5555;
 
-  background: #1e1e2e !important;
+  /* .app-content paints white at equal specificity; this must win. */
+  background: #000 !important;
   color: var(--term-fg);
-  font-family: 'Courier New', 'Consolas', monospace;
+  font-family: 'Lucida Console', Consolas, 'Courier New', monospace;
   padding: 0;
   cursor: text;
   position: relative;
   overflow: hidden;
 }
 
-/* ── CRT scanline overlay ──────────── */
+/* ── CRT scanline overlay (the physical monitor, not the software) ── */
 .terminal-scanlines {
   pointer-events: none;
   position: absolute;
@@ -26,10 +31,10 @@
   z-index: 2;
   background: repeating-linear-gradient(
     0deg,
-    rgba(0, 0, 0, 0) 0px,
-    rgba(0, 0, 0, 0) 1px,
-    rgba(0, 0, 0, 0.06) 1px,
-    rgba(0, 0, 0, 0.06) 2px
+    rgba(255, 255, 255, 0) 0px,
+    rgba(255, 255, 255, 0) 2px,
+    rgba(255, 255, 255, 0.02) 2px,
+    rgba(255, 255, 255, 0.02) 3px
   );
 }
 
@@ -40,27 +45,42 @@
   width: 100%;
   height: 100%;
   overflow-y: auto;
-  font-size: 14px;
-  line-height: 1.5;
-  padding: 16px 20px;
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 12px 14px;
   box-sizing: border-box;
 }
 
 /* ── Lines ─────────────────────────── */
 .terminal-line {
-  margin: 0;
+  margin: 2px 0;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
+/* What you typed echoes bright, like real DOS */
 .terminal-line--command {
-  color: var(--term-prompt);
-  opacity: 0.7;
+  color: var(--term-bright);
   margin-top: 8px;
 }
 
 .terminal-line--output {
   color: var(--term-fg);
+}
+
+.terminal-line--dim {
+  color: var(--term-dim);
+}
+
+/* ASCII banner in DOS bright cyan - pure ANSI-art energy */
+.terminal-line--banner {
+  color: var(--term-banner);
+}
+
+/* Identity line under the banner */
+.terminal-line--heading {
+  color: var(--term-bright);
+  font-weight: bold;
 }
 
 .terminal-line--error {
@@ -71,16 +91,15 @@
 .terminal-input-line {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0;
   margin-top: 8px;
   padding: 0;
 }
 
 .terminal-prompt {
-  color: var(--term-prompt);
-  font-weight: bold;
+  color: var(--term-fg);
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .terminal-input-wrapper {
@@ -95,18 +114,20 @@
   background: transparent;
   border: none;
   outline: none;
-  color: var(--term-fg);
+  color: var(--term-bright);
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
-  caret-color: var(--term-prompt);
+  caret-color: var(--term-fg);
   padding: 0;
   position: relative;
   z-index: 2;
 }
 
-.terminal-input::selection {
-  background: var(--term-prompt);
+/* Inverted selection, DOS style */
+.terminal-input::selection,
+.terminal-content ::selection {
+  background: var(--term-fg);
   color: #000;
 }
 
@@ -121,25 +142,28 @@
   line-height: inherit;
   white-space: pre;
   z-index: 1;
-  color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.22);
 }
 
-/* ══════════════════════════════════════
-   Scrollbar
-   ══════════════════════════════════════ */
+/* ── Scrollbar: square, gray, flat ── */
 .terminal-content::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 .terminal-content::-webkit-scrollbar-track {
-  background: #1e1e2e;
+  background: #000;
 }
 
 .terminal-content::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
+  background: #4a4a4a;
+  border-radius: 0;
 }
 
 .terminal-content::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #6a6a6a;
+}
+
+.terminal-content {
+  scrollbar-width: thin;
+  scrollbar-color: #4a4a4a #000;
 }

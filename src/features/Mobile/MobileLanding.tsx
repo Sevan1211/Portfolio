@@ -22,13 +22,13 @@ export const MobileLanding: React.FC = () => {
 
   return (
     <div className="mobile-landing">
-      {/* 3D background — always visible */}
+      {/* 3D background - always visible */}
       <PhoneBackground />
 
       {/* Lock screen */}
       {state === 'locked' && <LockScreen onUnlock={handleUnlock} />}
 
-      {/* About app — slides up when unlocked */}
+      {/* About app - slides up when unlocked */}
       <div className={`mobile-app-container ${state === 'unlocked' ? 'mobile-app-container--open' : ''}`}>
         {state === 'unlocked' && <MobileAboutApp />}
       </div>

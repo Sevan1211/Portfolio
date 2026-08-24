@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
+import {
+  ABOUT,
+  CONTACT,
+  EDUCATION,
+  EXPERIENCE,
+  IDENTITY,
+  LANGUAGES,
+  PLATFORM_STATS,
+  SKILL_GROUPS,
+} from '@shared/content/portfolio';
 import profilePhoto from '@shared/assets/images/OS/picofme.jpeg';
-import awardPhoto from '@shared/assets/images/OS/awardwinning.jpeg';
 
 /* ══════════════════════════════════════════════════════════
    Mobile About App
-   All portfolio sections in a single scrollable view,
-   formatted for small screens. Retro iOS aesthetic.
+
+   Deliberately a condensed recruiter summary rather than a mirror of the
+   desktop OS: identity, availability, the short form of each role, and a
+   direct line to the resume. All content comes from the shared source.
    ══════════════════════════════════════════════════════════ */
 
 type SectionId = 'about' | 'experience' | 'projects' | 'contact';
@@ -17,29 +28,21 @@ const TABS: { id: SectionId; label: string }[] = [
   { id: 'contact', label: 'Contact' },
 ];
 
-/* ── Project data (mirrors desktop) ── */
+/* ── Project data (pending the projects rewrite) ── */
 interface Project {
   title: string;
   subtitle: string;
   description: string;
   tech: string[];
-  github: string;
+  github?: string;
 }
 
 const PROJECTS: Project[] = [
   {
-    title: 'PrepMe',
-    subtitle: 'Interactive Coding & Learning Platform',
-    description:
-      'Full-stack platform with 170+ coding challenges, cloud sandbox with Docker containers, AI tutor, and multi-language code execution.',
-    tech: ['React', 'TypeScript', 'Go', 'Python', 'Docker', 'PostgreSQL'],
-    github: 'https://github.com/Sevan1211/PrepMe',
-  },
-  {
     title: 'CodeLive',
     subtitle: 'Live Technical Interview Platform',
     description:
-      'Real-time collaborative coding interview tool with Monaco editor, in-browser transpilation, and 250+ curated problems.',
+      'Real-time collaborative coding interview tool with Monaco editor, in-browser transpilation, and a curated problem bank.',
     tech: ['React', 'TypeScript', 'Node.js', 'Express', 'Supabase'],
     github: 'https://github.com/UNO-CSCI4830/CodeLive',
   },
@@ -58,7 +61,6 @@ export const MobileAboutApp: React.FC = () => {
 
   return (
     <div className="m-app">
-      {/* ── Navigation tabs ── */}
       <nav className="m-tab-bar">
         {TABS.map(({ id, label }) => (
           <button
@@ -71,7 +73,6 @@ export const MobileAboutApp: React.FC = () => {
         ))}
       </nav>
 
-      {/* ── Content ── */}
       <div className="m-content">
         {activeTab === 'about' && <AboutSection />}
         {activeTab === 'experience' && <ExperienceSection />}
@@ -79,10 +80,9 @@ export const MobileAboutApp: React.FC = () => {
         {activeTab === 'contact' && <ContactSection />}
       </div>
 
-      {/* ── Desktop prompt ── */}
-      <div className="m-desktop-prompt">
-        💻 Visit on desktop for the full experience
-      </div>
+      <a className="m-resume-bar" href={CONTACT.resumePath} download>
+        Download Resume (PDF)
+      </a>
     </div>
   );
 };
@@ -91,135 +91,97 @@ export const MobileAboutApp: React.FC = () => {
    SECTIONS
    ══════════════════════════════════════ */
 
-/* ── About ── */
 const AboutSection: React.FC = () => (
   <div className="m-section">
-    <h2 className="m-title">Welcome</h2>
-    <p className="m-tagline">Full-Stack Developer · Problem Solver · Carpe Diem</p>
+    <h2 className="m-title">{IDENTITY.name}</h2>
+    <p className="m-tagline">{IDENTITY.tagline}</p>
+
+    <div className="m-availability">
+      <span className="m-availability-dot" />
+      {IDENTITY.availabilityShort} · Open to relocation
+    </div>
 
     <div className="m-photo-card">
-      <img src={profilePhoto} alt="Sevan Lewis-Payne" className="m-photo" />
-      <span className="m-photo-label">Sevan Lewis-Payne</span>
+      <img src={profilePhoto} alt={IDENTITY.name} className="m-photo" />
+    </div>
+
+    <div className="m-narrative">{IDENTITY.narrative}</div>
+
+    <div className="m-card">
+      <h3 className="m-card-title">About</h3>
+      {ABOUT.intro.map((paragraph) => (
+        <p key={paragraph}>{paragraph}</p>
+      ))}
     </div>
 
     <div className="m-card">
-      <h3 className="m-card-title">About Me</h3>
+      <h3 className="m-card-title">Education</h3>
       <p>
-        Hey, I'm Sevan Lewis-Payne — a full-stack developer based in Omaha, NE.
-        I'm pursuing a double major in <strong>Computer Science</strong> and{' '}
-        <strong>Artificial Intelligence</strong> at UNO, graduating May 2027.
+        <strong>{EDUCATION.degree}</strong>
+        <br />
+        {EDUCATION.school} · {EDUCATION.graduation}
       </p>
-      <p>
-        I love breaking problems down to their core and building toward the best
-        solution. Whether it's a responsive UI, a data pipeline, or a 3D scene
-        in the browser — I enjoy going from idea to something real.
-      </p>
-      <p>
-        My journey started early — programming LEGO robots as a kid, then taking
-        every tech class in high school: AP CS, InfoSec, Game Programming,
-        Robotics, and more. That's when I knew tech was my future.
-      </p>
-    </div>
-
-    <div className="m-card">
-      <h3 className="m-card-title">Awards & Honors</h3>
-      <img src={awardPhoto} alt="Rising Star Intern Award" className="m-photo m-photo--award" />
-      <p>
-        <strong>Rising Star Intern Award</strong> — UNO, Fall 2025. Recognized
-        for performing on par with full-time engineers during my summer internship
-        at First National Bank.
-      </p>
-      <p>
-        <strong>Buffett Scholarship</strong> — Full-ride covering tuition, room,
-        board, and more through graduation.
-      </p>
+      <ul className="m-bullets">
+        {EDUCATION.awards.map((award) => (
+          <li key={award.name}>{award.name}</li>
+        ))}
+      </ul>
     </div>
   </div>
 );
 
-/* ── Experience ── */
 const ExperienceSection: React.FC = () => (
   <div className="m-section">
     <h2 className="m-title">Experience</h2>
-    <p className="m-tagline">Where I've worked & what I've built</p>
+    <p className="m-tagline">Where I&apos;ve worked &amp; what I built</p>
 
-    {/* Skills */}
+    <div className="m-card m-card--stats">
+      <h3 className="m-card-title">Data platform at a glance</h3>
+      <div className="m-stat-grid">
+        {PLATFORM_STATS.map((stat) => (
+          <div className="m-stat" key={stat.label}>
+            <span className="m-stat-value">{stat.value}</span>
+            <span className="m-stat-label">{stat.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {EXPERIENCE.map((entry) => (
+      <div className="m-card" key={entry.id}>
+        <h3 className="m-card-title">{entry.company}</h3>
+        <span className="m-exp-role">{entry.role}</span>
+        <span className="m-exp-meta">
+          {entry.dates} · {entry.location}
+        </span>
+        <ul className="m-bullets">
+          {entry.summary.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      </div>
+    ))}
+
     <div className="m-card">
       <h3 className="m-card-title">Skills</h3>
       <div className="m-skill-row">
         <span className="m-skill-label">Languages</span>
-        <p>Python, Java, Kotlin, JavaScript, C, Go, SQL, HTML, CSS</p>
+        <p>{LANGUAGES.join(', ')}</p>
       </div>
-      <div className="m-skill-row">
-        <span className="m-skill-label">Frameworks</span>
-        <p>React, Node.js, Tailwind, Spring Boot, REST APIs, Three.js</p>
-      </div>
-      <div className="m-skill-row">
-        <span className="m-skill-label">Tools</span>
-        <p>Git, Docker, Linux, Power BI, dbt, Snowflake, npm</p>
-      </div>
-    </div>
-
-    {/* Jobs */}
-    <ExpCard
-      company="Rasmussen Air and Gas Energy"
-      role="Data Visualization & Automation Intern"
-      dates="Aug 2025 — Present"
-      location="Omaha, NE"
-      bullets={[
-        'Power BI dashboards + Snowflake data models → +40% reporting efficiency',
-        'Automated pipelines in n8n → saved 20+ hrs/month',
-        'Python data analysis (Pandas, NumPy) for cleaner insights',
-      ]}
-    />
-    <ExpCard
-      company="First National Bank"
-      role="Software Engineer Summer Intern"
-      dates="May 2024 — Aug 2025"
-      location="Omaha, NE"
-      bullets={[
-        'Modernized legacy HTML → responsive React + ADA compliance',
-        'Agile team of 7: ServiceNow, GitLab, sprints',
-        'Features reached 100K+ users, +20% team capacity',
-      ]}
-    />
-    <ExpCard
-      company="University of Nebraska Omaha"
-      role="IT Operations Specialist"
-      dates="Aug 2025 — Present"
-      location="Omaha, NE"
-      bullets={[
-        'Tech support for faculty/students (hardware, software, A/V)',
-        'Device setup & troubleshooting across Windows & macOS',
-      ]}
-    />
-  </div>
-);
-
-const ExpCard: React.FC<{
-  company: string;
-  role: string;
-  dates: string;
-  location: string;
-  bullets: string[];
-}> = ({ company, role, dates, location, bullets }) => (
-  <div className="m-card">
-    <h3 className="m-card-title">{company}</h3>
-    <span className="m-exp-role">{role}</span>
-    <span className="m-exp-meta">{dates} · {location}</span>
-    <ul className="m-bullets">
-      {bullets.map((b) => (
-        <li key={b}>{b}</li>
+      {SKILL_GROUPS.map((group) => (
+        <div className="m-skill-row" key={group.id}>
+          <span className="m-skill-label">{group.label}</span>
+          <p>{group.items.slice(0, 7).join(', ')}</p>
+        </div>
       ))}
-    </ul>
+    </div>
   </div>
 );
 
-/* ── Projects ── */
 const ProjectsSection: React.FC = () => (
   <div className="m-section">
     <h2 className="m-title">Projects</h2>
-    <p className="m-tagline">Things I've built & shipped</p>
+    <p className="m-tagline">Things I&apos;ve built &amp; shipped</p>
 
     {PROJECTS.map((p) => (
       <div key={p.title} className="m-card">
@@ -228,19 +190,23 @@ const ProjectsSection: React.FC = () => (
             <h3 className="m-card-title">{p.title}</h3>
             <span className="m-project-sub">{p.subtitle}</span>
           </div>
-          <a
-            href={p.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="m-github-btn"
-          >
-            GitHub →
-          </a>
+          {p.github && (
+            <a
+              href={p.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="m-github-btn"
+            >
+              GitHub →
+            </a>
+          )}
         </div>
         <p>{p.description}</p>
         <div className="m-tech-row">
           {p.tech.map((t) => (
-            <span key={t} className="m-tech-tag">{t}</span>
+            <span key={t} className="m-tech-tag">
+              {t}
+            </span>
           ))}
         </div>
       </div>
@@ -248,34 +214,33 @@ const ProjectsSection: React.FC = () => (
   </div>
 );
 
-/* ── Contact ── */
 const ContactSection: React.FC = () => (
   <div className="m-section">
     <h2 className="m-title">Get In Touch</h2>
-    <p className="m-tagline">Whether it's a job, a project, or just to say hey</p>
+    <p className="m-tagline">A role, a project, or just to say hey</p>
+
+    <div className="m-card m-card--availability">
+      <h3 className="m-card-title">Availability</h3>
+      <p>{IDENTITY.availability}</p>
+    </div>
 
     <div className="m-card">
       <ContactRow
-        label="School Email"
-        value="slewis-payne@unomaha.edu"
-        href="mailto:slewis-payne@unomaha.edu"
-      />
-      <ContactRow
-        label="Personal Email"
-        value="sevan1211@icloud.com"
-        href="mailto:sevan1211@icloud.com"
+        label="Email"
+        value={CONTACT.email}
+        href={`mailto:${CONTACT.email}`}
       />
       <ContactRow
         label="GitHub"
-        value="github.com/Sevan1211"
-        href="https://github.com/Sevan1211"
+        value={CONTACT.githubLabel}
+        href={CONTACT.github}
       />
       <ContactRow
         label="LinkedIn"
-        value="linkedin.com/in/sevan-lewis-payne"
-        href="https://www.linkedin.com/in/sevan-lewis-payne"
+        value={CONTACT.linkedinLabel}
+        href={CONTACT.linkedin}
       />
-      <ContactRow label="Location" value="Omaha, NE (Open to Relocation)" />
+      <ContactRow label="Location" value={CONTACT.location} />
     </div>
   </div>
 );
@@ -288,7 +253,12 @@ const ContactRow: React.FC<{ label: string; value: string; href?: string }> = ({
   <div className="m-contact-row">
     <span className="m-contact-label">{label}</span>
     {href ? (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="m-contact-value">
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="m-contact-value"
+      >
         {value}
       </a>
     ) : (
@@ -296,5 +266,3 @@ const ContactRow: React.FC<{ label: string; value: string; href?: string }> = ({
     )}
   </div>
 );
-
-

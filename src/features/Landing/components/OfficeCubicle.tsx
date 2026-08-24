@@ -104,8 +104,6 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
   const hasNotifiedLoaded = useRef(false);
   const osOverlayOpenRef = useRef(osOverlayOpen);
   osOverlayOpenRef.current = osOverlayOpen;
-  const isDraggingRef = useRef(isDragging);
-  isDraggingRef.current = isDragging;
   const tvStateRef = useRef<{
     program: TvProgram;
     texture: CanvasTexture;
@@ -192,22 +190,24 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
     // Steam rides the same frames as the screensaver - no extra invalidation.
     steamSystemRef.current?.update(state.clock.elapsedTime, Math.min(delta, 0.1));
 
-    // While the camera is being dragged, both decorative screens hold their
-    // last frame. A TV texture upload or a second render pass landing on a
-    // drag frame is exactly the alternating-cost spike that reads as judder,
-    // and a paused screensaver is imperceptible while the whole view moves.
-    if (isDraggingRef.current) return;
+    // Both decorative screens keep playing straight through drags - a frozen
+    // monitor mid-drag looks broken. Their ticks are staggered so no single
+    // frame ever pays for the TV upload AND the offscreen pass; together
+    // with the motion-scoped DPR that keeps drag frames inside budget.
+    const screensaverDue = nowMs - lastScreensaverMsRef.current >= 32;
 
-    // TV programming ticks at a retro ~11fps.
+    // TV programming ticks at a retro ~11fps, on frames the screensaver
+    // isn't using.
     const tvState = tvStateRef.current;
-    if (tvState && nowMs - tvState.lastUpdateMs >= 90) {
+    if (!screensaverDue && tvState && nowMs - tvState.lastUpdateMs >= 90) {
       tvState.lastUpdateMs = nowMs;
       if (tvState.program.draw(nowMs)) tvState.texture.needsUpdate = true;
     }
 
     // The offscreen pass keeps its own ~30fps cadence rather than following
-    // the main scene.
-    if (nowMs - lastScreensaverMsRef.current < 32) return;
+    // the main scene, so drag frames at display refresh don't each pay for a
+    // second full render.
+    if (!screensaverDue) return;
     lastScreensaverMsRef.current = nowMs;
 
     state.gl.setRenderTarget(renderTarget);

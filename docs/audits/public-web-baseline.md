@@ -5,6 +5,27 @@
 **Scope:** public requests, live browser inspection, repository read, the local resume as a factual cross-check, and the existing sevanworks globe implementation as a design reference.
 **Not in scope:** Cloudflare dashboard, GitHub hosting settings, origin configuration, deployments, or production writes. A local-only 3D implementation was completed after this public audit; its code and local validation evidence are recorded separately in [3D globe direction](../design/3d-globe-direction.md).
 
+## Local Python IDE stability pass — 2026-08-28
+
+**Sources:** current repository code, automated unit tests, local development rendering, and the rebuilt production preview at 1280×720. **Deployment status:** local only; production and hosting settings were not changed.
+
+- Each Python run now has a three-second execution deadline after package preparation. Package setup and the initial Pyodide boot use separate 45-second deadlines, so network setup time does not consume the code budget and a stalled setup cannot wait forever.
+- Worker stdout and stderr are combined into bounded batches before crossing into React. A run stops at 16,000 output characters with `Output Limit Exceeded`; silent runaway code stops with `Time Limit Exceeded`. Both paths terminate the active worker, ignore stale messages, and start a clean interpreter.
+- The examples control displays the actual selected example, changes to `Custom code` after an edit, and offers a `Blank file` that clears code, stdin, and prior output.
+- About This Site no longer exposes the local canvas count, asset-size percentage, Lighthouse scores, or measurement disclaimer as visitor-facing status cards. Its related exact-size wording and architecture diagram label were also rewritten for visitors.
+
+### Acceptance evidence
+
+| Check            | Result                                                                                                                                                                                                                                             |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Resource limits  | The supplied million-line `print` program stopped at 16,000 characters with `Output Limit Exceeded`; `while True: pass` stopped after three seconds with `Time Limit Exceeded`. The Run control became available after both clean-worker restarts. |
+| Normal execution | The Mandelbrot starter finished in 11 ms. The A\* example ran through Ctrl+Enter, printed a 26-step path, and finished in 5 ms.                                                                                                                    |
+| Picker behavior  | `Blank file` produced an empty editor and empty output panel; typing changed the visible selection to `Custom code`; selecting A* displayed `A* pathfinding`.                                                                                      |
+| Visitor content  | The built About This Site app contained zero status cards and none of `1 canvas`, `50.3%`, or `97 / 95`.                                                                                                                                           |
+| Automated checks | `npm.cmd run type-check`, `npm.cmd run lint`, and `npm.cmd test` passed. Vitest ran two files with five passing resource-limit and example-contract tests.                                                                                         |
+| Production build | `npm.cmd run build` passed with 2,767 modules transformed. The only build notice was the existing stale `caniuse-lite` advisory.                                                                                                                   |
+| Browser console  | The development and production-preview Python flows completed with no browser errors.                                                                                                                                                              |
+
 ## Post-release mobile correction — 2026-08-28
 
 **Sources:** user-supplied live screenshot from `sevanlewispayne.com`, current repository code, local development rendering, and the rebuilt Cloudflare production preview. **Deployment status:** the earlier ship candidate is live per the user; the corrections below remain local until a follow-up merge/deploy.
@@ -49,7 +70,7 @@ Updated on 2026-08-28 for the final ship candidate; these rows supersede the ear
 | App behavior                 | `?app=projects` opened directly, session reload skipped the lock, project list/detail navigation worked, and the two explicit display settings changed and persisted their states. OS-level reduced motion remains automatic.                                                                       |
 | Console                      | The final desktop and 390 px mobile production previews had no browser warnings or errors.                                                                                                                                                                                                          |
 | Diff/format                  | `git diff --check` passed; all changed supported text files passed targeted Prettier formatting.                                                                                                                                                                                                    |
-| Repository test/lint tooling | `npm.cmd run lint`, `npm.cmd run type-check`, and `npm.cmd test` passed. Vitest is configured to succeed when no test files exist and reported that no tests were found; rendered interaction checks remain part of the release gate.                                                               |
+| Repository test/lint tooling | `npm.cmd run lint`, `npm.cmd run type-check`, and `npm.cmd test` passed. The Python IDE stability pass added two test files with five passing resource-limit and example-contract tests; rendered interaction checks remain part of the release gate.                                               |
 
 This is implementation evidence, not a new public performance score. Run mobile lab/field measurements only after an authorized deployment; preserve the 2026-08-21 PSI numbers below as the live pre-change baseline until then.
 

@@ -58,7 +58,7 @@ The transfer totals above came from the local Cloudflare production-preview serv
 - Production build rendered the original star-shell, cubicle composition, materials, poster, monitor, TV, and lighting without visible regression or browser warnings/errors.
 - A camera drag completed without the previous quality-resolution jump; both physical screens continued playing throughout the gesture, and the room settled without continuing a drag render loop.
 - The semantic “Open the computer” route received keyboard focus and opened the interactive Retro OS; the resulting DOM retained named app, tab, window, resume, and external-link controls.
-- `npm.cmd run type-check`, `npm.cmd run lint`, `npm.cmd test`, `npm.cmd run build`, and `git diff --check` passed. The test command currently has no test files and exits successfully by explicit configuration; rendered interaction checks remain required.
+- `npm.cmd run type-check`, `npm.cmd run lint`, `npm.cmd test`, `npm.cmd run build`, and `git diff --check` passed. The later Python IDE stability pass added two Vitest files with five passing tests; rendered interaction checks remain required.
 
 ### Remaining external gates
 

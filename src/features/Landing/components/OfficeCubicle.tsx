@@ -4,7 +4,6 @@ import { useGLTF } from "@react-three/drei";
 import {
   Box3,
   CanvasTexture,
-  Color,
   FrontSide,
   Group,
   LinearFilter,
@@ -13,16 +12,13 @@ import {
   MeshBasicMaterial,
   NearestFilter,
   Object3D,
-  PerspectiveCamera,
   PlaneGeometry,
   Raycaster,
   RepeatWrapping,
-  Scene,
   SRGBColorSpace,
   Texture,
   Vector2,
   Vector3,
-  WebGLRenderTarget,
 } from "three";
 import type { Material } from "three";
 import { useSafeLayoutEffect } from "../hooks/useSafeLayoutEffect";
@@ -58,11 +54,7 @@ const STEAM_MESH_NAME = "Steam_Steam_0";
 // The wall poster whose artwork we replace with our generated wanted poster.
 const POSTER_MESH_NAME = "Terminator_Poster_Terminator_Poster_0";
 export const CUBICLE_MODEL_PATH = "/models/low_poly_90s_office_cubicle.glb";
-
-// Start the model download as soon as this chunk evaluates - a plain fetch,
-// unlike a <link rel="prefetch">, carries no "Sec-Purpose: prefetch" header
-// for Cloudflare's bot protection to 503.
-useGLTF.preload(CUBICLE_MODEL_PATH);
+const SCREENSAVER_FPS = 24;
 
 interface OfficeCubicleProps {
   isScreenHovered: boolean;
@@ -82,9 +74,9 @@ interface OfficeCubicleProps {
 }
 
 /**
- * The GLB stays in the main scene. The monitor shows a live screensaver
- * rendered to a texture; the interactive OS opens as a full-screen overlay
- * above the canvas once the camera has finished zooming in.
+ * The GLB and monitor screensaver stay in the main scene. The screensaver is
+ * mounted directly into the physical CRT mesh; the interactive OS opens as a
+ * full-screen DOM overlay once the camera has finished zooming in.
  */
 export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
   isScreenHovered,
@@ -97,11 +89,11 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
   onLoaded,
   onScreenClick,
 }) => {
-  const { scene } = useGLTF(CUBICLE_MODEL_PATH);
   const { gl, camera, invalidate } = useThree();
+  // The model has no Draco geometry, so avoid the unused decoder request.
+  const { scene } = useGLTF(CUBICLE_MODEL_PATH, false, true);
   const clonedScene = useMemo(() => scene.clone(true), [scene]);
   const [screenMesh, setScreenMesh] = useState<Mesh | null>(null);
-  const screenMaterialRef = useRef<MeshBasicMaterial | null>(null);
   const onScreenHoverRef = useRef(onScreenHover);
   const onLoadedRef = useRef(onLoaded);
   const onScreenClickRef = useRef(onScreenClick);
@@ -116,35 +108,9 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
   } | null>(null);
   const steamSystemRef = useRef<SteamSystem | null>(null);
   const steamAnchorRef = useRef<Group>(null);
-  const lastScreensaverMsRef = useRef(0);
-
-  // ── Monitor screensaver (original mechanism) ──
-  // The loading scene's spinning 7 + star shell is portaled into an offscreen
-  // scene and rendered to a small texture that lives on the physical screen
-  // whenever the interactive OS isn't mounted.
-  const screensaverScene = useMemo(() => {
-    const offscreen = new Scene();
-    offscreen.background = new Color("#1e3a8a");
-    return offscreen;
-  }, []);
-
-  const screensaverCamera = useMemo(() => {
-    const offscreenCamera = new PerspectiveCamera(50, 1, 0.1, 100);
-    offscreenCamera.position.set(0, 0, 8);
-    return offscreenCamera;
-  }, []);
-
-  const renderTarget = useMemo(() => {
-    const target = new WebGLRenderTarget(256, 256);
-    target.texture.colorSpace = SRGBColorSpace;
-    return target;
-  }, []);
-
-  useEffect(() => () => renderTarget.dispose(), [renderTarget]);
-
-  // Scanlines composited into the screensaver pass itself, so the idle
-  // monitor reads as a tube rather than a backlit panel.
-  useEffect(() => {
+  // Scanlines now sit directly on the physical monitor. The screensaver is
+  // also part of the room scene, eliminating the old second WebGL pass.
+  const scanTexture = useMemo(() => {
     const pattern = document.createElement("canvas");
     pattern.width = 2;
     pattern.height = 4;
@@ -154,38 +120,34 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
       patternContext.fillStyle = "#000";
       patternContext.fillRect(0, 0, 2, 1);
     }
-    const scanTexture = new CanvasTexture(pattern);
-    scanTexture.wrapS = RepeatWrapping;
-    scanTexture.wrapT = RepeatWrapping;
-    scanTexture.repeat.set(1, 64);
-    scanTexture.magFilter = NearestFilter;
-    const scanMaterial = new MeshBasicMaterial({
-      map: scanTexture,
-      transparent: true,
-      opacity: 0.32,
-      depthWrite: false,
-      toneMapped: false,
-    });
-    const scanQuad = new Mesh(new PlaneGeometry(3.4, 3.4), scanMaterial);
-    scanQuad.position.set(0, 0, 5);
-    scanQuad.renderOrder = 20;
-    screensaverScene.add(scanQuad);
-    return () => {
-      screensaverScene.remove(scanQuad);
-      scanQuad.geometry.dispose();
-      scanMaterial.dispose();
-      scanTexture.dispose();
-    };
-  }, [screensaverScene]);
+    const texture = new CanvasTexture(pattern);
+    texture.wrapS = RepeatWrapping;
+    texture.wrapT = RepeatWrapping;
+    texture.repeat.set(1, 64);
+    texture.magFilter = NearestFilter;
+    return texture;
+  }, []);
+  useEffect(() => () => scanTexture.dispose(), [scanTexture]);
 
-  // The tube runs dimmed - a CRT never sits at full brightness.
-  useEffect(() => {
-    screenMaterialRef.current?.color.set("#c9ced6");
-    invalidate();
-  }, [invalidate]);
+  const screenDisplay = useMemo(() => {
+    if (!screenMesh) return null;
+    const geometry = screenMesh.geometry;
+    if (!geometry.boundingBox) geometry.computeBoundingBox();
+    const bounds = geometry.boundingBox;
+    if (!bounds) return null;
 
-  // Render the screensaver into the target while the monitor shows it, and
-  // stop entirely once the interactive OS DOM covers the screen.
+    const center = new Vector3()
+      .addVectors(bounds.min, bounds.max)
+      .multiplyScalar(0.5);
+    const size = new Vector3().subVectors(bounds.max, bounds.min);
+    // LoadingScene's shell is six units across. Fill 80% of the CRT height,
+    // matching the former 4:3 render-target composition.
+    const scale = (size.y * 0.8) / 6;
+    return { center, size, scale };
+  }, [screenMesh]);
+
+  // Decorative systems ride the room's existing frames. The monitor itself
+  // is now regular scene geometry, so dragging never pays for a second render.
   useFrame((state, delta) => {
     // The full-screen OS hides the canvas entirely - nothing here is visible,
     // so skip all of it.
@@ -193,32 +155,17 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
     const nowMs = performance.now();
 
     // Steam rides the same frames as the screensaver - no extra invalidation.
-    steamSystemRef.current?.update(state.clock.elapsedTime, Math.min(delta, 0.1));
+    steamSystemRef.current?.update(
+      state.clock.elapsedTime,
+      Math.min(delta, 0.1),
+    );
 
-    // Both decorative screens keep playing straight through drags - a frozen
-    // monitor mid-drag looks broken. Their ticks are staggered so no single
-    // frame ever pays for the TV upload AND the offscreen pass; together
-    // with the motion-scoped DPR that keeps drag frames inside budget.
-    const screensaverDue = nowMs - lastScreensaverMsRef.current >= 32;
-
-    // TV programming ticks at a retro ~11fps, on frames the screensaver
-    // isn't using.
+    // TV programming keeps its retro ~11fps cadence during both idle and drag.
     const tvState = tvStateRef.current;
-    if (!screensaverDue && tvState && nowMs - tvState.lastUpdateMs >= 90) {
+    if (tvState && nowMs - tvState.lastUpdateMs >= 90) {
       tvState.lastUpdateMs = nowMs;
       if (tvState.program.draw(nowMs)) tvState.texture.needsUpdate = true;
     }
-
-    // The offscreen pass keeps its own ~30fps cadence rather than following
-    // the main scene, so drag frames at display refresh don't each pay for a
-    // second full render.
-    if (!screensaverDue) return;
-    lastScreensaverMsRef.current = nowMs;
-
-    state.gl.setRenderTarget(renderTarget);
-    state.gl.clear();
-    state.gl.render(screensaverScene, screensaverCamera);
-    state.gl.setRenderTarget(null);
   });
 
   useEffect(() => {
@@ -236,12 +183,10 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
     let cancelled = false;
     let posterTexture: CanvasTexture | null = null;
     const screenMaterial = new MeshBasicMaterial({
-      map: renderTarget.texture,
-      color: "#c9ced6", // idle tube brightness; see the blackout effect below
+      color: "#182f74",
       side: FrontSide,
       toneMapped: false,
     });
-    screenMaterialRef.current = screenMaterial;
 
     // Anisotropic filtering + trilinear mipmaps sharpen every texture at the
     // oblique angles this room is mostly seen from. Capped by device tier so
@@ -250,6 +195,7 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
       gl.capabilities.getMaxAnisotropy?.() ?? 8,
       QUALITY.anisotropy,
     );
+    const configuredTextures = new Set<Texture>();
 
     clonedScene.traverse((child: Object3D) => {
       if (!(child instanceof Mesh)) return;
@@ -286,6 +232,8 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
         materials.forEach((material: Material) => {
           Object.values(material).forEach((value) => {
             if (value instanceof Texture) {
+              if (configuredTextures.has(value)) return;
+              configuredTextures.add(value);
               value.anisotropy = maxAnisotropy;
               value.minFilter = LinearMipmapLinearFilter;
               value.magFilter = LinearFilter;
@@ -466,9 +414,8 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
       cancelled = true;
       posterTexture?.dispose();
       screenMaterial.dispose();
-      screenMaterialRef.current = null;
     };
-  }, [clonedScene, gl, reducedMotion, renderTarget]);
+  }, [clonedScene, gl, reducedMotion]);
 
   useEffect(() => {
     document.body.style.cursor =
@@ -553,13 +500,49 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
 
   return (
     <>
-      {/* Screensaver lives in the offscreen scene. Its 30fps cadence paces the
-          whole idle roam loop; it unmounts once the OS overlay covers the
-          canvas so nothing renders behind it. */}
+      {/* The screensaver lives directly on the CRT mesh. It remains animated
+          during camera input without a second scene render or render target. */}
       {!osOverlayOpen &&
+        screenMesh &&
+        screenDisplay &&
         createPortal(
-          <LoadingScene reducedMotion={reducedMotion} idleFps={30} />,
-          screensaverScene,
+          <>
+            <group
+              position={[
+                screenDisplay.center.x,
+                screenDisplay.center.y,
+                screenDisplay.center.z + 0.04,
+              ]}
+              scale={[screenDisplay.scale, screenDisplay.scale, 0.01]}
+            >
+              <LoadingScene
+                reducedMotion={reducedMotion}
+                idleFps={SCREENSAVER_FPS}
+                includeBackdrop={false}
+                foregroundColor="#c9ced6"
+              />
+            </group>
+            <mesh
+              position={[
+                screenDisplay.center.x,
+                screenDisplay.center.y,
+                screenDisplay.center.z + 0.08,
+              ]}
+              renderOrder={20}
+            >
+              <planeGeometry
+                args={[screenDisplay.size.x, screenDisplay.size.y]}
+              />
+              <meshBasicMaterial
+                map={scanTexture}
+                transparent
+                opacity={0.32}
+                depthWrite={false}
+                toneMapped={false}
+              />
+            </mesh>
+          </>,
+          screenMesh,
         )}
       <group position={[0, 0, -10]} scale={5.4}>
         <primitive object={clonedScene} />

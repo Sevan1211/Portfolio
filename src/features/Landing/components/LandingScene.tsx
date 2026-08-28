@@ -1,4 +1,10 @@
-import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import type { MutableRefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace } from "three";
@@ -32,8 +38,7 @@ const EventController: React.FC<{ monitorActive: boolean }> = ({
 // then the veil lifts as the camera glides down into the cubicle. One color,
 // no hard cuts.
 const DEPARTURE_DURATION_SECONDS = 0.72;
-const LOADING_MIN_TIME = 2400;
-const VEIL_HOLD_MS = 150;
+const VEIL_HOLD_MS = 80;
 /** Keep in sync with the .os-overlay transition in landing.css. */
 const OS_FADE_MS = 260;
 
@@ -93,8 +98,7 @@ const DepartureDirector: React.FC<{
 
 const LandingScene: React.FC = () => {
   const [globePresented, setGlobePresented] = useState(false);
-  const [modelLoaded, setModelLoaded] = useState(false);
-  const [minimumLoadTimePassed, setMinimumLoadTimePassed] = useState(false);
+  const [scenePrepared, setScenePrepared] = useState(false);
   const [departureStarted, setDepartureStarted] = useState(false);
   const [roomStaged, setRoomStaged] = useState(false);
   const [roomActive, setRoomActive] = useState(false);
@@ -131,23 +135,10 @@ const LandingScene: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(
-      () => setMinimumLoadTimePassed(true),
-      LOADING_MIN_TIME,
-    );
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (
-      globePresented &&
-      modelLoaded &&
-      minimumLoadTimePassed &&
-      !departureStarted
-    ) {
+    if (globePresented && scenePrepared && !departureStarted) {
       setDepartureStarted(true);
     }
-  }, [departureStarted, globePresented, minimumLoadTimePassed, modelLoaded]);
+  }, [departureStarted, globePresented, scenePrepared]);
 
   // Once the veil is opaque the room gets staged; after a short hold the
   // veil lifts while the descent begins.
@@ -181,10 +172,7 @@ const LandingScene: React.FC = () => {
     requestAnimationFrame(() => setOsVisible(true));
   }, []);
 
-  useEffect(
-    () => () => window.clearTimeout(osUnmountTimerRef.current),
-    [],
-  );
+  useEffect(() => () => window.clearTimeout(osUnmountTimerRef.current), []);
 
   useEffect(() => {
     if (!monitorActive) return;
@@ -261,18 +249,20 @@ const LandingScene: React.FC = () => {
           onComplete={() => setRoomStaged(true)}
         />
         {globePresented && (
-          <CubicleScene
-            roomStaged={roomStaged}
-            roomActive={roomActive}
-            osOverlayOpen={osVisible}
-            reducedMotion={reducedMotion}
-            enterMonitorTrigger={enterMonitorTrigger}
-            zoomOutTrigger={zoomOutTrigger}
-            onModelLoaded={() => setModelLoaded(true)}
-            onRoomReady={() => setRoomReady(true)}
-            onZoomChange={setMonitorActive}
-            onZoomComplete={handleZoomComplete}
-          />
+          <Suspense fallback={null}>
+            <CubicleScene
+              roomStaged={roomStaged}
+              roomActive={roomActive}
+              osOverlayOpen={osVisible}
+              reducedMotion={reducedMotion}
+              enterMonitorTrigger={enterMonitorTrigger}
+              zoomOutTrigger={zoomOutTrigger}
+              onPrepared={() => setScenePrepared(true)}
+              onRoomReady={() => setRoomReady(true)}
+              onZoomChange={setMonitorActive}
+              onZoomComplete={handleZoomComplete}
+            />
+          </Suspense>
         )}
       </Canvas>
 
@@ -281,9 +271,7 @@ const LandingScene: React.FC = () => {
       {/* Full-screen Retro OS. The camera stays parked at the monitor behind
           it, so leaving fades this out onto the exact frame it covered. */}
       {osMounted && (
-        <div
-          className={`os-overlay${osVisible ? " os-overlay--visible" : ""}`}
-        >
+        <div className={`os-overlay${osVisible ? " os-overlay--visible" : ""}`}>
           <Suspense fallback={null}>
             <RetroOS isZoomedIn fullscreen />
           </Suspense>

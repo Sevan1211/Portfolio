@@ -5,7 +5,6 @@ import { Center, Text3D } from "@react-three/drei";
 import {
   BackSide,
   BoxGeometry,
-  Color,
   Group,
   InstancedMesh,
   Matrix4,
@@ -21,7 +20,6 @@ import {
 // the shared canvas and fades out under the transition veil instead of
 // unmounting its own overlay canvas.
 const PARTICLE_COUNT = 1200;
-const PARTICLE_COLOR = new Color("#ffffff");
 const PARTICLE_SIZE = 0.03;
 const FIELD_BLUE = "#1e3a8a";
 
@@ -77,6 +75,10 @@ interface LoadingSceneProps {
    * refresh; the entry loader leaves this unset for full smoothness.
    */
   idleFps?: number;
+  /** The entry needs its exact blue field; the physical CRT does not. */
+  includeBackdrop?: boolean;
+  /** Optional CRT tint; the full-screen entry remains pure white. */
+  foregroundColor?: string;
   onReady?: () => void;
 }
 
@@ -85,6 +87,8 @@ export const LoadingScene: React.FC<LoadingSceneProps> = ({
   transitionProgressRef,
   reducedMotion = false,
   idleFps,
+  includeBackdrop = true,
+  foregroundColor = "#ffffff",
   onReady,
 }) => {
   const { invalidate } = useThree();
@@ -98,10 +102,7 @@ export const LoadingScene: React.FC<LoadingSceneProps> = ({
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
 
-  useEffect(
-    () => () => window.clearTimeout(throttleTimerRef.current),
-    [],
-  );
+  useEffect(() => () => window.clearTimeout(throttleTimerRef.current), []);
 
   const requestFrame = () => {
     if (!idleFps) {
@@ -124,10 +125,10 @@ export const LoadingScene: React.FC<LoadingSceneProps> = ({
   const material = useMemo(
     () =>
       new MeshBasicMaterial({
-        color: PARTICLE_COLOR,
+        color: foregroundColor,
         transparent: true,
       }),
-    [],
+    [foregroundColor],
   );
   // Backdrop sphere instead of scene.background: it skips tone mapping, so
   // the rendered field is the exact same #1e3a8a as the DOM page cover and
@@ -213,11 +214,12 @@ export const LoadingScene: React.FC<LoadingSceneProps> = ({
 
   return (
     <>
-      <ambientLight intensity={0.6} />
-      <mesh>
-        <sphereGeometry args={[40, 16, 12]} />
-        <primitive object={backdropMaterial} attach="material" />
-      </mesh>
+      {includeBackdrop && (
+        <mesh>
+          <sphereGeometry args={[40, 16, 12]} />
+          <primitive object={backdropMaterial} attach="material" />
+        </mesh>
+      )}
       <group ref={groupRef} visible={false}>
         <Center>
           <Text3D
@@ -230,7 +232,7 @@ export const LoadingScene: React.FC<LoadingSceneProps> = ({
             7
             <meshBasicMaterial
               ref={textMaterialRef}
-              color="#ffffff"
+              color={foregroundColor}
               transparent
             />
           </Text3D>

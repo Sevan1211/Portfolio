@@ -101,7 +101,7 @@ export const ABOUT = {
     "When I'm not writing code, you'll find me on the golf course, gaming with friends, or traveling. I've been lucky enough to visit multiple countries and I'm always planning the next trip.",
   ],
   philosophy:
-    "I care about the parts of engineering that make systems trustworthy: clear ownership, explicit contracts, data quality, testing, observability, secure defaults, and honest failure states.",
+    "I enjoy solving challenging problems, asking thoughtful questions, and learning from every project I take on. I approach my work with curiosity and an open mind, always looking for ways to improve, expand my skills, and grow as an engineer.",
 } as const;
 
 /* ── Experience ───────────────────────────────────────────── */

@@ -5,6 +5,17 @@
 **Status:** user-approved direction; local implementation, production-preview visual QA, and local lab verification complete; live and physical-device verification remain open
 **Reference:** C:\Users\Sevan\iCloudDrive\Documents\sevanworks is a visual/system reference only. Reuse the design language and engineering ideas, not its orange palette, exact geometry, source code, or interaction effects.
 
+## Implementation update — 2026-08-28: uniform CRT glass
+
+**Source:** user review of the prior local correction, repository inspection, and 1280×720 production-preview rendering. **Deployment status:** local only.
+
+- Removed both dark edge treatments that could read as four separate corner shadows: the full-screen OS inset shadow/radial vignette and the physical monitor texture's heavy radial edge.
+- The full-screen layer now uses a broad diagonal glass reflection plus a four-pixel, sub-pixel phosphor grain. It has no scan bars, blur, inset shadow, corner falloff, animation, or pointer handling.
+- The physical CRT texture uses one uniform low-opacity tint, the same broad reflection, and deterministic sparse grain. It remains a fitted 160×120 static canvas texture and adds no frame work.
+- The rendered monitor transition filled the 1280×720 viewport exactly. Text and window geometry stayed crisp, the desktop remained fully interactive, and no corner-shadow blocks were visible.
+
+This section supersedes the prior correction's vignette language; the sizing, star-shell fit, and single-canvas decisions remain unchanged.
+
 ## Implementation update — 2026-08-28: post-release CRT correction
 
 **Source:** user-reported live visual regression, supplied production screenshot, repository inspection, and local development/production-preview rendering. **Deployment status:** correction remains local.

@@ -5,6 +5,39 @@
 **Scope:** public requests, live browser inspection, repository read, the local resume as a factual cross-check, and the existing sevanworks globe implementation as a design reference.
 **Not in scope:** Cloudflare dashboard, GitHub hosting settings, origin configuration, deployments, or production writes. A local-only 3D implementation was completed after this public audit; its code and local validation evidence are recorded separately in [3D globe direction](../design/3d-globe-direction.md).
 
+## Local search, agent, and accessibility pass — 2026-08-28
+
+**Sources:** user-supplied production search screenshot and Is Agentic report, current repository code, official Google Search and Cloudflare documentation, the 1280×720 local production preview, and a 390×844 responsive preview. **Deployment status:** local only; no production, DNS, WAF, crawler-policy, or Cloudflare setting was changed.
+
+### Search identity and favicon
+
+- The old live result still showed `Full-Stack Software Developer` and a generic globe icon. The repository now consistently uses `Sevan Lewis-Payne | Data & Software Engineer` with the description: `Data and software engineer building governed data platforms, backend systems, and AI developer tools. Explore Sevan Lewis-Payne's projects, experience, and resume.` No em dash remains in SEO copy.
+- Favicon discovery now provides a root `favicon.ico` with 16, 32, and 48 px images, a geometric SVG, a dedicated 48 px PNG, 180 px Apple touch icon, 192 and 512 px PNGs, and a web manifest. The code-native 7 mark uses a stable blue square and white foreground instead of font-dependent transparent artwork.
+- Structured data is a truthful `WebSite` + `ProfilePage` + `Person` graph. Open Graph/Twitter identity, image dimensions, image alt text, locale, canonical URL, and crawler directives match the visible title and description.
+
+These changes make the site eligible for consistent favicon and title discovery; a search engine still chooses when to recrawl and whether to display the supplied icon or title.
+
+### Agent-readable and no-WebGL content
+
+- The raw homepage HTML already carried useful experience and education. It now adds the canonical project set, current metadata, and a plain-text discovery link. `llms.txt` adds usage boundaries and projects; the new public `agents.md` tells agents which sources to trust and explicitly states that the portfolio is not a hosted API, OAuth provider, GraphQL service, OpenAPI service, or public MCP endpoint.
+- The supplied 2026-08-28 Is Agentic report scored 19/100. Its crawler/WAF and reliable no-JavaScript findings are actionable. Its OpenAPI, GraphQL, OAuth, MCP, sandbox, rate-limit, and developer-portal findings are not product requirements for this personal portfolio and are partly false positives from the SPA returning homepage HTML for invented paths.
+- The rendered React application now retains a real H1, identity, availability, project summary, resume, GitHub, LinkedIn, and direct `/os` route in an accessible overview. A visible-on-focus skip link bypasses the WebGL scene. This preserves the user-approved cubicle while giving keyboard and assistive-technology users a complete non-gesture route.
+- The report's agent-user-agent blocking remains an external gate. Cloudflare documents that upstream WAF rules can still block crawlers allowed elsewhere. The dashboard must be reviewed separately before any policy change; this repository pass does not claim that real agents can reach production.
+
+### Accessibility acceptance
+
+| Check                  | Result                                                                                                                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Landmarks and identity | The mounted desktop route exposes one main landmark, a level-one `Sevan Lewis-Payne` heading in the accessible overview, and a visible keyboard skip route around the 3D scene.                   |
+| Core recruiter route   | The overview exposes Resume, GitHub, LinkedIn, `/os`, availability, and all four selected project names without a mouse or canvas raycast.                                                        |
+| Desktop semantics      | Open app windows announce as labeled non-modal dialogs; titlebar artwork is decorative; existing minimize, maximize, close, app, tab, resume, and external-link controls retain accessible names. |
+| Async Python UI        | Loading/restart state is announced as status/progress, output is exposed as a polite log, and editor, stdin, terminal, Paint, and Pac-Man focus indicators are visible.                           |
+| Image stability        | About and award images now declare their intrinsic 400×400 and 600×600 dimensions.                                                                                                                |
+| Responsive visual      | The production preview at 390×844 selected the phone layout, retained the lock-screen controls, opened Settings as a named dialog, and exposed exactly the two intended switches.                 |
+| Automated checks       | `npm.cmd run type-check`, `npm.cmd run lint`, and five Vitest tests passed. The final production build transformed 2,767 modules; `git diff --check` passed.                                      |
+
+This is a material WCAG-oriented remediation and rendered keyboard/semantic check, not a certification of every third-party assistive-technology combination. A post-deployment screen-reader and crawler-policy check remains appropriate.
+
 ## Local Python IDE stability pass — 2026-08-28
 
 **Sources:** current repository code, automated unit tests, local development rendering, and the rebuilt production preview at 1280×720. **Deployment status:** local only; production and hosting settings were not changed.

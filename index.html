@@ -6,8 +6,17 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon-192.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="/llms.txt"
+      title="AI-readable portfolio summary"
+    />
 
     <!-- DNS prefetch and preconnect for performance -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
@@ -38,9 +47,10 @@
     <title>Sevan Lewis-Payne | Data &amp; Software Engineer</title>
     <meta
       name="description"
-      content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into."
+      content="Data and software engineer building governed data platforms, backend systems, and AI developer tools. Explore Sevan Lewis-Payne's projects, experience, and resume."
     />
     <meta name="author" content="Sevan Lewis-Payne" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="https://sevanlewispayne.com" />
 
     <!-- Open Graph (social media previews) -->
@@ -50,14 +60,19 @@
     />
     <meta
       property="og:description"
-      content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into."
+      content="Data and software engineer building governed data platforms, backend systems, and AI developer tools. Explore Sevan Lewis-Payne's projects, experience, and resume."
     />
     <meta property="og:url" content="https://sevanlewispayne.com" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Sevan Lewis-Payne" />
+    <meta property="og:locale" content="en_US" />
     <meta
       property="og:image"
-      content="https://sevanlewispayne.com/favicon-192.png"
+      content="https://sevanlewispayne.com/favicon-512.png"
     />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="Sevan Lewis-Payne 7 logo" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
@@ -67,48 +82,72 @@
     />
     <meta
       name="twitter:description"
-      content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into."
+      content="Data and software engineer building governed data platforms, backend systems, and AI developer tools. Explore Sevan Lewis-Payne's projects, experience, and resume."
     />
     <meta
       name="twitter:image"
-      content="https://sevanlewispayne.com/favicon-192.png"
+      content="https://sevanlewispayne.com/favicon-512.png"
     />
+    <meta name="twitter:image:alt" content="Sevan Lewis-Payne 7 logo" />
 
     <!-- Structured identity for search engines and AI agents -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Sevan Lewis-Payne",
-        "url": "https://sevanlewispayne.com",
-        "jobTitle": "Data & Software Engineer",
-        "email": [
-          "mailto:sevanllewispayne@gmail.com",
-          "mailto:slewis-payne@unomaha.edu"
-        ],
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Omaha",
-          "addressRegion": "NE",
-          "addressCountry": "US"
-        },
-        "alumniOf": {
-          "@type": "CollegeOrUniversity",
-          "name": "University of Nebraska Omaha"
-        },
-        "sameAs": [
-          "https://github.com/Sevan1211",
-          "https://www.linkedin.com/in/sevan-lewis-payne"
-        ],
-        "knowsAbout": [
-          "Data engineering",
-          "Snowflake",
-          "dbt",
-          "Data quality testing",
-          "React",
-          "TypeScript",
-          "Python",
-          "Go"
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://sevanlewispayne.com/#website",
+            "url": "https://sevanlewispayne.com/",
+            "name": "Sevan Lewis-Payne",
+            "description": "Portfolio of Sevan Lewis-Payne, a data and software engineer building governed data platforms, backend systems, and AI developer tools.",
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "ProfilePage",
+            "@id": "https://sevanlewispayne.com/#profile",
+            "url": "https://sevanlewispayne.com/",
+            "name": "Sevan Lewis-Payne | Data & Software Engineer",
+            "isPartOf": { "@id": "https://sevanlewispayne.com/#website" },
+            "mainEntity": { "@id": "https://sevanlewispayne.com/#sevan" }
+          },
+          {
+            "@type": "Person",
+            "@id": "https://sevanlewispayne.com/#sevan",
+            "name": "Sevan Lewis-Payne",
+            "url": "https://sevanlewispayne.com/",
+            "jobTitle": "Data & Software Engineer",
+            "email": [
+              "mailto:sevanllewispayne@gmail.com",
+              "mailto:slewis-payne@unomaha.edu"
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Omaha",
+              "addressRegion": "NE",
+              "addressCountry": "US"
+            },
+            "alumniOf": {
+              "@type": "CollegeOrUniversity",
+              "name": "University of Nebraska Omaha"
+            },
+            "sameAs": [
+              "https://github.com/Sevan1211",
+              "https://www.linkedin.com/in/sevan-lewis-payne"
+            ],
+            "knowsAbout": [
+              "Data engineering",
+              "Snowflake",
+              "dbt",
+              "Data quality testing",
+              "Backend systems",
+              "AI developer tools",
+              "React",
+              "TypeScript",
+              "Python",
+              "Go"
+            ]
+          }
         ]
       }
     </script>
@@ -134,16 +173,6 @@
       #root {
         width: 100%;
         height: 100%;
-      }
-
-      .page-cover-mark {
-        color: #fff;
-        font-family: "Helvetica Neue", "Segoe UI", Arial, sans-serif;
-        font-size: clamp(112px, 18vw, 190px);
-        font-weight: 700;
-        line-height: 1;
-        text-shadow: 0 0 42px rgba(255, 255, 255, 0.22);
-        user-select: none;
       }
 
       /* Static content for crawlers, agents, and no-JS visitors. React
@@ -231,6 +260,29 @@
           testing. React, Node.js, FastAPI, Docker, CI/CD, and Azure.
         </p>
 
+        <h2>Selected Projects</h2>
+        <ul>
+          <li>
+            <strong>p100</strong>, a local-first AI coding-agent controller with
+            bounded hybrid delegation, measured local inference, and explicit
+            model lifecycle and recovery controls.
+          </li>
+          <li>
+            <strong>PRISM</strong>, a source-faithful learning interface with
+            resumable PDF ingestion, provenance, validation, and accessible
+            recovery paths.
+          </li>
+          <li>
+            <strong>Threadroot</strong>, an open-source CLI and MCP server that
+            turns repository work into smaller evidence-backed Codex runs.
+          </li>
+          <li>
+            <strong>CodeLive</strong>, a live technical-interview platform with
+            isolated code execution, synchronized editing, and structured
+            evaluator workflows.
+          </li>
+        </ul>
+
         <h2>Links</h2>
         <ul>
           <li>
@@ -257,26 +309,23 @@
       </main>
     </div>
 
-    <!-- Blue curtain: covers everything on load, then fades out once the globe
-         has painted (the rendered field is the same #1e3a8a, so the fade reads
-         as one continuous surface). Re-shown on beforeunload so CSS3D content
-         can never flash during reload. -->
+    <!-- Plain blue curtain: covers everything on load, then fades out once the
+         actual WebGL star-shell and rotating 7 have painted. Keeping this
+         curtain unbranded prevents a second, oversized 7 from flashing during
+         startup or reload. -->
     <div
       id="page-cover"
       style="
         position: fixed;
         inset: 0;
-        display: grid;
-        place-items: center;
+        display: block;
         background: #1e3a8a;
         z-index: 99999;
         opacity: 1;
         transition: opacity 0.45s ease;
       "
       aria-hidden="true"
-    >
-      <span class="page-cover-mark">7</span>
-    </div>
+    ></div>
     <script>
       window.addEventListener("beforeunload", function () {
         var c = document.getElementById("page-cover");

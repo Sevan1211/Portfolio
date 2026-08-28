@@ -10,11 +10,9 @@ import {
   LinearMipmapLinearFilter,
   Mesh,
   MeshBasicMaterial,
-  NearestFilter,
   Object3D,
   PlaneGeometry,
   Raycaster,
-  RepeatWrapping,
   SRGBColorSpace,
   Texture,
   Vector2,
@@ -108,26 +106,41 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
   } | null>(null);
   const steamSystemRef = useRef<SteamSystem | null>(null);
   const steamAnchorRef = useRef<Group>(null);
-  // Scanlines now sit directly on the physical monitor. The screensaver is
-  // also part of the room scene, eliminating the old second WebGL pass.
-  const scanTexture = useMemo(() => {
-    const pattern = document.createElement("canvas");
-    pattern.width = 2;
-    pattern.height = 4;
-    const patternContext = pattern.getContext("2d");
-    if (patternContext) {
-      patternContext.clearRect(0, 0, 2, 4);
-      patternContext.fillStyle = "#000";
-      patternContext.fillRect(0, 0, 2, 1);
+  // A static fitted glass texture gives the tube a broad reflection and fine
+  // phosphor grain without scan bars, dark corners, or a second render loop.
+  const glassTexture = useMemo(() => {
+    const glass = document.createElement("canvas");
+    glass.width = 160;
+    glass.height = 120;
+    const context = glass.getContext("2d");
+    if (context) {
+      context.clearRect(0, 0, glass.width, glass.height);
+
+      context.fillStyle = "rgba(4, 12, 24, 0.035)";
+      context.fillRect(0, 0, glass.width, glass.height);
+
+      const reflection = context.createLinearGradient(0, 0, 160, 120);
+      reflection.addColorStop(0, "rgba(226, 242, 255, 0.1)");
+      reflection.addColorStop(0.18, "rgba(210, 234, 255, 0.035)");
+      reflection.addColorStop(0.42, "rgba(194, 225, 255, 0)");
+      reflection.addColorStop(1, "rgba(194, 225, 255, 0.012)");
+      context.fillStyle = reflection;
+      context.fillRect(0, 0, glass.width, glass.height);
+
+      for (let index = 0; index < 120; index += 1) {
+        const x = (index * 71) % glass.width;
+        const y = (index * 43) % glass.height;
+        const alpha = 0.012 + (index % 4) * 0.006;
+        context.fillStyle = `rgba(220, 238, 255, ${alpha})`;
+        context.fillRect(x, y, 1, 1);
+      }
     }
-    const texture = new CanvasTexture(pattern);
-    texture.wrapS = RepeatWrapping;
-    texture.wrapT = RepeatWrapping;
-    texture.repeat.set(1, 64);
-    texture.magFilter = NearestFilter;
+    const texture = new CanvasTexture(glass);
+    texture.minFilter = LinearFilter;
+    texture.magFilter = LinearFilter;
     return texture;
   }, []);
-  useEffect(() => () => scanTexture.dispose(), [scanTexture]);
+  useEffect(() => () => glassTexture.dispose(), [glassTexture]);
 
   const screenDisplay = useMemo(() => {
     if (!screenMesh) return null;
@@ -140,9 +153,10 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
       .addVectors(bounds.min, bounds.max)
       .multiplyScalar(0.5);
     const size = new Vector3().subVectors(bounds.max, bounds.min);
-    // LoadingScene's shell is six units across. Fill 80% of the CRT height,
-    // matching the former 4:3 render-target composition.
-    const scale = (size.y * 0.8) / 6;
+    // LoadingScene's shell is six units across. Fit it against the smaller
+    // screen axis so the complete rotating mark stays inside the glass at
+    // every aspect ratio while using nearly all of the available tube.
+    const scale = (Math.min(size.x, size.y) * 0.92) / 6;
     return { center, size, scale };
   }, [screenMesh]);
 
@@ -531,12 +545,15 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
               renderOrder={20}
             >
               <planeGeometry
-                args={[screenDisplay.size.x, screenDisplay.size.y]}
+                args={[
+                  screenDisplay.size.x * 0.99,
+                  screenDisplay.size.y * 0.99,
+                ]}
               />
               <meshBasicMaterial
-                map={scanTexture}
+                map={glassTexture}
                 transparent
-                opacity={0.32}
+                opacity={0.9}
                 depthWrite={false}
                 toneMapped={false}
               />

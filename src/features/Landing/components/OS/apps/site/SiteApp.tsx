@@ -18,20 +18,10 @@ export const SiteApp: React.FC = () => {
       <div className="site-scroll">
         <PageHead
           title="About this site"
-          sub="How the final desktop and mobile experiences work"
+          sub="How to explore the desktop, phone, and interactive apps"
         />
 
         <p className="ab-p site-intro">{SITE_INFO.intro}</p>
-
-        <dl className="site-status-grid" aria-label="Local build status">
-          {SITE_INFO.status.map((item) => (
-            <div className="site-status-card" key={item.label}>
-              <dt>{item.label}</dt>
-              <dd>{item.value}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="site-status-note">{SITE_INFO.statusNote}</p>
 
         {SITE_INFO.sections.map((section) => (
           <GBox label={section.title} key={section.id}>

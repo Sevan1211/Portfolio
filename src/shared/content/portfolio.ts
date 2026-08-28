@@ -101,7 +101,7 @@ export const ABOUT = {
     "When I'm not writing code, you'll find me on the golf course, gaming with friends, or traveling. I've been lucky enough to visit multiple countries and I'm always planning the next trip.",
   ],
   philosophy:
-    "I care about the parts of engineering that make systems trustworthy: clear ownership, explicit contracts, data quality, testing, observability, secure defaults, and honest failure states.",
+    "I enjoy solving challenging problems, asking thoughtful questions, and learning from every project I take on. I approach my work with curiosity and an open mind, always looking for ways to improve, expand my skills, and grow as an engineer.",
 } as const;
 
 /* ── Experience ───────────────────────────────────────────── */
@@ -486,20 +486,13 @@ export interface SiteSection {
 
 export const SITE_INFO = {
   intro:
-    "This portfolio is one responsive React application with two deliberately different interfaces: a 3D office and desktop on larger screens, and a mobile-native retro phone on narrower screens. This page describes the final local build.",
-  status: [
-    { value: "1 canvas", label: "loader + office" },
-    { value: "50.3% smaller", label: "cubicle GLB" },
-    { value: "97 / 95", label: "local desktop / mobile" },
-  ],
-  statusNote:
-    "Measured in a local production preview on August 28, 2026. These are implementation checks, not evidence of a production deployment.",
+    "This portfolio has two deliberately different interfaces: a playful 3D office and desktop on larger screens, and a mobile-native retro phone on narrower screens. Both lead to the same projects, experience, skills, resume, and contact information.",
   sections: [
     {
       id: "architecture",
       title: "Architecture",
       body: [
-        "On desktop, the star-shell loader and the cubicle share one React Three Fiber canvas. The operating system is a DOM overlay that fades in when the camera reaches the monitor; there is no second WebGL canvas or continuously rendered offscreen scene.",
+        "On desktop, the star-shell loader transitions directly into the 3D office. The operating system is a DOM overlay that fades in when the camera reaches the monitor, so it behaves like a real interface instead of a picture inside the scene.",
         "Because the desktop is real DOM rather than a rendered texture, text stays selectable, links stay links, and the browser handles scrolling and focus natively. While the desktop is open, the demand-based canvas has no reason to render, so reading this page adds no continuous GPU work.",
       ],
     },
@@ -507,7 +500,7 @@ export const SITE_INFO = {
       id: "office",
       title: "The 3D office",
       body: [
-        "The room is a glTF model optimized with Meshopt and high-quality embedded WebP textures. The optimized file is 50.3% smaller while preserving the inspected node, mesh, material, texture, and triangle counts.",
+        "The room uses an optimized glTF model with embedded WebP textures. Its compact assets shorten the handoff from the loading screen without changing the office's intended look.",
         "The star-shell screensaver is mounted directly inside the physical monitor mesh, so it stays animated during a camera drag without a second render pass. The TV synthesizes its own channels on a small canvas texture, the coffee steam is a bounded particle system, and the wanted poster is drawn once onto a canvas.",
       ],
     },

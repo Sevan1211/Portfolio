@@ -5,6 +5,28 @@
 **Status:** user-approved direction; local implementation, production-preview visual QA, and local lab verification complete; live and physical-device verification remain open
 **Reference:** C:\Users\Sevan\iCloudDrive\Documents\sevanworks is a visual/system reference only. Reuse the design language and engineering ideas, not its orange palette, exact geometry, source code, or interaction effects.
 
+## Implementation update — 2026-08-28: uniform CRT glass
+
+**Source:** user review of the prior local correction, repository inspection, and 1280×720 production-preview rendering. **Deployment status:** local only.
+
+- Removed both dark edge treatments that could read as four separate corner shadows: the full-screen OS inset shadow/radial vignette and the physical monitor texture's heavy radial edge.
+- The full-screen layer now uses a broad diagonal glass reflection plus a four-pixel, sub-pixel phosphor grain. It has no scan bars, blur, inset shadow, corner falloff, animation, or pointer handling.
+- The physical CRT texture uses one uniform low-opacity tint, the same broad reflection, and deterministic sparse grain. It remains a fitted 160×120 static canvas texture and adds no frame work.
+- The rendered monitor transition filled the 1280×720 viewport exactly. Text and window geometry stayed crisp, the desktop remained fully interactive, and no corner-shadow blocks were visible.
+
+This section supersedes the prior correction's vignette language; the sizing, star-shell fit, and single-canvas decisions remain unchanged.
+
+## Implementation update — 2026-08-28: post-release CRT correction
+
+**Source:** user-reported live visual regression, supplied production screenshot, repository inspection, and local development/production-preview rendering. **Deployment status:** correction remains local.
+
+- Removed the separate oversized DOM “7” from the initial page cover. The empty `#1e3a8a` curtain now hands directly to the intended one-canvas rotating 7 and star shell, so reload cannot expose a second logo.
+- Replaced the monitor’s repeated four-pixel black scan-bar texture with a deterministic 160×120 static glass texture: soft edge vignette, restrained upper-glass bloom, and sparse fixed phosphor grain. It adds no animation loop or input work.
+- The glass plane is derived from the physical screen geometry and inset to 99% of its measured bounds. The star shell min-fits to 92% of the smaller screen axis, keeping the complete rotating mark inside the tube at any mesh aspect ratio.
+- Removed the duplicate scanline layer inside the About app. The full Retro OS now uses one pointer-transparent, viewport-fitted glass vignette; at 1440×900 its rendered bounds measured exactly 1440×900 with no overflow.
+
+Rendered checks showed the rotating monitor content cleanly contained by the CRT bezel with no visible horizontal bars. The rebuilt desktop production preview kept one canvas, an empty hidden page cover after startup, no horizontal overflow, and no console warnings or errors.
+
 ## Implementation update — 2026-08-28: final performance pass
 
 **Source:** repository inspection, GLB inspection, same-machine Lighthouse 13.4.1 runs against the local production preview, and rendered browser checks. **Deployment status:** local only; no Cloudflare, DNS, GitHub, or production settings were changed.
@@ -47,7 +69,7 @@ The transfer totals above came from the local Cloudflare production-preview serv
 - Production build rendered the original star-shell, cubicle composition, materials, poster, monitor, TV, and lighting without visible regression or browser warnings/errors.
 - A camera drag completed without the previous quality-resolution jump; both physical screens continued playing throughout the gesture, and the room settled without continuing a drag render loop.
 - The semantic “Open the computer” route received keyboard focus and opened the interactive Retro OS; the resulting DOM retained named app, tab, window, resume, and external-link controls.
-- `npm.cmd run type-check`, `npm.cmd run lint`, `npm.cmd test`, `npm.cmd run build`, and `git diff --check` passed. The test command currently has no test files and exits successfully by explicit configuration; rendered interaction checks remain required.
+- `npm.cmd run type-check`, `npm.cmd run lint`, `npm.cmd test`, `npm.cmd run build`, and `git diff --check` passed. The later Python IDE stability pass added two Vitest files with five passing tests; rendered interaction checks remain required.
 
 ### Remaining external gates
 
@@ -119,7 +141,7 @@ Verified locally: type check, production build, fresh-load drag test with zero r
 - The OS overlay is no longer hand-calibrated: its Html scale and position are derived from `Glowing_Screen_Screen_Emission_0`'s geometry bounding box (drei `<Html transform>` lays out 400/distanceFactor CSS px per local unit; distanceFactor is pinned at 10), min-fitted with a 1% inset so it can never exceed the mesh. The screen mesh's phosphor texture is multiplied to black while the OS DOM is mounted so nothing can rim around it; it restores to the screensaver on leave.
 - Embedded-look guards: the OS DOM mounts only once the zoom camera has fully settled (progress ≥ 0.995 — a moving camera would draw the DOM over the bezel at oblique angles), and the zoom framing fills at most 84% width / 80% height of the viewport so the CRT bezel always stays in frame.
 - The TV picture is fitted from geometry, not guesswork: the mesh contains an inset glass quad (recessed 0.058 units behind the front face; 85.3% × 64.1% of the face, centre +12.3% above the midline). The picture plane uses those measured fractions and sits behind the front rim so the bezel occludes it at oblique angles.
-- CRT character pass: the TV composes half-res content through blur/desaturation plus scanlines, noise flecks, a rolling tracking band, vignette, and an overall dim; the monitor screensaver renders through a scanline quad in the offscreen pass with the idle tube dimmed (`#c9ced6` multiply); the Retro OS overlay gained an RGB aperture grille, deeper corner falloff, and a subtle flicker (animation disabled under reduced motion; the OS DOM itself stays unfiltered for readability).
+- CRT character pass: the TV keeps its intentionally rough half-res broadcast treatment, while the computer monitor now uses a static fitted glass vignette and sparse phosphor grain with no repeated scan bars. The Retro OS remains crisp and receives only the pointer-transparent viewport glass treatment described in the 2026-08-28 correction above.
 - The Panasonic TV now plays procedural "programming" (`tvChannels.ts`): SMPTE-style bars with a SEVAN TV / CH 07 ident, a bouncing 7 logo, a drifting NO SIGNAL card, and static bursts between channels. All original content drawn to a 320×240 canvas at ~11 fps riding the screensaver's frame loop (paused while the OS is open; single static frame under reduced motion). The picture plane is fitted to the TV mesh's front face from its geometry box. **Decision: no licensed media (anime/sports) on the site — copyright.** If real footage is ever wanted, use CC-licensed material with attribution or the user's own project demo reels.
 
 ## Implementation update — 2026-08-21 (evening): veil transition + globe restyle
@@ -144,7 +166,7 @@ Verified locally: type check, production build, fresh-load drag test with zero r
 - Kept globe, cubicle, and transition in one R3F Canvas. The old loading Canvas, full-screen OS overlay, and 256×256 per-frame monitor render target are gone.
 - Deferred cubicle mounting until the globe has visibly painted; then wait for the GLB and the brief art-directed minimum before the handoff begins. This protects the first visible globe frame without returning to a separate rendering context.
 - Replaced the random monitor screensaver path with a static low-cost blue screen while roaming. Once the camera is close, a lazy-loaded `<Html transform>` portal mounts the real React Retro OS directly on `Glowing_Screen_Screen_Emission_0`.
-- Calibrated the monitor DOM to the model’s actual opening (1280×992 CSS layout, 1.29:1) and added a subtle non-interactive scanline/glass layer. The OS itself receives normal pointer and keyboard events.
+- Calibrated the monitor DOM to the model’s actual opening (1280×992 CSS layout, 1.29:1) and added a subtle non-interactive glass layer. The OS itself receives normal pointer and keyboard events.
 - Added native “Open the computer” and “Leave computer · Esc” controls, Escape return, labelled window controls, and a reduced-motion path that disables globe rotation and makes non-essential camera handoffs immediate.
 - Switched the R3F Canvas to demand-driven rendering. It explicitly invalidates only while the globe spins, the handoff/camera is moving, or the visitor moves the room camera; the loader unmounts once the cubicle is active.
 

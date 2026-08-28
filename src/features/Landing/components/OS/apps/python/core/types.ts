@@ -3,8 +3,8 @@
  */
 
 export interface PyOutputLine {
-  type: 'stdout' | 'stderr' | 'info' | 'result';
+  type: "stdout" | "stderr" | "info" | "result";
   text: string;
 }
 
-export type PyStatus = 'idle' | 'loading' | 'ready' | 'running';
+export type PyStatus = "idle" | "loading" | "ready" | "running" | "error";

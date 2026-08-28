@@ -1,14 +1,14 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React from "react";
+import { motion } from "framer-motion";
 import {
   RetroCalendar,
   RetroPin,
   RetroAward,
-} from '../../../components/icons/RetroIcons';
-import { EDUCATION } from '@shared/content/portfolio';
-import awardPhoto from '@shared/assets/images/OS/awardwinning.jpeg';
-import { GBox, PageHead } from '../../../components/win95/Win95';
-import '../styles/education-page.css';
+} from "../../../components/icons/RetroIcons";
+import { EDUCATION } from "@shared/content/portfolio";
+import awardPhoto from "@shared/assets/images/OS/awardwinning.jpeg";
+import { GBox, PageHead } from "../../../components/win95/Win95";
+import "../styles/education-page.css";
 
 export const EducationPage: React.FC = () => (
   <motion.div
@@ -47,7 +47,12 @@ export const EducationPage: React.FC = () => (
           ))}
         </div>
         <div className="award-photo-well">
-          <img src={awardPhoto} alt="Rising Star Intern Award ceremony" />
+          <img
+            src={awardPhoto}
+            alt="Rising Star Intern Award ceremony"
+            width="600"
+            height="600"
+          />
           <span className="award-photo-caption">Rising Star Intern Award</span>
         </div>
       </div>

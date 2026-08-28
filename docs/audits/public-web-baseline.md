@@ -5,6 +5,71 @@
 **Scope:** public requests, live browser inspection, repository read, the local resume as a factual cross-check, and the existing sevanworks globe implementation as a design reference.
 **Not in scope:** Cloudflare dashboard, GitHub hosting settings, origin configuration, deployments, or production writes. A local-only 3D implementation was completed after this public audit; its code and local validation evidence are recorded separately in [3D globe direction](../design/3d-globe-direction.md).
 
+## Local search, agent, and accessibility pass — 2026-08-28
+
+**Sources:** user-supplied production search screenshot and Is Agentic report, current repository code, official Google Search and Cloudflare documentation, the 1280×720 local production preview, and a 390×844 responsive preview. **Deployment status:** local only; no production, DNS, WAF, crawler-policy, or Cloudflare setting was changed.
+
+### Search identity and favicon
+
+- The old live result still showed `Full-Stack Software Developer` and a generic globe icon. The repository now consistently uses `Sevan Lewis-Payne | Data & Software Engineer` with the description: `Data and software engineer building governed data platforms, backend systems, and AI developer tools. Explore Sevan Lewis-Payne's projects, experience, and resume.` No em dash remains in SEO copy.
+- Favicon discovery now provides a root `favicon.ico` with 16, 32, and 48 px images, the approved transparent blue 7 SVG, a dedicated 48 px PNG, 180 px Apple touch icon, 192 and 512 px PNGs, and a web manifest. The browser-specific raster and ICO variants are generated from the committed 192 px original so broader browser support does not change the design.
+- Structured data is a truthful `WebSite` + `ProfilePage` + `Person` graph. Open Graph/Twitter identity, image dimensions, image alt text, locale, canonical URL, and crawler directives match the visible title and description.
+
+These changes make the site eligible for consistent favicon and title discovery; a search engine still chooses when to recrawl and whether to display the supplied icon or title.
+
+### Agent-readable and no-WebGL content
+
+- The raw homepage HTML already carried useful experience and education. It now adds the canonical project set, current metadata, and a plain-text discovery link. `llms.txt` adds usage boundaries and projects; the new public `agents.md` tells agents which sources to trust and explicitly states that the portfolio is not a hosted API, OAuth provider, GraphQL service, OpenAPI service, or public MCP endpoint.
+- The supplied 2026-08-28 Is Agentic report scored 19/100. Its crawler/WAF and reliable no-JavaScript findings are actionable. Its OpenAPI, GraphQL, OAuth, MCP, sandbox, rate-limit, and developer-portal findings are not product requirements for this personal portfolio and are partly false positives from the SPA returning homepage HTML for invented paths.
+- The rendered React application now retains a real H1, identity, availability, project summary, resume, GitHub, LinkedIn, and direct `/os` route in an accessible overview. A visible-on-focus skip link bypasses the WebGL scene. This preserves the user-approved cubicle while giving keyboard and assistive-technology users a complete non-gesture route.
+- The report's agent-user-agent blocking remains an external gate. Cloudflare documents that upstream WAF rules can still block crawlers allowed elsewhere. The dashboard must be reviewed separately before any policy change; this repository pass does not claim that real agents can reach production.
+
+### Accessibility acceptance
+
+| Check                  | Result                                                                                                                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Landmarks and identity | The mounted desktop route exposes one main landmark, a level-one `Sevan Lewis-Payne` heading in the accessible overview, and a visible keyboard skip route around the 3D scene.                   |
+| Core recruiter route   | The overview exposes Resume, GitHub, LinkedIn, `/os`, availability, and all four selected project names without a mouse or canvas raycast.                                                        |
+| Desktop semantics      | Open app windows announce as labeled non-modal dialogs; titlebar artwork is decorative; existing minimize, maximize, close, app, tab, resume, and external-link controls retain accessible names. |
+| Async Python UI        | Loading/restart state is announced as status/progress, output is exposed as a polite log, and editor, stdin, terminal, Paint, and Pac-Man focus indicators are visible.                           |
+| Image stability        | About and award images now declare their intrinsic 400×400 and 600×600 dimensions.                                                                                                                |
+| Responsive visual      | The production preview at 390×844 selected the phone layout, retained the lock-screen controls, opened Settings as a named dialog, and exposed exactly the two intended switches.                 |
+| Automated checks       | `npm.cmd run type-check`, `npm.cmd run lint`, and five Vitest tests passed. The final production build transformed 2,767 modules; `git diff --check` passed.                                      |
+
+This is a material WCAG-oriented remediation and rendered keyboard/semantic check, not a certification of every third-party assistive-technology combination. A post-deployment screen-reader and crawler-policy check remains appropriate.
+
+## Local Python IDE stability pass — 2026-08-28
+
+**Sources:** current repository code, automated unit tests, local development rendering, and the rebuilt production preview at 1280×720. **Deployment status:** local only; production and hosting settings were not changed.
+
+- Each Python run now has a three-second execution deadline after package preparation. Package setup and the initial Pyodide boot use separate 45-second deadlines, so network setup time does not consume the code budget and a stalled setup cannot wait forever.
+- Worker stdout and stderr are combined into bounded batches before crossing into React. A run stops at 16,000 output characters with `Output Limit Exceeded`; silent runaway code stops with `Time Limit Exceeded`. Both paths terminate the active worker, ignore stale messages, and start a clean interpreter.
+- The examples control displays the actual selected example, changes to `Custom code` after an edit, and offers a `Blank file` that clears code, stdin, and prior output.
+- About This Site no longer exposes the local canvas count, asset-size percentage, Lighthouse scores, or measurement disclaimer as visitor-facing status cards. Its related exact-size wording and architecture diagram label were also rewritten for visitors.
+
+### Acceptance evidence
+
+| Check            | Result                                                                                                                                                                                                                                             |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Resource limits  | The supplied million-line `print` program stopped at 16,000 characters with `Output Limit Exceeded`; `while True: pass` stopped after three seconds with `Time Limit Exceeded`. The Run control became available after both clean-worker restarts. |
+| Normal execution | The Mandelbrot starter finished in 11 ms. The A\* example ran through Ctrl+Enter, printed a 26-step path, and finished in 5 ms.                                                                                                                    |
+| Picker behavior  | `Blank file` produced an empty editor and empty output panel; typing changed the visible selection to `Custom code`; selecting A* displayed `A* pathfinding`.                                                                                      |
+| Visitor content  | The built About This Site app contained zero status cards and none of `1 canvas`, `50.3%`, or `97 / 95`.                                                                                                                                           |
+| Automated checks | `npm.cmd run type-check`, `npm.cmd run lint`, and `npm.cmd test` passed. Vitest ran two files with five passing resource-limit and example-contract tests.                                                                                         |
+| Production build | `npm.cmd run build` passed with 2,767 modules transformed. The only build notice was the existing stale `caniuse-lite` advisory.                                                                                                                   |
+| Browser console  | The development and production-preview Python flows completed with no browser errors.                                                                                                                                                              |
+
+## Post-release mobile correction — 2026-08-28
+
+**Sources:** user-supplied live screenshot from `sevanlewispayne.com`, current repository code, local development rendering, and the rebuilt Cloudflare production preview. **Deployment status:** the earlier ship candidate is live per the user; the corrections below remain local until a follow-up merge/deploy.
+
+- Removed the site-level Reduce Motion toggle and stopped reading its stale persisted value. The phone still follows `prefers-reduced-motion` automatically, while Simplified Graphics and High Contrast remain explicit persisted display controls.
+- Removed the four mirrored dock-icon elements rather than merely hiding them. The 390×844 production preview has zero reflection nodes and no horizontal overflow.
+- Increased every Snake D-pad target to 64×54 px, capped pending turns at two to prevent rapid-input backlog, and added a compact-height layout that keeps the larger controls usable at 320×568.
+- Removed the oversized “7” from the DOM page cover. That layer is now an empty blue curtain; the rotating 7 and stars in the real WebGL `LoadingScene` remain unchanged.
+
+The rebuilt 390×844 production preview exposed exactly two Settings switches, started Snake normally, measured all four D-pad controls at 64×54 px, and produced no console warnings or errors. The 320×568 layout had no horizontal overflow.
+
 ## Local performance update — 2026-08-28
 
 The final local production-preview passes are recorded in [3D globe direction](../design/3d-globe-direction.md). The initial optimization comparison improved desktop Lighthouse from 75 to 97 and mobile from 38 to 97. The complete ship candidate measured **97 desktop / 95 mobile**; its mobile route transferred 243,689 B after removing accidental desktop-3D and animation dependencies. The cubicle asset fell from 2,909,120 B to 1,447,052 B with its inspected scene counts and rendered look preserved. This does **not** replace the dated public baseline below: nothing was deployed, no Cloudflare state was changed, and real-device/live verification remains open.
@@ -22,23 +87,23 @@ The mobile route now has an intentionally separate product identity: a custom 20
 - The Home grid is About, Experience, Skills, GitHub, LinkedIn, Notes, Snake, and Settings. The dock is Contact, Mail, Resume, and Projects. All launcher artwork is one code-native icon family; the mobile Desktop app was removed.
 - Projects open an internal detail view before any external destination. The initial featured set is p100, PRISM, Threadroot, and CodeLive. Project screenshots were deliberately omitted until real project imagery is approved.
 - The same typed `PROJECTS` source now feeds mobile and desktop. p100 and PRISM are labeled private/local; public projects expose only their approved external links.
-- Settings now make real changes: Reduce Motion, Simplified Graphics, and High Contrast persist locally. The operating-system reduced-motion preference overrides the site control. The draining battery remains an intentional joke and bottoms out at 7%.
+- Settings now expose Simplified Graphics and High Contrast as persisted display controls. Motion follows the operating-system reduced-motion preference automatically and has no separate site toggle. The draining battery remains an intentional joke and bottoms out at 7%.
 - Mobile and desktop bundles are lazy at the layout boundary. The final lock wallpaper is a lightweight CSS composition rather than a delayed WebGL enhancement, so a mobile-first visit does not request the desktop Three.js stack for a transient background.
 
 ### Local acceptance evidence
 
 Updated on 2026-08-28 for the final ship candidate; these rows supersede the earlier tooling-gap notes from the first mobile implementation pass.
 
-| Check                        | Result                                                                                                                                                                                                                                                                      |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TypeScript                   | `npm.cmd run type-check` passed.                                                                                                                                                                                                                                            |
-| Production build             | `npm.cmd run build` passed: 2,766 modules transformed. MobileLanding emitted as a 28.54 kB JS chunk (8.18 kB gzip). Its dependency map contains no Three.js, React Three Fiber, desktop typeface, or Framer Motion chunk; those remain behind desktop-only lazy boundaries. |
-| Rendered layouts             | 320×568 and 390×844 phones, 834×1112 tablet, 1024×768 breakpoint, and 1280×800 desktop were checked. No tested layout had horizontal overflow; the desktop retained one cubicle canvas.                                                                                     |
-| Interaction/accessibility    | Keyboard unlock and keyboard Snake start passed; Home is inert while locked or behind an app; apps use named modal-dialog structure; Home/browser Back restore the launcher path; tested interactive targets were at least 44×44 px.                                        |
-| App behavior                 | `?app=projects` opened directly, session reload skipped the lock, project list/detail navigation worked, and all three accessibility settings changed and persisted their states.                                                                                           |
-| Console                      | The final desktop and 390 px mobile production previews had no browser warnings or errors.                                                                                                                                                                                  |
-| Diff/format                  | `git diff --check` passed; all changed supported text files passed targeted Prettier formatting.                                                                                                                                                                            |
-| Repository test/lint tooling | `npm.cmd run lint`, `npm.cmd run type-check`, and `npm.cmd test` passed. Vitest is configured to succeed when no test files exist and reported that no tests were found; rendered interaction checks remain part of the release gate.                                       |
+| Check                        | Result                                                                                                                                                                                                                                                                                              |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TypeScript                   | `npm.cmd run type-check` passed.                                                                                                                                                                                                                                                                    |
+| Production build             | `npm.cmd run build` passed: 2,766 modules transformed. The post-release hotfix emitted MobileLanding as a 27.97 kB JS chunk (8.07 kB gzip). Its dependency map contains no Three.js, React Three Fiber, desktop typeface, or Framer Motion chunk; those remain behind desktop-only lazy boundaries. |
+| Rendered layouts             | 320×568 and 390×844 phones, 834×1112 tablet, 1024×768 breakpoint, and 1280×800 desktop were checked. No tested layout had horizontal overflow; the desktop retained one cubicle canvas.                                                                                                             |
+| Interaction/accessibility    | Keyboard unlock and keyboard Snake start passed; Home is inert while locked or behind an app; apps use named modal-dialog structure; Home/browser Back restore the launcher path; Snake D-pad targets are 64×54 px and other tested controls remain at least 44×44 px.                              |
+| App behavior                 | `?app=projects` opened directly, session reload skipped the lock, project list/detail navigation worked, and the two explicit display settings changed and persisted their states. OS-level reduced motion remains automatic.                                                                       |
+| Console                      | The final desktop and 390 px mobile production previews had no browser warnings or errors.                                                                                                                                                                                                          |
+| Diff/format                  | `git diff --check` passed; all changed supported text files passed targeted Prettier formatting.                                                                                                                                                                                                    |
+| Repository test/lint tooling | `npm.cmd run lint`, `npm.cmd run type-check`, and `npm.cmd test` passed. The Python IDE stability pass added two test files with five passing resource-limit and example-contract tests; rendered interaction checks remain part of the release gate.                                               |
 
 This is implementation evidence, not a new public performance score. Run mobile lab/field measurements only after an authorized deployment; preserve the 2026-08-21 PSI numbers below as the live pre-change baseline until then.
 

@@ -3,7 +3,7 @@ import React from "react";
 /* ══════════════════════════════════════════════════════════
    Architecture diagram for About This Site.
 
-   Mini Win95 windows for the React app, one WebGL canvas, and the DOM
+   Mini Win95 windows for the React app, the WebGL stage, and the DOM
    interfaces plus the shared content model, connected by arrows. Pure SVG
    through the w95 tokens, and scales with the window width.
    ══════════════════════════════════════════════════════════ */
@@ -40,7 +40,7 @@ export const SiteDiagram: React.FC = () => (
     className="site-diagram"
     viewBox="0 0 560 258"
     role="img"
-    aria-label="Architecture diagram: one React application renders the loader and 3D office in a single WebGL canvas, while the desktop and mobile phone remain accessible DOM interfaces fed by one shared content model."
+    aria-label="Architecture diagram: one React application connects the 3D office to accessible desktop and mobile browser interfaces fed by one shared content model."
   >
     {/* React application */}
     <Win
@@ -60,13 +60,13 @@ export const SiteDiagram: React.FC = () => (
     <polygon className="dg-arrow" points="129,92 125.5,84 132.5,84" />
     <polygon className="dg-arrow" points="431,92 427.5,84 434.5,84" />
 
-    {/* One WebGL canvas */}
+    {/* 3D stage */}
     <Win
       x={14}
       y={92}
       w={230}
       h={88}
-      title="One WebGL canvas"
+      title="3D stage · WebGL"
       lines={[
         "star loader + 3D office",
         "demand renderer · frozen shadows",

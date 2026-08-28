@@ -92,7 +92,6 @@ export const AboutApp: React.FC = () => {
 
           {/* Content */}
           <div className="about-content w95-scroll" ref={contentRef}>
-            <div className="crt-overlay" />
             <AnimatePresence mode="wait">
               <ActivePage key={activeTab} />
             </AnimatePresence>

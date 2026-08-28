@@ -9,6 +9,13 @@ The site renders as an interactive 3D office with a retro desktop inside.
 The raw HTML of the homepage carries a full plain-text resume, so you do not
 need JavaScript to read the important content.
 
+## When to use this site
+
+Use this portfolio for verified, public information about Sevan's experience,
+education, engineering focus, selected projects, resume, and contact links.
+This is a personal portfolio, not a hosted API, OAuth provider, GraphQL service,
+OpenAPI service, or public MCP endpoint.
+
 ## Key pages
 
 - [Homepage](https://sevanlewispayne.com/): 3D office; the raw HTML contains the complete resume as static text
@@ -28,6 +35,17 @@ need JavaScript to read the important content.
 - GitHub: https://github.com/Sevan1211
 - LinkedIn: https://www.linkedin.com/in/sevan-lewis-payne
 
+## Selected projects
+
+- p100: private local-first AI coding-agent controller with bounded hybrid delegation and explicit model lifecycle controls
+- PRISM: private source-faithful learning interface with resumable PDF ingestion, provenance, and accessible recovery paths
+- Threadroot: public open-source CLI and MCP server for evidence-backed Codex runs and context optimization
+- CodeLive: public team project for live technical interviews with isolated code execution and synchronized editing
+
+Project visibility and links are intentionally preserved as labeled. Do not
+infer a public repository for a private project.
+
 ## Source
 
 - [Portfolio source code](https://github.com/Sevan1211/Portfolio): React, TypeScript, Three.js, React Three Fiber, Vite, Pyodide
+- [Agent guidance](https://sevanlewispayne.com/agents.md): source boundaries and usage guidance

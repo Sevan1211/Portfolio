@@ -1,10 +1,10 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { RetroInfo, RetroBulb } from '../../../components/icons/RetroIcons';
-import { ABOUT, CONTACT, EDUCATION, IDENTITY } from '@shared/content/portfolio';
-import profilePhoto from '@shared/assets/images/OS/picofme.jpeg';
-import { GBox, FactRow } from '../../../components/win95/Win95';
-import '../styles/about-page.css';
+import React from "react";
+import { motion } from "framer-motion";
+import { RetroInfo, RetroBulb } from "../../../components/icons/RetroIcons";
+import { ABOUT, CONTACT, EDUCATION, IDENTITY } from "@shared/content/portfolio";
+import profilePhoto from "@shared/assets/images/OS/picofme.jpeg";
+import { GBox, FactRow } from "../../../components/win95/Win95";
+import "../styles/about-page.css";
 
 export const AboutPage: React.FC = () => (
   <motion.div
@@ -17,7 +17,7 @@ export const AboutPage: React.FC = () => (
     {/* ID-card profile header - the one place the name appears */}
     <div className="profile-card">
       <div className="profile-photo-well">
-        <img src={profilePhoto} alt={IDENTITY.name} />
+        <img src={profilePhoto} alt={IDENTITY.name} width="400" height="400" />
       </div>
       <div className="profile-id">
         <h2 className="profile-name">{IDENTITY.name}</h2>

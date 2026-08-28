@@ -1,10 +1,11 @@
-import React from 'react';
-import { PyStatus } from '../core/types';
-import { EXAMPLES } from '../core/examples';
+import React from "react";
+import { PyStatus } from "../core/types";
+import { CUSTOM_EXAMPLE_ID, EXAMPLES } from "../core/examples";
 
 interface ToolbarProps {
   status: PyStatus;
   stdinOpen: boolean;
+  selectedExampleId: string;
   onRun: () => void;
   onStop: () => void;
   onClear: () => void;
@@ -19,6 +20,7 @@ interface ToolbarProps {
 export const Toolbar: React.FC<ToolbarProps> = ({
   status,
   stdinOpen,
+  selectedExampleId,
   onRun,
   onStop,
   onClear,
@@ -29,7 +31,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     <button
       type="button"
       className="py-btn py-btn--run"
-      disabled={status !== 'ready'}
+      disabled={status !== "ready"}
       onClick={onRun}
       title="Run (Ctrl+Enter)"
     >
@@ -38,7 +40,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     <button
       type="button"
       className="py-btn"
-      disabled={status !== 'running'}
+      disabled={status !== "running"}
       onClick={onStop}
       title="Stop the running program"
     >
@@ -59,14 +61,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       Examples
       <select
         className="py-select"
-        value=""
-        onChange={(e) => {
-          if (e.target.value) onLoadExample(e.target.value);
-        }}
+        value={selectedExampleId}
+        onChange={(e) => onLoadExample(e.target.value)}
         aria-label="Load an example program"
       >
-        <option value="" disabled>
-          Load…
+        <option value={CUSTOM_EXAMPLE_ID} disabled>
+          Custom code
         </option>
         {EXAMPLES.map((example) => (
           <option key={example.id} value={example.id}>
@@ -78,7 +78,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
     <button
       type="button"
-      className={`py-btn${stdinOpen ? ' py-btn--pressed' : ''}`}
+      className={`py-btn${stdinOpen ? " py-btn--pressed" : ""}`}
       onClick={onToggleStdin}
       aria-pressed={stdinOpen}
       title="Show the stdin panel; input() reads from it line by line"

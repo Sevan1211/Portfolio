@@ -142,11 +142,20 @@ for i in range(1, count + 1):
 `;
 
 export const EXAMPLES: PyExample[] = [
-  { id: 'mandelbrot', label: 'Mandelbrot set', code: MANDELBROT },
-  { id: 'astar', label: 'A* pathfinding', code: ASTAR },
-  { id: 'sales', label: 'CSV rollup', code: SALES_ROLLUP },
-  { id: 'numpy', label: 'NumPy matrix', code: NUMPY_DEMO },
-  { id: 'stdin', label: 'Reading input()', code: STDIN_DEMO, stdin: 'Sevan\n3' },
+  { id: "blank", label: "Blank file", code: "" },
+  { id: "mandelbrot", label: "Mandelbrot set", code: MANDELBROT },
+  { id: "astar", label: "A* pathfinding", code: ASTAR },
+  { id: "sales", label: "CSV rollup", code: SALES_ROLLUP },
+  { id: "numpy", label: "NumPy matrix", code: NUMPY_DEMO },
+  {
+    id: "stdin",
+    label: "Reading input()",
+    code: STDIN_DEMO,
+    stdin: "Sevan\n3",
+  },
 ];
 
-export const DEFAULT_EXAMPLE = EXAMPLES[0]!;
+export const DEFAULT_EXAMPLE = EXAMPLES.find(
+  (example) => example.id === "mandelbrot",
+)!;
+export const CUSTOM_EXAMPLE_ID = "custom";

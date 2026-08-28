@@ -5,6 +5,7 @@ const COLS = 15;
 const CELL = 16;
 const SIZE = COLS * CELL;
 const TICK_MS = 140;
+const MAX_QUEUED_TURNS = 2;
 
 type Dir = "up" | "down" | "left" | "right";
 type Phase = "ready" | "running" | "over";
@@ -98,6 +99,7 @@ export const SnakeApp: React.FC = () => {
   }, [placeFood]);
 
   const turn = useCallback((dir: Dir) => {
+    if (queueRef.current.length >= MAX_QUEUED_TURNS) return;
     const last =
       queueRef.current[queueRef.current.length - 1] ?? dirRef.current;
     if (dir !== last && dir !== OPPOSITE[last]) {
@@ -242,7 +244,7 @@ export const SnakeApp: React.FC = () => {
           aria-label="Up"
           onClick={() => turn("up")}
         >
-          <ArrowUp size={20} aria-hidden="true" />
+          <ArrowUp size={24} aria-hidden="true" />
         </button>
         <span />
         <button
@@ -251,7 +253,7 @@ export const SnakeApp: React.FC = () => {
           aria-label="Left"
           onClick={() => turn("left")}
         >
-          <ArrowLeft size={20} aria-hidden="true" />
+          <ArrowLeft size={24} aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -259,7 +261,7 @@ export const SnakeApp: React.FC = () => {
           aria-label="Down"
           onClick={() => turn("down")}
         >
-          <ArrowDown size={20} aria-hidden="true" />
+          <ArrowDown size={24} aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -267,7 +269,7 @@ export const SnakeApp: React.FC = () => {
           aria-label="Right"
           onClick={() => turn("right")}
         >
-          <ArrowRight size={20} aria-hidden="true" />
+          <ArrowRight size={24} aria-hidden="true" />
         </button>
       </div>
     </div>

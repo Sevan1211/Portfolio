@@ -121,8 +121,8 @@ interface HomeScreenProps {
 
 /**
  * The springboard. Solid black, glossy icons, and a metal dock shelf that
- * reflects its icons, the way the original did. External links (GitHub,
- * LinkedIn, and Mail) are icons too; everything on this phone is an app.
+ * anchors the four primary actions. External links (GitHub, LinkedIn, and
+ * Mail) are icons too; everything on this phone is an app.
  */
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpen,
@@ -153,7 +153,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </main>
       <nav className="rp-dock" aria-label="Dock">
         {DOCK_APPS.map((app) => (
-          <SpringboardIcon key={app.label} app={app} onOpen={onOpen} reflect />
+          <SpringboardIcon key={app.label} app={app} onOpen={onOpen} />
         ))}
       </nav>
     </div>
@@ -163,8 +163,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 const SpringboardIcon: React.FC<{
   app: AppDef | LinkDef;
   onOpen: HomeScreenProps["onOpen"];
-  reflect?: boolean;
-}> = ({ app, onOpen, reflect }) => {
+}> = ({ app, onOpen }) => {
   const face = (
     <span className="rp-icon" style={{ background: app.gradient }}>
       <RetroAppIcon kind={app.icon} />
@@ -175,11 +174,6 @@ const SpringboardIcon: React.FC<{
     <>
       {face}
       <span className="rp-applabel">{app.label}</span>
-      {reflect && (
-        <span className="rp-reflect" aria-hidden="true">
-          {face}
-        </span>
-      )}
     </>
   );
 

@@ -17,7 +17,6 @@ import "./styles/mobile.css";
 type Phase = "locked" | "unlocking" | "home";
 
 interface MobilePreferences {
-  reduceMotion: boolean;
   simplifiedGraphics: boolean;
   highContrast: boolean;
 }
@@ -50,7 +49,7 @@ export const MobileLanding: React.FC = () => {
   const skipInitialAppAnimation = useRef(initialAppRef.current !== null);
   const [preferences, setPreferences] =
     useState<MobilePreferences>(readPreferences);
-  const reduceMotion = systemReduceMotion || preferences.reduceMotion;
+  const reduceMotion = systemReduceMotion;
   const [phase, setPhase] = useState<Phase>(() =>
     hasSessionUnlock() || initialAppRef.current ? "home" : "locked",
   );
@@ -219,11 +218,8 @@ export const MobileLanding: React.FC = () => {
             dark={DARK_APPS.has(openApp)}
           >
             {renderApp(openApp, handleOpenFromApp, {
-              reduceMotion,
-              systemReduceMotion,
               simplifiedGraphics: preferences.simplifiedGraphics,
               highContrast: preferences.highContrast,
-              onToggleReduceMotion: () => updatePreference("reduceMotion"),
               onToggleSimplifiedGraphics: () =>
                 updatePreference("simplifiedGraphics"),
               onToggleHighContrast: () => updatePreference("highContrast"),
@@ -251,11 +247,8 @@ const SimplePhoneBackground: React.FC = () => (
 );
 
 interface SettingsHandlers {
-  reduceMotion: boolean;
-  systemReduceMotion: boolean;
   simplifiedGraphics: boolean;
   highContrast: boolean;
-  onToggleReduceMotion: () => void;
   onToggleSimplifiedGraphics: () => void;
   onToggleHighContrast: () => void;
 }
@@ -337,7 +330,6 @@ function rememberSessionUnlock(): void {
 
 function readPreferences(): MobilePreferences {
   const defaults: MobilePreferences = {
-    reduceMotion: false,
     simplifiedGraphics: false,
     highContrast: false,
   };
@@ -346,7 +338,6 @@ function readPreferences(): MobilePreferences {
       window.localStorage.getItem(PREFERENCES_KEY) ?? "{}",
     ) as Partial<MobilePreferences>;
     return {
-      reduceMotion: parsed.reduceMotion === true,
       simplifiedGraphics: parsed.simplifiedGraphics === true,
       highContrast: parsed.highContrast === true,
     };

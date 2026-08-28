@@ -2,11 +2,8 @@ import React from "react";
 import { SITE_INFO } from "@shared/content/portfolio";
 
 interface SettingsAppProps {
-  reduceMotion: boolean;
-  systemReduceMotion: boolean;
   simplifiedGraphics: boolean;
   highContrast: boolean;
-  onToggleReduceMotion: () => void;
   onToggleSimplifiedGraphics: () => void;
   onToggleHighContrast: () => void;
 }
@@ -15,30 +12,13 @@ interface SettingsAppProps {
  * Settings that materially change the mobile experience.
  */
 export const SettingsApp: React.FC<SettingsAppProps> = ({
-  reduceMotion,
-  systemReduceMotion,
   simplifiedGraphics,
   highContrast,
-  onToggleReduceMotion,
   onToggleSimplifiedGraphics,
   onToggleHighContrast,
 }) => (
   <>
     <div className="rp-group">
-      <div className="rp-row" style={{ alignItems: "center" }}>
-        <span>
-          <span className="rp-rowlabel">Reduce motion</span>
-          {systemReduceMotion && (
-            <small className="rp-setting-note">On in system settings</small>
-          )}
-        </span>
-        <Toggle
-          on={reduceMotion}
-          label="Reduce motion"
-          onToggle={onToggleReduceMotion}
-          disabled={systemReduceMotion}
-        />
-      </div>
       <div className="rp-row" style={{ alignItems: "center" }}>
         <span className="rp-rowlabel">Simplified graphics</span>
         <Toggle
@@ -57,8 +37,8 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
       </div>
     </div>
     <p className="rp-note">
-      These choices stay on this device. Your operating-system motion preference
-      always takes priority.
+      Display choices stay on this device. Motion automatically follows your
+      operating-system accessibility preference.
     </p>
 
     <p className="rp-grouplabel">About this website</p>
@@ -96,8 +76,7 @@ const Toggle: React.FC<{
   on: boolean;
   label: string;
   onToggle: () => void;
-  disabled?: boolean;
-}> = ({ on, label, onToggle, disabled }) => (
+}> = ({ on, label, onToggle }) => (
   <button
     type="button"
     role="switch"
@@ -105,7 +84,6 @@ const Toggle: React.FC<{
     aria-label={label}
     className={on ? "rp-toggle rp-toggle--on" : "rp-toggle"}
     onClick={onToggle}
-    disabled={disabled}
   >
     <b aria-hidden="true" />
   </button>

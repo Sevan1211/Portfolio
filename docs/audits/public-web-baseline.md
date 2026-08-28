@@ -5,6 +5,43 @@
 **Scope:** public requests, live browser inspection, repository read, the local resume as a factual cross-check, and the existing sevanworks globe implementation as a design reference.
 **Not in scope:** Cloudflare dashboard, GitHub hosting settings, origin configuration, deployments, or production writes. A local-only 3D implementation was completed after this public audit; its code and local validation evidence are recorded separately in [3D globe direction](../design/3d-globe-direction.md).
 
+## Local performance update — 2026-08-28
+
+The final local production-preview passes are recorded in [3D globe direction](../design/3d-globe-direction.md). The initial optimization comparison improved desktop Lighthouse from 75 to 97 and mobile from 38 to 97. The complete ship candidate measured **97 desktop / 95 mobile**; its mobile route transferred 243,689 B after removing accidental desktop-3D and animation dependencies. The cubicle asset fell from 2,909,120 B to 1,447,052 B with its inspected scene counts and rendered look preserved. This does **not** replace the dated public baseline below: nothing was deployed, no Cloudflare state was changed, and real-device/live verification remains open.
+
+## Local mobile implementation update — 2026-08-26
+
+**Sources:** code review, local production build, and rendered local browser checks. **Deployment status:** local only; the public site and Cloudflare configuration were not changed or remeasured.
+
+The mobile route now has an intentionally separate product identity: a custom 2007-era “Sevan phone” rather than a reduced copy of the Windows 95 desktop. The desktop cubicle remains the primary experience above the responsive cutoff and is still directly reachable at `/os`; mobile contains no Desktop app or `/os` prompt.
+
+### Approved decisions implemented
+
+- Viewports at or below 1024 px use the phone/tablet layout, including narrow desktop windows. The layout reacts to breakpoint changes instead of making a one-time touch/UA decision.
+- The lock screen appears once per tab session. A valid `?app=` deep link bypasses the lock, app launches write shareable URLs, browser Back returns to Home, and the hardware-style Home control restores the launching icon's focus.
+- The Home grid is About, Experience, Skills, GitHub, LinkedIn, Notes, Snake, and Settings. The dock is Contact, Mail, Resume, and Projects. All launcher artwork is one code-native icon family; the mobile Desktop app was removed.
+- Projects open an internal detail view before any external destination. The initial featured set is p100, PRISM, Threadroot, and CodeLive. Project screenshots were deliberately omitted until real project imagery is approved.
+- The same typed `PROJECTS` source now feeds mobile and desktop. p100 and PRISM are labeled private/local; public projects expose only their approved external links.
+- Settings now make real changes: Reduce Motion, Simplified Graphics, and High Contrast persist locally. The operating-system reduced-motion preference overrides the site control. The draining battery remains an intentional joke and bottoms out at 7%.
+- Mobile and desktop bundles are lazy at the layout boundary. The final lock wallpaper is a lightweight CSS composition rather than a delayed WebGL enhancement, so a mobile-first visit does not request the desktop Three.js stack for a transient background.
+
+### Local acceptance evidence
+
+Updated on 2026-08-28 for the final ship candidate; these rows supersede the earlier tooling-gap notes from the first mobile implementation pass.
+
+| Check                        | Result                                                                                                                                                                                                                                                                      |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TypeScript                   | `npm.cmd run type-check` passed.                                                                                                                                                                                                                                            |
+| Production build             | `npm.cmd run build` passed: 2,766 modules transformed. MobileLanding emitted as a 28.54 kB JS chunk (8.18 kB gzip). Its dependency map contains no Three.js, React Three Fiber, desktop typeface, or Framer Motion chunk; those remain behind desktop-only lazy boundaries. |
+| Rendered layouts             | 320×568 and 390×844 phones, 834×1112 tablet, 1024×768 breakpoint, and 1280×800 desktop were checked. No tested layout had horizontal overflow; the desktop retained one cubicle canvas.                                                                                     |
+| Interaction/accessibility    | Keyboard unlock and keyboard Snake start passed; Home is inert while locked or behind an app; apps use named modal-dialog structure; Home/browser Back restore the launcher path; tested interactive targets were at least 44×44 px.                                        |
+| App behavior                 | `?app=projects` opened directly, session reload skipped the lock, project list/detail navigation worked, and all three accessibility settings changed and persisted their states.                                                                                           |
+| Console                      | The final desktop and 390 px mobile production previews had no browser warnings or errors.                                                                                                                                                                                  |
+| Diff/format                  | `git diff --check` passed; all changed supported text files passed targeted Prettier formatting.                                                                                                                                                                            |
+| Repository test/lint tooling | `npm.cmd run lint`, `npm.cmd run type-check`, and `npm.cmd test` passed. Vitest is configured to succeed when no test files exist and reported that no tests were found; rendered interaction checks remain part of the release gate.                                       |
+
+This is implementation evidence, not a new public performance score. Run mobile lab/field measurements only after an authorized deployment; preserve the 2026-08-21 PSI numbers below as the live pre-change baseline until then.
+
 ## Executive readout
 
 > **Direction update (2026-08-21):** The verified findings below remain the baseline. The earlier recommendation for a conventional recruiter-first entry shell is superseded by the user-approved 3D flow in [3D globe direction](../design/3d-globe-direction.md). The same accessibility, keyboard, no-WebGL, and content-discovery outcomes remain required, but they must not replace the cubicle on capable desktop devices.

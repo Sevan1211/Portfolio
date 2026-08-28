@@ -1,22 +1,36 @@
-import React, { useRef, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, FolderClosed, User } from "lucide-react";
+import type { AppId } from "./HomeScreen";
 
 interface LockScreenProps {
-  onUnlock: () => void;
+  /** Unlock the phone; optionally straight into an app. */
+  onUnlock: (target?: AppId) => void;
+  /** Status bar element, rendered at the top of the lock layer. */
+  statusBar?: React.ReactNode;
 }
 
+const UNLOCK_RATIO = 0.72;
+const TAP_SLOP_PX = 8;
+const KNOB_SIZE = 44;
+
 /**
- * Old-iPhone-style lock screen.
- *  – Large clock & date
- *  – "Swipe up to unlock" prompt with bounce animation
- *  – Touch/mouse swipe-up gesture triggers unlock
+ * The 2007 hello: clock band, a couple of lock-screen notifications carrying
+ * the recruiter signals, and a slide-to-unlock control that actually slides.
+ * The knob is a real button: Enter, Space, or a plain tap also unlock.
  */
-export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
+export const LockScreen: React.FC<LockScreenProps> = ({
+  onUnlock,
+  statusBar,
+}) => {
   const [time, setTime] = useState(getTime());
   const [dateStr, setDateStr] = useState(getDate());
-  const startYRef = useRef<number | null>(null);
-  const screenRef = useRef<HTMLDivElement>(null);
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
 
-  /* ── Clock ── */
+  const trackRef = useRef<HTMLDivElement>(null);
+  const startXRef = useRef(0);
+  const maxXRef = useRef(1);
+
   useEffect(() => {
     const id = setInterval(() => {
       setTime(getTime());
@@ -25,91 +39,152 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
     return () => clearInterval(id);
   }, []);
 
-  /* ── Swipe detection (touch) ── */
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    if (touch) startYRef.current = touch.clientY;
-  }, []);
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLButtonElement>) => {
+      const track = trackRef.current;
+      if (!track) return;
+      maxXRef.current = Math.max(1, track.clientWidth - 8 - KNOB_SIZE);
+      startXRef.current = e.clientX;
+      setDragging(true);
+      e.currentTarget.setPointerCapture(e.pointerId);
+    },
+    [],
+  );
 
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      if (startYRef.current === null) return;
-      const touch = e.changedTouches[0];
-      if (!touch) return;
-      const delta = startYRef.current - touch.clientY;
-      if (delta > 60) onUnlock(); // swiped up 60 px+
-      startYRef.current = null;
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (!dragging) return;
+      const next = Math.min(
+        maxXRef.current,
+        Math.max(0, e.clientX - startXRef.current),
+      );
+      setDragX(next);
+    },
+    [dragging],
+  );
+
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (!dragging) return;
+      setDragging(false);
+      const travelled = e.clientX - startXRef.current;
+      if (
+        dragX >= maxXRef.current * UNLOCK_RATIO ||
+        Math.abs(travelled) < TAP_SLOP_PX
+      ) {
+        onUnlock();
+      } else {
+        setDragX(0);
+      }
+    },
+    [dragging, dragX, onUnlock],
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLButtonElement>) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onUnlock();
+      }
     },
     [onUnlock],
   );
-
-  /* ── Fallback: mouse drag for desktop preview (won't appear on desktop, but just in case) ── */
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    startYRef.current = e.clientY;
-  }, []);
-
-  const handleMouseUp = useCallback(
-    (e: React.MouseEvent) => {
-      if (startYRef.current === null) return;
-      const delta = startYRef.current - e.clientY;
-      if (delta > 60) onUnlock();
-      startYRef.current = null;
-    },
-    [onUnlock],
-  );
-
-  /* ── Also allow tap/click as a fallback ── */
-  const handleClick = useCallback(() => {
-    onUnlock();
-  }, [onUnlock]);
 
   return (
-    <div
-      ref={screenRef}
-      className="lock-screen"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-    >
-      {/* Clock */}
-      <div className="lock-clock">
-        <div className="lock-time">{time}</div>
-        <div className="lock-date">{dateStr}</div>
+    <div className="rp-lock">
+      {statusBar}
+      <div className="rp-lock-clockband">
+        <div className="rp-lock-time">{time}</div>
+        <div className="rp-lock-date">{dateStr}</div>
       </div>
 
-      {/* Swipe prompt */}
-      <div className="lock-prompt" onClick={handleClick}>
-        <div className="lock-chevron">
-          <ChevronUp />
+      <div className="rp-lock-ntfs">
+        <button
+          type="button"
+          className="rp-ntf"
+          onClick={() => onUnlock("about")}
+        >
+          <span
+            className="rp-ntf-icon"
+            style={{ background: "linear-gradient(180deg, #7ade6a, #2f9e20)" }}
+          >
+            <User size={18} aria-hidden="true" />
+          </span>
+          <span>
+            <span className="rp-ntf-title">Sevan Lewis-Payne</span>
+            <span className="rp-ntf-body" style={{ display: "block" }}>
+              Data &amp; software engineer. Tap to meet me.
+            </span>
+          </span>
+        </button>
+        <button
+          type="button"
+          className="rp-ntf"
+          onClick={() => onUnlock("projects")}
+        >
+          <span
+            className="rp-ntf-icon"
+            style={{
+              background: "linear-gradient(180deg, #f4f5f7, #c9cdd6)",
+              color: "#d0342c",
+            }}
+          >
+            <FolderClosed size={18} aria-hidden="true" />
+          </span>
+          <span>
+            <span className="rp-ntf-title">Available May 2027</span>
+            <span className="rp-ntf-body" style={{ display: "block" }}>
+              View featured systems and tools.
+            </span>
+          </span>
+        </button>
+      </div>
+
+      <div className="rp-slideband">
+        <div className="rp-slidetrack" ref={trackRef}>
+          <button
+            type="button"
+            className="rp-slideknob"
+            aria-label="Slide or press Enter to unlock"
+            style={{
+              transform: `translateX(${dragX}px)`,
+              transition: dragging ? "none" : "transform 0.25s ease",
+            }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={() => {
+              setDragging(false);
+              setDragX(0);
+            }}
+            onKeyDown={handleKeyDown}
+          >
+            <ArrowRight size={20} aria-hidden="true" />
+          </button>
+          <span
+            className="rp-slidetext"
+            style={{ opacity: dragX > 12 ? 0 : 1 }}
+          >
+            slide to unlock
+          </span>
         </div>
-        <span>swipe up to unlock</span>
       </div>
     </div>
   );
 };
 
-/* ── Helpers ── */
 function getTime(): string {
-  const now = new Date();
-  return now.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
+  return new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
     hour12: true,
   });
 }
 
 function getDate(): string {
-  const now = new Date();
-  return now.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
+  return new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
   });
 }
-
-const ChevronUp: React.FC = () => (
-  <svg width="24" height="14" viewBox="0 0 24 14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="4 12 12 4 20 12" />
-  </svg>
-);

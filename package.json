@@ -15,7 +15,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "generate:globe-data": "node scripts/generate-land-nodes.mjs",
-    "test": "vitest",
+    "test": "vitest --config vitest.config.ts --run",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {

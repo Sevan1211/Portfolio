@@ -12,18 +12,17 @@
  * raises EOFError exactly like a real piped process.
  */
 
-/* eslint-disable no-restricted-globals */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ctx: any = self;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let pyodide: any = null;
 
-const PYODIDE_VERSION = '0.27.4';
+const PYODIDE_VERSION = "0.27.4";
 const PYODIDE_CDN = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
 
 async function initPyodide() {
-  ctx.postMessage({ type: 'status', status: 'loading' });
+  ctx.postMessage({ type: "status", status: "loading" });
 
   try {
     // Dynamic import works in ES-module workers (Vite ?worker)
@@ -36,25 +35,25 @@ async function initPyodide() {
 
     // Live output: batched mode delivers one callback per line.
     pyodide.setStdout({
-      batched: (text: string) => ctx.postMessage({ type: 'stdout', text }),
+      batched: (text: string) => ctx.postMessage({ type: "stdout", text }),
     });
     pyodide.setStderr({
-      batched: (text: string) => ctx.postMessage({ type: 'stderr', text }),
+      batched: (text: string) => ctx.postMessage({ type: "stderr", text }),
     });
 
     const version: string = pyodide.runPython(
       'import sys; ".".join(map(str, sys.version_info[:3]))',
     );
 
-    ctx.postMessage({ type: 'status', status: 'ready', version });
+    ctx.postMessage({ type: "status", status: "ready", version });
   } catch (err) {
-    ctx.postMessage({ type: 'error', text: `Failed to load Python: ${err}` });
+    ctx.postMessage({ type: "error", text: `Failed to load Python: ${err}` });
   }
 }
 
 /** Feed the run's stdin text to Python line by line; null signals EOF. */
 function setStdinLines(text: string) {
-  const lines = text.length > 0 ? text.split('\n') : [];
+  const lines = text.length > 0 ? text.split("\n") : [];
   let next = 0;
   pyodide.setStdin({
     stdin: () => (next < lines.length ? `${lines[next++]}\n` : null),
@@ -66,17 +65,20 @@ function setStdinLines(text: string) {
  * code's trace, not /lib/python…/_pyodide/ plumbing.
  */
 function cleanTraceback(message: string): string {
-  const lines = message.split('\n');
+  const lines = message.split("\n");
   const execIndex = lines.findIndex((line) => line.includes('File "<exec>"'));
   if (execIndex > 0) {
-    return ['Traceback (most recent call last):', ...lines.slice(execIndex)].join('\n');
+    return [
+      "Traceback (most recent call last):",
+      ...lines.slice(execIndex),
+    ].join("\n");
   }
   return message;
 }
 
 async function runCode(code: string, stdinText: string) {
   if (!pyodide) {
-    ctx.postMessage({ type: 'error', text: 'Python is not loaded yet.' });
+    ctx.postMessage({ type: "error", text: "Python is not loaded yet." });
     return;
   }
 
@@ -84,10 +86,10 @@ async function runCode(code: string, stdinText: string) {
   // matplotlib, …). Downloads can take a while, so bracket them with
   // messages that pause the main thread's execution timeout.
   try {
-    ctx.postMessage({ type: 'packages-start' });
+    ctx.postMessage({ type: "packages-start" });
     await pyodide.loadPackagesFromImports(code, {
       messageCallback: (text: string) => {
-        if (/loading/i.test(text)) ctx.postMessage({ type: 'info', text });
+        if (/loading/i.test(text)) ctx.postMessage({ type: "info", text });
       },
       errorCallback: () => {
         /* Unavailable packages surface as a normal Python ImportError. */
@@ -96,7 +98,7 @@ async function runCode(code: string, stdinText: string) {
   } catch {
     /* Fall through - the import itself will raise a clear error. */
   } finally {
-    ctx.postMessage({ type: 'packages-done' });
+    ctx.postMessage({ type: "packages-done" });
   }
 
   setStdinLines(stdinText);
@@ -110,10 +112,10 @@ async function runCode(code: string, stdinText: string) {
       try {
         text = String(result);
       } catch {
-        text = '<unprintable result>';
+        text = "<unprintable result>";
       }
-      ctx.postMessage({ type: 'result', text });
-      if (typeof result === 'object' && typeof result.destroy === 'function') {
+      ctx.postMessage({ type: "result", text });
+      if (typeof result === "object" && typeof result.destroy === "function") {
         try {
           result.destroy();
         } catch {
@@ -123,21 +125,21 @@ async function runCode(code: string, stdinText: string) {
     }
   } catch (pyErr: unknown) {
     const message = pyErr instanceof Error ? pyErr.message : String(pyErr);
-    ctx.postMessage({ type: 'stderr', text: cleanTraceback(message) });
+    ctx.postMessage({ type: "stderr", text: cleanTraceback(message) });
   }
 
   ctx.postMessage({
-    type: 'done',
+    type: "done",
     ms: Math.round(performance.now() - startedAt),
   });
 }
 
-ctx.addEventListener('message', (e: MessageEvent) => {
+ctx.addEventListener("message", (e: MessageEvent) => {
   const { type, code, stdin } = e.data;
 
-  if (type === 'init') {
+  if (type === "init") {
     initPyodide();
-  } else if (type === 'run') {
-    runCode(code, typeof stdin === 'string' ? stdin : '');
+  } else if (type === "run") {
+    runCode(code, typeof stdin === "string" ? stdin : "");
   }
 });

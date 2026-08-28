@@ -1,56 +1,38 @@
 Add-Type -AssemblyName System.Drawing
 
 $publicDirectory = Join-Path $PSScriptRoot "..\public"
-$sizes = @(16, 32, 48, 180, 192, 512)
+$sourcePath = Join-Path $publicDirectory "favicon-192.png"
+$outputSizes = @(16, 32, 48, 180, 512)
 $pngData = @{}
 
-function New-SevanIcon {
-  param([int]$Size)
-
-  $bitmap = [System.Drawing.Bitmap]::new($Size, $Size)
-  $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-  $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-  $graphics.Clear([System.Drawing.Color]::Transparent)
-
-  $scale = $Size / 64.0
-  $radius = 13 * $scale
-  $path = [System.Drawing.Drawing2D.GraphicsPath]::new()
-  $diameter = $radius * 2
-  $path.AddArc(0, 0, $diameter, $diameter, 180, 90)
-  $path.AddArc($Size - $diameter, 0, $diameter, $diameter, 270, 90)
-  $path.AddArc($Size - $diameter, $Size - $diameter, $diameter, $diameter, 0, 90)
-  $path.AddArc(0, $Size - $diameter, $diameter, $diameter, 90, 90)
-  $path.CloseFigure()
-
-  $background = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(255, 30, 58, 138))
-  $graphics.FillPath($background, $path)
-
-  $borderWidth = [Math]::Max(1.0, 2.5 * $scale)
-  $border = [System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(255, 157, 184, 255), $borderWidth)
-  $graphics.DrawPath($border, $path)
-
-  $points = [System.Drawing.PointF[]]@(
-    [System.Drawing.PointF]::new(15 * $scale, 14 * $scale),
-    [System.Drawing.PointF]::new(51 * $scale, 14 * $scale),
-    [System.Drawing.PointF]::new(51 * $scale, 24 * $scale),
-    [System.Drawing.PointF]::new(36 * $scale, 53 * $scale),
-    [System.Drawing.PointF]::new(23 * $scale, 53 * $scale),
-    [System.Drawing.PointF]::new(38 * $scale, 24 * $scale),
-    [System.Drawing.PointF]::new(15 * $scale, 24 * $scale)
+function New-ResizedIcon {
+  param(
+    [System.Drawing.Image]$Source,
+    [int]$Size
   )
-  $mark = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::White)
-  $graphics.FillPolygon($mark, $points)
 
-  $mark.Dispose()
-  $border.Dispose()
-  $background.Dispose()
-  $path.Dispose()
+  $bitmap = [System.Drawing.Bitmap]::new(
+    $Size,
+    $Size,
+    [System.Drawing.Imaging.PixelFormat]::Format32bppArgb
+  )
+  $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+  $graphics.Clear([System.Drawing.Color]::Transparent)
+  $graphics.CompositingMode = [System.Drawing.Drawing2D.CompositingMode]::SourceCopy
+  $graphics.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality
+  $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+  $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+  $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+  $graphics.DrawImage($Source, [System.Drawing.Rectangle]::new(0, 0, $Size, $Size))
   $graphics.Dispose()
+
   return $bitmap
 }
 
-foreach ($size in $sizes) {
-  $bitmap = New-SevanIcon -Size $size
+$source = [System.Drawing.Image]::FromFile($sourcePath)
+
+foreach ($size in $outputSizes) {
+  $bitmap = New-ResizedIcon -Source $source -Size $size
   $stream = [System.IO.MemoryStream]::new()
   $bitmap.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
   $pngData[$size] = $stream.ToArray()
@@ -61,13 +43,15 @@ foreach ($size in $sizes) {
   elseif ($size -eq 180) {
     $bitmap.Save((Join-Path $publicDirectory "apple-touch-icon.png"), [System.Drawing.Imaging.ImageFormat]::Png)
   }
-  elseif ($size -eq 192 -or $size -eq 512) {
-    $bitmap.Save((Join-Path $publicDirectory "favicon-$size.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+  elseif ($size -eq 512) {
+    $bitmap.Save((Join-Path $publicDirectory "favicon-512.png"), [System.Drawing.Imaging.ImageFormat]::Png)
   }
 
   $stream.Dispose()
   $bitmap.Dispose()
 }
+
+$source.Dispose()
 
 $iconStream = [System.IO.File]::Create((Join-Path $publicDirectory "favicon.ico"))
 $writer = [System.IO.BinaryWriter]::new($iconStream)

@@ -12,7 +12,7 @@
 ### Search identity and favicon
 
 - The old live result still showed `Full-Stack Software Developer` and a generic globe icon. The repository now consistently uses `Sevan Lewis-Payne | Data & Software Engineer` with the description: `Data and software engineer building governed data platforms, backend systems, and AI developer tools. Explore Sevan Lewis-Payne's projects, experience, and resume.` No em dash remains in SEO copy.
-- Favicon discovery now provides a root `favicon.ico` with 16, 32, and 48 px images, a geometric SVG, a dedicated 48 px PNG, 180 px Apple touch icon, 192 and 512 px PNGs, and a web manifest. The code-native 7 mark uses a stable blue square and white foreground instead of font-dependent transparent artwork.
+- Favicon discovery now provides a root `favicon.ico` with 16, 32, and 48 px images, the approved transparent blue 7 SVG, a dedicated 48 px PNG, 180 px Apple touch icon, 192 and 512 px PNGs, and a web manifest. The browser-specific raster and ICO variants are generated from the committed 192 px original so broader browser support does not change the design.
 - Structured data is a truthful `WebSite` + `ProfilePage` + `Person` graph. Open Graph/Twitter identity, image dimensions, image alt text, locale, canonical URL, and crawler directives match the visible title and description.
 
 These changes make the site eligible for consistent favicon and title discovery; a search engine still chooses when to recrawl and whether to display the supplied icon or title.

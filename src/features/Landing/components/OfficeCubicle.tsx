@@ -10,11 +10,9 @@ import {
   LinearMipmapLinearFilter,
   Mesh,
   MeshBasicMaterial,
-  NearestFilter,
   Object3D,
   PlaneGeometry,
   Raycaster,
-  RepeatWrapping,
   SRGBColorSpace,
   Texture,
   Vector2,
@@ -108,26 +106,44 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
   } | null>(null);
   const steamSystemRef = useRef<SteamSystem | null>(null);
   const steamAnchorRef = useRef<Group>(null);
-  // Scanlines now sit directly on the physical monitor. The screensaver is
-  // also part of the room scene, eliminating the old second WebGL pass.
-  const scanTexture = useMemo(() => {
-    const pattern = document.createElement("canvas");
-    pattern.width = 2;
-    pattern.height = 4;
-    const patternContext = pattern.getContext("2d");
-    if (patternContext) {
-      patternContext.clearRect(0, 0, 2, 4);
-      patternContext.fillStyle = "#000";
-      patternContext.fillRect(0, 0, 2, 1);
+  // A static fitted glass texture gives the tube a soft vignette, bloom, and
+  // phosphor grain without the conspicuous repeated black scan bars.
+  const glassTexture = useMemo(() => {
+    const glass = document.createElement("canvas");
+    glass.width = 160;
+    glass.height = 120;
+    const context = glass.getContext("2d");
+    if (context) {
+      context.clearRect(0, 0, glass.width, glass.height);
+
+      const vignette = context.createRadialGradient(80, 54, 22, 80, 60, 94);
+      vignette.addColorStop(0, "rgba(4, 10, 24, 0)");
+      vignette.addColorStop(0.68, "rgba(4, 10, 24, 0.025)");
+      vignette.addColorStop(1, "rgba(0, 3, 12, 0.56)");
+      context.fillStyle = vignette;
+      context.fillRect(0, 0, glass.width, glass.height);
+
+      const glow = context.createRadialGradient(45, 24, 0, 45, 24, 76);
+      glow.addColorStop(0, "rgba(224, 242, 255, 0.12)");
+      glow.addColorStop(0.38, "rgba(194, 225, 255, 0.035)");
+      glow.addColorStop(1, "rgba(194, 225, 255, 0)");
+      context.fillStyle = glow;
+      context.fillRect(0, 0, glass.width, glass.height);
+
+      for (let index = 0; index < 120; index += 1) {
+        const x = (index * 71) % glass.width;
+        const y = (index * 43) % glass.height;
+        const alpha = 0.012 + (index % 4) * 0.006;
+        context.fillStyle = `rgba(220, 238, 255, ${alpha})`;
+        context.fillRect(x, y, 1, 1);
+      }
     }
-    const texture = new CanvasTexture(pattern);
-    texture.wrapS = RepeatWrapping;
-    texture.wrapT = RepeatWrapping;
-    texture.repeat.set(1, 64);
-    texture.magFilter = NearestFilter;
+    const texture = new CanvasTexture(glass);
+    texture.minFilter = LinearFilter;
+    texture.magFilter = LinearFilter;
     return texture;
   }, []);
-  useEffect(() => () => scanTexture.dispose(), [scanTexture]);
+  useEffect(() => () => glassTexture.dispose(), [glassTexture]);
 
   const screenDisplay = useMemo(() => {
     if (!screenMesh) return null;
@@ -140,9 +156,10 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
       .addVectors(bounds.min, bounds.max)
       .multiplyScalar(0.5);
     const size = new Vector3().subVectors(bounds.max, bounds.min);
-    // LoadingScene's shell is six units across. Fill 80% of the CRT height,
-    // matching the former 4:3 render-target composition.
-    const scale = (size.y * 0.8) / 6;
+    // LoadingScene's shell is six units across. Fit it against the smaller
+    // screen axis so the complete rotating mark stays inside the glass at
+    // every aspect ratio while using nearly all of the available tube.
+    const scale = (Math.min(size.x, size.y) * 0.92) / 6;
     return { center, size, scale };
   }, [screenMesh]);
 
@@ -531,12 +548,15 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
               renderOrder={20}
             >
               <planeGeometry
-                args={[screenDisplay.size.x, screenDisplay.size.y]}
+                args={[
+                  screenDisplay.size.x * 0.99,
+                  screenDisplay.size.y * 0.99,
+                ]}
               />
               <meshBasicMaterial
-                map={scanTexture}
+                map={glassTexture}
                 transparent
-                opacity={0.32}
+                opacity={0.9}
                 depthWrite={false}
                 toneMapped={false}
               />

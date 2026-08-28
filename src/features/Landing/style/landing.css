@@ -97,10 +97,44 @@
   transition: opacity 260ms ease;
   will-change: opacity;
   contain: layout style paint;
+  isolation: isolate;
 }
 
 .os-overlay--visible {
   opacity: 1;
+}
+
+/* Fitted CRT glass, without the heavy repeated scan bars. The vignette and
+   soft corner tint stay fixed to the viewport, so the desktop fills the tube
+   cleanly at every screen size and all text remains crisp. */
+.os-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(220, 240, 255, 0.015) 0 66%,
+      rgba(0, 6, 18, 0.14) 100%
+    ),
+    radial-gradient(
+      circle at 24% 10%,
+      rgba(224, 242, 255, 0.055),
+      transparent 32%
+    );
+  box-shadow: inset 0 0 48px rgba(0, 8, 22, 0.14);
+}
+
+.os-overlay .retro-os--fullscreen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

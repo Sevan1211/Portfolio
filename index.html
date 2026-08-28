@@ -136,16 +136,6 @@
         height: 100%;
       }
 
-      .page-cover-mark {
-        color: #fff;
-        font-family: "Helvetica Neue", "Segoe UI", Arial, sans-serif;
-        font-size: clamp(112px, 18vw, 190px);
-        font-weight: 700;
-        line-height: 1;
-        text-shadow: 0 0 42px rgba(255, 255, 255, 0.22);
-        user-select: none;
-      }
-
       /* Static content for crawlers, agents, and no-JS visitors. React
          replaces it on mount, and the page cover hides it before that, so
          browser users never see it. */
@@ -257,26 +247,23 @@
       </main>
     </div>
 
-    <!-- Blue curtain: covers everything on load, then fades out once the globe
-         has painted (the rendered field is the same #1e3a8a, so the fade reads
-         as one continuous surface). Re-shown on beforeunload so CSS3D content
-         can never flash during reload. -->
+    <!-- Plain blue curtain: covers everything on load, then fades out once the
+         actual WebGL star-shell and rotating 7 have painted. Keeping this
+         curtain unbranded prevents a second, oversized 7 from flashing during
+         startup or reload. -->
     <div
       id="page-cover"
       style="
         position: fixed;
         inset: 0;
-        display: grid;
-        place-items: center;
+        display: block;
         background: #1e3a8a;
         z-index: 99999;
         opacity: 1;
         transition: opacity 0.45s ease;
       "
       aria-hidden="true"
-    >
-      <span class="page-cover-mark">7</span>
-    </div>
+    ></div>
     <script>
       window.addEventListener("beforeunload", function () {
         var c = document.getElementById("page-cover");

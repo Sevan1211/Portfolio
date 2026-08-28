@@ -1,9 +1,9 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { RetroDocument } from '../../../components/icons/RetroIcons';
-import { CONTACT, IDENTITY } from '@shared/content/portfolio';
-import { FactRow, GBox, PageHead } from '../../../components/win95/Win95';
-import '../styles/contact-page.css';
+import React from "react";
+import { motion } from "framer-motion";
+import { RetroDocument } from "../../../components/icons/RetroIcons";
+import { CONTACT, IDENTITY } from "@shared/content/portfolio";
+import { FactRow, GBox, PageHead } from "../../../components/win95/Win95";
+import "../styles/contact-page.css";
 
 export const ContactPage: React.FC = () => (
   <motion.div
@@ -31,6 +31,12 @@ export const ContactPage: React.FC = () => (
           label="Email"
           value={CONTACT.email}
           href={`mailto:${CONTACT.email}`}
+          mono
+        />
+        <FactRow
+          label="School Email"
+          value={CONTACT.emailSchool}
+          href={`mailto:${CONTACT.emailSchool}`}
           mono
         />
         <FactRow

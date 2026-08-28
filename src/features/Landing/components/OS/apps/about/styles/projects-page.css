@@ -17,7 +17,9 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
 }
 
@@ -31,6 +33,31 @@
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+.project-monogram {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 2px solid;
+  border-color: #fff #555 #555 #fff;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  text-shadow: 1px 1px #111;
+}
+
+.project-status {
+  margin-left: auto;
+  padding: 3px 7px;
+  border: 1px solid #777;
+  background: #fff;
+  color: #333;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
 }
 
 .project-icon-wrapper {
@@ -58,6 +85,13 @@
   font-size: 14px;
   color: #555;
   font-style: italic;
+}
+
+.project-role {
+  margin: -6px 0 0;
+  color: #555;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 /* Description */
@@ -123,6 +157,34 @@
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.15s ease;
+}
+
+.project-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-private-note {
+  margin: 0;
+  padding: 7px 9px;
+  border: 1px dashed #777;
+  background: #f4f4f4;
+  color: #444;
+  font-size: 11px;
+}
+
+@media (max-width: 640px) {
+  .project-card-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .project-status {
+    width: 100%;
+    margin-left: 62px;
+    text-align: left;
+  }
 }
 
 .project-github-link:hover {

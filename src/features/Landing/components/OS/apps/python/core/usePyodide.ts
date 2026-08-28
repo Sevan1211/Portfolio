@@ -102,7 +102,7 @@ export function usePyodide() {
         case "output-limit":
           restartAfterVerdict({
             type: "stderr",
-            text: `Output Limit Exceeded — stopped after ${OUTPUT_CHARACTER_LIMIT.toLocaleString()} characters to keep this page responsive.`,
+            text: `Output Limit Exceeded: stopped after ${OUTPUT_CHARACTER_LIMIT.toLocaleString()} characters to keep this page responsive.`,
           });
           break;
 
@@ -112,7 +112,7 @@ export function usePyodide() {
           armWatchdog(PACKAGE_SETUP_LIMIT_MS, () => {
             restartAfterVerdict({
               type: "stderr",
-              text: "Environment Setup Timed Out — Python is restarting. Check your connection, then run the code again.",
+              text: "Environment Setup Timed Out. Python is restarting. Check your connection, then run the code again.",
             });
           });
           break;
@@ -121,7 +121,7 @@ export function usePyodide() {
           armWatchdog(EXECUTION_TIME_LIMIT_MS, () => {
             restartAfterVerdict({
               type: "stderr",
-              text: `Time Limit Exceeded — execution stopped after ${executionLimitLabel}. Python is restarting.`,
+              text: `Time Limit Exceeded: execution stopped after ${executionLimitLabel}. Python is restarting.`,
             });
           });
           break;

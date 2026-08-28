@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useCallback, useEffect } from "react";
+import React, { Suspense, useRef, useCallback, useEffect, useId } from "react";
 import { WindowState } from "../core/types";
 import { useDesktop } from "../core/useDesktop";
 import { getApp } from "../core/appRegistry";
@@ -23,6 +23,7 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({
   } = useDesktop();
 
   const windowRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   const windowStateRef = useRef(windowState);
   windowStateRef.current = windowState;
 
@@ -239,16 +240,21 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({
       className={`window-frame ${isActive ? "window-active" : ""}`}
       style={style}
       onMouseDown={handleMouseDown}
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby={titleId}
     >
       <div className="window-titlebar" onMouseDown={handleTitleBarMouseDown}>
-        <div className="window-titlebar__icon">
+        <div className="window-titlebar__icon" aria-hidden="true">
           {typeof app.icon !== "string" ? (
             <app.icon size={18} color="#ffffff" />
           ) : (
             <span>{app.icon}</span>
           )}
         </div>
-        <div className="window-title">{windowState.title}</div>
+        <div className="window-title" id={titleId}>
+          {windowState.title}
+        </div>
         <div className="window-controls">
           <button
             className="window-btn window-btn--minimize"

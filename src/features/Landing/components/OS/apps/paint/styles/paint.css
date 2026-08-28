@@ -17,6 +17,11 @@
   outline: none;
 }
 
+.paint-app:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: -3px;
+}
+
 /* ── Action bar (menu-bar stand-in) ── */
 .paint-actionbar {
   display: flex;
@@ -41,7 +46,9 @@
 }
 
 .paint-action-btn:active:not(:disabled) {
-  box-shadow: inset 1px 1px 0 var(--sh), inset -1px -1px 0 var(--hi);
+  box-shadow:
+    inset 1px 1px 0 var(--sh),
+    inset -1px -1px 0 var(--hi);
 }
 
 .paint-action-btn:disabled {
@@ -112,13 +119,17 @@
 }
 
 .paint-tool-btn--active {
-  box-shadow: inset 1px 1px 0 var(--sh), inset -1px -1px 0 var(--hi);
+  box-shadow:
+    inset 1px 1px 0 var(--sh),
+    inset -1px -1px 0 var(--hi);
   background: repeating-conic-gradient(var(--hi) 0% 25%, var(--face) 0% 50%);
   background-size: 2px 2px;
 }
 
 .paint-tool-btn:active {
-  box-shadow: inset 1px 1px 0 var(--sh), inset -1px -1px 0 var(--hi);
+  box-shadow:
+    inset 1px 1px 0 var(--sh),
+    inset -1px -1px 0 var(--hi);
 }
 
 /* ── Options well ──────────────────── */
@@ -210,14 +221,18 @@
   min-height: 0;
   overflow: auto;
   background: var(--sh);
-  box-shadow: inset 1px 1px 0 var(--dk), inset -1px -1px 0 var(--lt);
+  box-shadow:
+    inset 1px 1px 0 var(--dk),
+    inset -1px -1px 0 var(--lt);
   padding: 12px;
 }
 
 .paint-doc {
   position: relative;
   background: #fff;
-  box-shadow: 1px 1px 0 var(--dk), 3px 3px 0 rgba(0, 0, 0, 0.25);
+  box-shadow:
+    1px 1px 0 var(--dk),
+    3px 3px 0 rgba(0, 0, 0, 0.25);
 }
 
 .paint-canvas {
@@ -301,7 +316,9 @@
 }
 
 .paint-swatch--bg {
-  box-shadow: 0 0 0 1px var(--hi), 0 0 0 2px var(--sh);
+  box-shadow:
+    0 0 0 1px var(--hi),
+    0 0 0 2px var(--sh);
 }
 
 /* ── Status bar ────────────────────── */

@@ -16,7 +16,7 @@
   /* .app-content paints white at equal specificity; this must win. */
   background: #000 !important;
   color: var(--term-fg);
-  font-family: 'Lucida Console', Consolas, 'Courier New', monospace;
+  font-family: "Lucida Console", Consolas, "Courier New", monospace;
   padding: 0;
   cursor: text;
   position: relative;
@@ -122,6 +122,11 @@
   padding: 0;
   position: relative;
   z-index: 2;
+}
+
+.terminal-input:focus-visible {
+  outline: 2px solid var(--term-banner);
+  outline-offset: 2px;
 }
 
 /* Inverted selection, DOS style */

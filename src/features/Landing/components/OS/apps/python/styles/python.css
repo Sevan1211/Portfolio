@@ -175,6 +175,11 @@
   box-sizing: border-box;
 }
 
+.py-editor__textarea:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: -2px;
+}
+
 /* Highlighted code (below) */
 .py-editor__highlight {
   pointer-events: none;
@@ -267,6 +272,11 @@
   font-size: 12.5px;
   line-height: 1.45;
   color: var(--ink);
+}
+
+.py-stdin__textarea:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: -2px;
 }
 
 /* ── Output Panel ──────────────────── */

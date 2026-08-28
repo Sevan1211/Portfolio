@@ -3,8 +3,7 @@
 // Capable machines keep every quality setting; only genuinely weak hardware
 // trades pixels for a stable frame rate - a stutter is far more visible than
 // a slightly lower render resolution. The tier is resolved once at module
-// load, and `AdaptiveQuality` in CubicleScene can still step DPR down at
-// runtime if a device underperforms its tier.
+// load so the renderer never oscillates between pixel ratios during a drag.
 
 export type DeviceTier = "low" | "medium" | "high";
 

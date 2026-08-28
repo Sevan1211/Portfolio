@@ -1,87 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { PageHead } from '../../../components/win95/Win95';
-import '../styles/projects-page.css';
-
-/* ── Project data ── */
-interface Project {
-  title: string;
-  subtitle: string;
-  description: string;
-  highlights: string[];
-  tech: string[];
-}
-
-const PROJECTS: Project[] = [
-  {
-    title: 'PrepMe',
-    subtitle: 'Interactive Coding & Learning Platform',
-    description:
-      'A full-stack platform with 170+ coding challenges across frontend, backend, database, and algorithm categories. Features a cloud sandbox with real Docker containers, an AI tutor ("Nova"), multi-language code execution (Python, JS, Java, C++, C), and a gamification/XP system.',
-    highlights: [
-      'Fullstack sandbox: Docker containers with terminal (xterm.js), Monaco editor & live preview',
-      'Multi-layer security: Docker isolation, Bubblewrap, Seccomp syscall filtering',
-      'Microservices architecture: React SPA, Go API, Python judge service',
-    ],
-    tech: [
-      'React 18',
-      'TypeScript',
-      'Go',
-      'Python',
-      'FastAPI',
-      'Docker',
-      'PostgreSQL',
-      'Redis',
-      'Monaco Editor',
-      'xterm.js',
-      'Auth0',
-      'WebSocket',
-    ],
-  },
-  {
-    title: 'CodeLive',
-    subtitle: 'Live Technical Interview Platform',
-    description:
-      'A real-time collaborative coding interview platform with a VS Code–quality editor, live preview via in-browser transpilation, multi-file editing, and 250+ curated problems. Designed to replace whiteboard interviews with authentic development workflows.',
-    highlights: [
-      'Custom in-browser module system with Sucrase transpilation & double-buffered iframes',
-      'Role-based access (Candidate / Interviewer) with Supabase auth & JWT validation',
-      'Code-split Monaco editor (~454 KB main + ~354 KB editor chunk)',
-    ],
-    tech: [
-      'React 19',
-      'TypeScript',
-      'Vite',
-      'Node.js',
-      'Express',
-      'Supabase',
-      'Monaco Editor',
-      'Sucrase',
-      'Tailwind CSS',
-      'JSON Schema',
-    ],
-  },
-  {
-    title: 'Elmwood Exteriors',
-    subtitle: 'Professional Business Website',
-    description:
-      'A fully responsive business website for a home exterior contracting company. Acts as a 24/7 digital storefront, showcasing services, displaying project galleries with before/after photos, and capturing leads through integrated contact and estimate request forms.',
-    highlights: [
-      'EmailJS integration for serverless form submissions, no backend required',
-      'Interactive lightbox gallery with multi-photo project portfolios',
-      'Pure CSS responsive design, hand-crafted with media queries, flexbox & grid',
-    ],
-    tech: [
-      'React 18',
-      'JavaScript',
-      'CSS3',
-      'EmailJS',
-      'React Slick',
-      'React Lightbox',
-      'Jest',
-    ],
-  },
-];
+import React from "react";
+import { motion } from "framer-motion";
+import { PROJECTS, type ProjectEntry } from "@shared/content/portfolio";
+import { PageHead } from "../../../components/win95/Win95";
+import "../styles/projects-page.css";
 
 /* ── Card component ── */
 const cardVariants = {
@@ -93,7 +14,7 @@ const cardVariants = {
   }),
 };
 
-const ProjectCard: React.FC<{ project: Project; index: number }> = ({
+const ProjectCard: React.FC<{ project: ProjectEntry; index: number }> = ({
   project,
   index,
 }) => (
@@ -105,12 +26,21 @@ const ProjectCard: React.FC<{ project: Project; index: number }> = ({
     variants={cardVariants}
   >
     <div className="project-card-header">
+      <span
+        className="project-monogram"
+        style={{ background: project.accent }}
+        aria-hidden="true"
+      >
+        {project.monogram}
+      </span>
       <div>
         <h4 className="project-title">{project.title}</h4>
         <span className="project-subtitle">{project.subtitle}</span>
       </div>
+      <span className="project-status">{project.status}</span>
     </div>
 
+    <p className="project-role">{project.role}</p>
     <p className="project-desc">{project.description}</p>
 
     <ul className="project-highlights">
@@ -124,6 +54,26 @@ const ProjectCard: React.FC<{ project: Project; index: number }> = ({
         <span key={t}>{t}</span>
       ))}
     </div>
+
+    {project.links.length > 0 ? (
+      <div className="project-links">
+        {project.links.map((link) => (
+          <a
+            className="project-github-link"
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            key={link.href}
+          >
+            {link.label} ↗
+          </a>
+        ))}
+      </div>
+    ) : (
+      <p className="project-private-note">
+        Private/local project · public-safe architecture summary
+      </p>
+    )}
   </motion.div>
 );
 

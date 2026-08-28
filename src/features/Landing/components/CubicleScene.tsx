@@ -7,15 +7,18 @@ import {
   Group,
   Matrix4,
   Mesh,
+  Object3D,
   PerspectiveCamera,
   Quaternion,
   Texture,
   Vector3,
 } from "three";
+import type { WebGLRenderer } from "three";
 import { CUBICLE_MODEL_PATH, OfficeCubicle } from "./OfficeCubicle";
 import { ModelRetryBoundary } from "./ModelRetryBoundary";
 import { useCameraControls } from "../hooks/useCameraControls";
 import { QUALITY } from "./deviceTier";
+import { scheduleIdleTask } from "@shared/utils/idle";
 
 interface CubicleSceneProps {
   /** Camera parked at the intro start behind the opaque veil. */
@@ -27,7 +30,8 @@ interface CubicleSceneProps {
   reducedMotion?: boolean;
   enterMonitorTrigger?: number;
   zoomOutTrigger?: number;
-  onModelLoaded?: () => void;
+  /** The model, shaders, and textures are ready for a hitch-free reveal. */
+  onPrepared?: () => void;
   onRoomReady?: () => void;
   onZoomChange?: (isZoomed: boolean) => void;
   onZoomComplete?: () => void;
@@ -91,6 +95,70 @@ const getMonitorFov = (aspect: number) => {
 
 const smoothStep = (value: number) => value * value * (3 - 2 * value);
 
+const collectTextures = (root: Object3D): Texture[] => {
+  const textures = new Set<Texture>();
+  root.traverse((object) => {
+    if (!(object instanceof Mesh)) return;
+    const materials = Array.isArray(object.material)
+      ? object.material
+      : [object.material];
+    materials.forEach((material) => {
+      if (!material) return;
+      Object.values(material).forEach((value) => {
+        if (value instanceof Texture) textures.add(value);
+      });
+    });
+  });
+  return [...textures];
+};
+
+const uploadTexturesDuringIdle = (
+  gl: WebGLRenderer,
+  textures: Texture[],
+  isCancelled: () => boolean,
+): { cancel: () => void; promise: Promise<void> } => {
+  let cancelScheduled: () => void = () => undefined;
+  let index = 0;
+
+  const promise = new Promise<void>((resolve) => {
+    const scheduleNext = () => {
+      cancelScheduled = scheduleIdleTask(
+        (deadline) => {
+          if (isCancelled()) {
+            resolve();
+            return;
+          }
+
+          // Always make progress, but yield before an upload batch can turn
+          // into the long frame the visitor previously saw at the veil.
+          let uploadedThisSlice = 0;
+          while (
+            index < textures.length &&
+            (uploadedThisSlice < 1 || deadline.timeRemaining() > 5)
+          ) {
+            const texture = textures[index];
+            try {
+              if (texture) gl.initTexture(texture);
+            } catch {
+              // A normal render can retry this texture; do not strand entry.
+            }
+            index += 1;
+            uploadedThisSlice += 1;
+          }
+
+          if (index >= textures.length) resolve();
+          else scheduleNext();
+        },
+        { fallbackDelay: 16, timeout: 80 },
+      );
+    };
+
+    scheduleNext();
+  });
+
+  return { cancel: () => cancelScheduled(), promise };
+};
+
 export const CubicleScene: React.FC<CubicleSceneProps> = ({
   roomStaged,
   roomActive,
@@ -98,12 +166,12 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
   reducedMotion = false,
   enterMonitorTrigger = 0,
   zoomOutTrigger = 0,
-  onModelLoaded,
+  onPrepared,
   onRoomReady,
   onZoomChange,
   onZoomComplete,
 }) => {
-  const { camera: sceneCamera, gl, scene, invalidate, setDpr } = useThree();
+  const { camera: sceneCamera, gl, scene, invalidate } = useThree();
   // This canvas is configured with a perspective camera in LandingScene.
   const camera = sceneCamera as PerspectiveCamera;
   const invalidateRef = useRef(invalidate);
@@ -114,6 +182,7 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
   const [isScreenHovered, setIsScreenHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isZoomedIn, setIsZoomedIn] = useState(false);
+  const [modelReady, setModelReady] = useState(false);
   const isZoomedInRef = useRef(false);
   const roomReadyRef = useRef(false);
   const roomIntroProgressRef = useRef(-1);
@@ -147,18 +216,11 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
   const roomStagedRef = useRef(false);
   const shadowWarmupFramesRef = useRef(0);
   const shadowFrozenRef = useRef(false);
-  const frameSamplesRef = useRef<number[]>([]);
-  const dprStepRef = useRef(0);
   /** Latest pointer position, consumed once per rendered frame. */
   const pendingPointerRef = useRef<{ x: number; y: number } | null>(null);
-  /** Resolution the scene renders at when the camera is still. */
-  const baseDprRef = useRef(QUALITY.maxDpr);
-  /** True while the drag renders at reduced resolution. */
-  const motionDprActiveRef = useRef(false);
-  /** Adaptive step-downs collected mid-motion, applied only once settled. */
-  const pendingDprStepRef = useRef(0);
-  const setDprRef = useRef(setDpr);
-  setDprRef.current = setDpr;
+  const scenePreparedRef = useRef(false);
+  const onPreparedRef = useRef(onPrepared);
+  onPreparedRef.current = onPrepared;
 
   const monitorZoomProgressRef = useRef(-1);
   const monitorZoomOutProgressRef = useRef(-1);
@@ -188,11 +250,59 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
     };
   }, [camera, gl, scene]);
 
-  // Behind the opaque veil: park the camera at the top of the descent, then
-  // force every shader and texture in the room onto the GPU before anything
-  // is visible. Without this, each prop compiles its program and uploads its
-  // textures the first time it scrolls into view - which lands as a frame
-  // hitch mid-drag. Paying it once here is invisible; paying it later isn't.
+  // Prepare the hidden room while the globe remains fully visible. Shader
+  // compilation uses KHR_parallel_shader_compile when available, and texture
+  // uploads are split across idle slices. Entry does not begin until both are
+  // finished, so the veil and camera motion never have to absorb one long
+  // synchronous warm-up frame.
+  useEffect(() => {
+    const roomGroup = roomGroupRef.current;
+    if (!modelReady || !roomGroup || scenePreparedRef.current) return;
+
+    let cancelled = false;
+    let cancelUploads: () => void = () => undefined;
+    const warmupCamera = new PerspectiveCamera(
+      INTRO_FOV_START,
+      camera.aspect,
+      camera.near,
+      camera.far,
+    );
+    warmupCamera.position.copy(ROOM_START_POSITION);
+    warmupCamera.quaternion.copy(ROOM_START_QUATERNION);
+    warmupCamera.updateProjectionMatrix();
+
+    const prepare = async () => {
+      try {
+        await gl.compileAsync(roomGroup, warmupCamera, scene);
+      } catch {
+        // compileAsync already falls back on unsupported drivers, but a sync
+        // compile still leaves a reliable path for unusual WebGL stacks.
+        gl.compile(roomGroup, warmupCamera, scene);
+      }
+      if (cancelled) return;
+
+      const upload = uploadTexturesDuringIdle(
+        gl,
+        collectTextures(roomGroup),
+        () => cancelled,
+      );
+      cancelUploads = upload.cancel;
+      await upload.promise;
+      if (cancelled) return;
+
+      scenePreparedRef.current = true;
+      onPreparedRef.current?.();
+    };
+
+    void prepare();
+    return () => {
+      cancelled = true;
+      cancelUploads();
+    };
+  }, [camera.aspect, camera.far, camera.near, gl, modelReady, scene]);
+
+  // The actual handoff only changes scene state; all expensive preparation
+  // has already completed while the globe was running.
   useEffect(() => {
     if (!roomStaged || roomStagedRef.current) return;
     roomStagedRef.current = true;
@@ -201,24 +311,8 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
     camera.fov = INTRO_FOV_START;
     camera.updateProjectionMatrix();
     scene.background = ROOM_BACKGROUND;
-
-    gl.compile(scene, camera);
-    const uploaded = new Set<Texture>();
-    scene.traverse((object) => {
-      if (!(object instanceof Mesh)) return;
-      const materials = Array.isArray(object.material)
-        ? object.material
-        : [object.material];
-      materials.forEach((material) => {
-        if (!material) return;
-        Object.values(material).forEach((value) => {
-          if (!(value instanceof Texture) || uploaded.has(value)) return;
-          uploaded.add(value);
-          gl.initTexture(value);
-        });
-      });
-    });
-
+    gl.shadowMap.autoUpdate = true;
+    gl.shadowMap.needsUpdate = true;
     invalidate();
   }, [camera, gl, invalidate, roomStaged, scene]);
 
@@ -282,7 +376,9 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
       screenCenter,
     );
     if (normal.dot(towardCamera) < 0) normal.negate();
-    const up = new Vector3(0, 1, 0).applyQuaternion(worldQuaternion).normalize();
+    const up = new Vector3(0, 1, 0)
+      .applyQuaternion(worldQuaternion)
+      .normalize();
 
     if (!screenMesh.geometry.boundingBox) {
       screenMesh.geometry.computeBoundingBox();
@@ -322,7 +418,8 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
   }, [camera, invalidate, onZoomChange]);
 
   const leaveMonitor = useCallback(() => {
-    if (!isZoomedInRef.current || monitorZoomOutProgressRef.current >= 0) return;
+    if (!isZoomedInRef.current || monitorZoomOutProgressRef.current >= 0)
+      return;
 
     // The overlay fades out on the DOM side while the camera pulls back, so
     // the two read as one motion.
@@ -368,6 +465,7 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
         return;
 
       pendingPointerRef.current = { x: event.clientX, y: event.clientY };
+      invalidateRef.current();
     };
 
     const onMouseDown = (event: MouseEvent) => {
@@ -386,9 +484,6 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
         event.clientY,
         dragRotationRef.current,
       );
-      // While the button is held the frame loop self-sustains (it keeps
-      // invalidating); this first invalidate starts it.
-      invalidateRef.current();
     };
 
     const onMouseUp = () => {
@@ -442,40 +537,12 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
     const roomGroup = roomGroupRef.current;
     if (roomGroup) roomGroup.visible = roomStagedRef.current;
 
-    // Runtime safety net for devices the static tier misjudges (core count
-    // says nothing about the GPU). Only sampled during continuous motion -
-    // the idle loop is deliberately capped at 30fps and would read as a
-    // false failure. Steps down at most twice and never back up, so the
-    // resolution can't oscillate. Crucially, a step is only RECORDED here;
-    // it is applied when the camera settles - resizing the framebuffer in
-    // the middle of a drag is itself a visible hitch.
-    const inMotion =
-      isDraggingRef.current ||
-      monitorTransitionRef.current ||
-      (roomIntroProgressRef.current >= 0 && roomIntroProgressRef.current < 1);
-    if (!inMotion) {
-      frameSamplesRef.current.length = 0;
-    } else if (
-      dprStepRef.current + pendingDprStepRef.current < 2 &&
-      rawDelta < 0.1
-    ) {
-      const samples = frameSamplesRef.current;
-      samples.push(rawDelta);
-      if (samples.length >= 45) {
-        const median = [...samples].sort((a, b) => a - b)[22] ?? 0;
-        samples.length = 0;
-        if (median > 0.027) {
-          pendingDprStepRef.current += 1;
-        }
-      }
-    }
-
     // Nothing in the room ever moves, so the shadow map only needs to be
     // rendered once. Let a few staged frames draw it, then freeze the pass -
     // full 1024² quality at zero per-frame cost.
     if (roomStagedRef.current && !shadowFrozenRef.current) {
       shadowWarmupFramesRef.current += 1;
-      if (shadowWarmupFramesRef.current >= 3) {
+      if (shadowWarmupFramesRef.current >= 2) {
         shadowFrozenRef.current = true;
         gl.shadowMap.autoUpdate = false;
       }
@@ -599,17 +666,6 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
           hasDraggedRef.current = true;
           isDraggingRef.current = true;
           setIsDragging(true);
-          // Motion resolution: while the camera is being driven, render at
-          // ~75% DPR. Fewer pixels guarantee frame-time headroom, and the
-          // reduction is invisible while everything is moving. Full
-          // resolution comes back the moment the camera settles. Engaging
-          // here (not on mousedown) keeps plain clicks resize-free.
-          if (!motionDprActiveRef.current) {
-            motionDprActiveRef.current = true;
-            setDprRef.current(
-              Math.max(0.75, Math.round(baseDprRef.current * 0.75 * 100) / 100),
-            );
-          }
         }
         if (isDraggingRef.current) {
           dragRotationRef.current = handleDragRef.current(deltaX, deltaY);
@@ -622,23 +678,9 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
         delta,
       );
 
-      if (isMouseDownRef.current || converging) {
-        // Held or still easing: keep the loop alive at display refresh.
-        invalidate();
-      } else if (motionDprActiveRef.current) {
-        // Camera settled: fold in any adaptive step the drag revealed, then
-        // return to full resolution. Both land on a static image, where a
-        // resize can't be felt.
-        motionDprActiveRef.current = false;
-        if (pendingDprStepRef.current > 0) {
-          dprStepRef.current += pendingDprStepRef.current;
-          pendingDprStepRef.current = 0;
-          baseDprRef.current = Math.max(
-            1,
-            QUALITY.maxDpr - dprStepRef.current * 0.35,
-          );
-        }
-        setDprRef.current(baseDprRef.current);
+      if (pending || converging) {
+        // New input or easing keeps the loop alive. Holding the pointer still
+        // no longer burns frames, and moving again explicitly invalidates.
         invalidate();
       }
     }
@@ -686,7 +728,7 @@ export const CubicleScene: React.FC<CubicleSceneProps> = ({
             reducedMotion={reducedMotion}
             onScreenHover={onScreenHover}
             onScreenReady={onScreenReady}
-            {...(onModelLoaded ? { onLoaded: onModelLoaded } : {})}
+            onLoaded={() => setModelReady(true)}
             onScreenClick={onScreenClick}
           />
         </ModelRetryBoundary>

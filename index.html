@@ -1,90 +1,128 @@
-<!DOCTYPE html>
-<html lang="en" style="background:#1e3a8a">
+<!doctype html>
+<html lang="en" style="background: #1e3a8a">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon-192.png" />
-    
+
     <!-- DNS prefetch and preconnect for performance -->
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
     <!-- Google Fonts: Inter (UI) and Fira Code (Monospace) with preload for critical font -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"></noscript>
-    
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+      as="style"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <noscript
+      ><link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet"
+    /></noscript>
+
     <!-- Performance optimizations -->
-    <meta name="theme-color" content="#1e3a8a">
+    <meta name="theme-color" content="#1e3a8a" />
 
     <!-- SEO Meta Tags -->
     <title>Sevan Lewis-Payne | Data &amp; Software Engineer</title>
-    <meta name="description" content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into." />
+    <meta
+      name="description"
+      content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into."
+    />
     <meta name="author" content="Sevan Lewis-Payne" />
     <link rel="canonical" href="https://sevanlewispayne.com" />
 
     <!-- Open Graph (social media previews) -->
-    <meta property="og:title" content="Sevan Lewis-Payne | Data &amp; Software Engineer" />
-    <meta property="og:description" content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into." />
+    <meta
+      property="og:title"
+      content="Sevan Lewis-Payne | Data &amp; Software Engineer"
+    />
+    <meta
+      property="og:description"
+      content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into."
+    />
     <meta property="og:url" content="https://sevanlewispayne.com" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://sevanlewispayne.com/favicon-192.png" />
+    <meta
+      property="og:image"
+      content="https://sevanlewispayne.com/favicon-192.png"
+    />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Sevan Lewis-Payne | Data &amp; Software Engineer" />
-    <meta name="twitter:description" content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into." />
-    <meta name="twitter:image" content="https://sevanlewispayne.com/favicon-192.png" />
+    <meta
+      name="twitter:title"
+      content="Sevan Lewis-Payne | Data &amp; Software Engineer"
+    />
+    <meta
+      name="twitter:description"
+      content="Data and software engineer in Omaha. I build governed data platforms and secure production software. My portfolio is a retro 3D office you can click into."
+    />
+    <meta
+      name="twitter:image"
+      content="https://sevanlewispayne.com/favicon-192.png"
+    />
 
     <!-- Structured identity for search engines and AI agents -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Sevan Lewis-Payne",
-      "url": "https://sevanlewispayne.com",
-      "jobTitle": "Data & Software Engineer",
-      "email": "mailto:slewis-payne@unomaha.edu",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Omaha",
-        "addressRegion": "NE",
-        "addressCountry": "US"
-      },
-      "alumniOf": {
-        "@type": "CollegeOrUniversity",
-        "name": "University of Nebraska Omaha"
-      },
-      "sameAs": [
-        "https://github.com/Sevan1211",
-        "https://www.linkedin.com/in/sevan-lewis-payne"
-      ],
-      "knowsAbout": [
-        "Data engineering",
-        "Snowflake",
-        "dbt",
-        "Data quality testing",
-        "React",
-        "TypeScript",
-        "Python",
-        "Go"
-      ]
-    }
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Sevan Lewis-Payne",
+        "url": "https://sevanlewispayne.com",
+        "jobTitle": "Data & Software Engineer",
+        "email": [
+          "mailto:sevanllewispayne@gmail.com",
+          "mailto:slewis-payne@unomaha.edu"
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Omaha",
+          "addressRegion": "NE",
+          "addressCountry": "US"
+        },
+        "alumniOf": {
+          "@type": "CollegeOrUniversity",
+          "name": "University of Nebraska Omaha"
+        },
+        "sameAs": [
+          "https://github.com/Sevan1211",
+          "https://www.linkedin.com/in/sevan-lewis-payne"
+        ],
+        "knowsAbout": [
+          "Data engineering",
+          "Snowflake",
+          "dbt",
+          "Data quality testing",
+          "React",
+          "TypeScript",
+          "Python",
+          "Go"
+        ]
+      }
     </script>
 
     <!-- The 3D model is NOT prefetched here on purpose: browsers mark
          link-prefetch requests with "Sec-Purpose: prefetch", which
          Cloudflare's bot protection answers with a 503 - and that poisoned
          response could then satisfy the real model fetch and strand the
-         loading screen. useGLTF.preload() in the app starts the download
-         with a normal fetch signature instead. -->
-    <link rel="preload" href="/fonts/helvetiker_regular.typeface.json" as="fetch" crossorigin="anonymous" />
-    
+         loading screen. The app starts a normal model request only after the
+         globe has visibly painted. -->
     <style>
       /* Reset and base styles */
-      html, body {
+      html,
+      body {
         margin: 0;
         padding: 0;
         width: 100%;
@@ -92,10 +130,20 @@
         overflow: hidden;
         background: #1e3a8a;
       }
-      
+
       #root {
         width: 100%;
         height: 100%;
+      }
+
+      .page-cover-mark {
+        color: #fff;
+        font-family: "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+        font-size: clamp(112px, 18vw, 190px);
+        font-weight: 700;
+        line-height: 1;
+        text-shadow: 0 0 42px rgba(255, 255, 255, 0.22);
+        user-select: none;
       }
 
       /* Static content for crawlers, agents, and no-JS visitors. React
@@ -106,7 +154,7 @@
         margin: 0 auto;
         padding: 48px 24px;
         color: #e8eeff;
-        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-family: "Segoe UI", system-ui, sans-serif;
         line-height: 1.6;
         overflow-y: auto;
         height: 100%;
@@ -122,8 +170,13 @@
          static resume below is readable instead of a blank blue screen. -->
     <noscript>
       <style>
-        #page-cover { display: none; }
-        html, body { overflow: auto; }
+        #page-cover {
+          display: none;
+        }
+        html,
+        body {
+          overflow: auto;
+        }
       </style>
     </noscript>
   </head>
@@ -138,9 +191,8 @@
           I build governed data platforms, secure production software, and
           AI-enabled developer tools. This site is an interactive 3D office:
           click the monitor and a retro desktop opens with my experience,
-          projects, a working Python IDE, and a few games. If you are a
-          crawler, an AI agent, or just in a hurry, everything important is
-          right here.
+          projects, a working Python IDE, and a few games. If you are a crawler,
+          an AI agent, or just in a hurry, everything important is right here.
         </p>
 
         <h2>Experience</h2>
@@ -148,8 +200,8 @@
           <li>
             <strong>Rasmussen Air and Gas Energy</strong>, Data Engineering and
             Analytics Intern, August 2025 to present. Primary architect of a
-            governed Snowflake and dbt data platform: medallion architecture,
-            a semantic metrics layer, 2,000+ automated data-quality tests,
+            governed Snowflake and dbt data platform: medallion architecture, a
+            semantic metrics layer, 2,000+ automated data-quality tests,
             PR-gated CI/CD, and six integrated production source systems.
           </li>
           <li>
@@ -181,11 +233,26 @@
 
         <h2>Links</h2>
         <ul>
-          <li><a href="/resume/Sevan-Lewis-Payne-2026-Resume.pdf">Resume (PDF)</a></li>
+          <li>
+            <a href="/resume/Sevan-Lewis-Payne-2026-Resume.pdf">Resume (PDF)</a>
+          </li>
           <li><a href="https://github.com/Sevan1211">GitHub</a></li>
-          <li><a href="https://www.linkedin.com/in/sevan-lewis-payne">LinkedIn</a></li>
-          <li><a href="mailto:slewis-payne@unomaha.edu">slewis-payne@unomaha.edu</a></li>
-          <li><a href="/os">Open the desktop directly, without the 3D scene</a></li>
+          <li>
+            <a href="https://www.linkedin.com/in/sevan-lewis-payne">LinkedIn</a>
+          </li>
+          <li>
+            <a href="mailto:sevanllewispayne@gmail.com"
+              >sevanllewispayne@gmail.com</a
+            >
+          </li>
+          <li>
+            <a href="mailto:slewis-payne@unomaha.edu"
+              >slewis-payne@unomaha.edu (school)</a
+            >
+          </li>
+          <li>
+            <a href="/os">Open the desktop directly, without the 3D scene</a>
+          </li>
         </ul>
       </main>
     </div>
@@ -194,11 +261,29 @@
          has painted (the rendered field is the same #1e3a8a, so the fade reads
          as one continuous surface). Re-shown on beforeunload so CSS3D content
          can never flash during reload. -->
-    <div id="page-cover" style="position:fixed;inset:0;background:#1e3a8a;z-index:99999;opacity:1;transition:opacity 0.45s ease"></div>
+    <div
+      id="page-cover"
+      style="
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #1e3a8a;
+        z-index: 99999;
+        opacity: 1;
+        transition: opacity 0.45s ease;
+      "
+      aria-hidden="true"
+    >
+      <span class="page-cover-mark">7</span>
+    </div>
     <script>
-      window.addEventListener('beforeunload', function () {
-        var c = document.getElementById('page-cover');
-        if (c) { c.style.display = ''; c.style.opacity = '1'; }
+      window.addEventListener("beforeunload", function () {
+        var c = document.getElementById("page-cover");
+        if (c) {
+          c.style.display = "";
+          c.style.opacity = "1";
+        }
       });
     </script>
 

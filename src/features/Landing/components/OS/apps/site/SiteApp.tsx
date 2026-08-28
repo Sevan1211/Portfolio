@@ -1,9 +1,9 @@
-import React from 'react';
-import { SITE_INFO } from '@shared/content/portfolio';
-import { GBox, PageHead } from '../../components/win95/Win95';
-import { RetroBulb, RetroGitHub } from '../../components/icons/RetroIcons';
-import { SiteDiagram } from './SiteDiagram';
-import './styles/index.css';
+import React from "react";
+import { SITE_INFO } from "@shared/content/portfolio";
+import { GBox, PageHead } from "../../components/win95/Win95";
+import { RetroBulb, RetroGitHub } from "../../components/icons/RetroIcons";
+import { SiteDiagram } from "./SiteDiagram";
+import "./styles/index.css";
 
 /**
  * Explains how the portfolio itself is built. The copy lives in
@@ -18,30 +18,40 @@ export const SiteApp: React.FC = () => {
       <div className="site-scroll">
         <PageHead
           title="About this site"
-          sub="How the portfolio works, from the canvas to the desktop"
+          sub="How the final desktop and mobile experiences work"
         />
 
         <p className="ab-p site-intro">{SITE_INFO.intro}</p>
 
+        <dl className="site-status-grid" aria-label="Local build status">
+          {SITE_INFO.status.map((item) => (
+            <div className="site-status-card" key={item.label}>
+              <dt>{item.label}</dt>
+              <dd>{item.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="site-status-note">{SITE_INFO.statusNote}</p>
+
         {SITE_INFO.sections.map((section) => (
           <GBox label={section.title} key={section.id}>
-            {section.id === 'architecture' && <SiteDiagram />}
+            {section.id === "architecture" && <SiteDiagram />}
             {section.body.map((paragraph) => (
               <p className="ab-p" key={paragraph}>
                 {paragraph}
               </p>
             ))}
-            {section.id === 'office' && (
+            {section.id === "office" && (
               <p className="site-credit">
-                {credit.prefix}{' '}
+                {credit.prefix}{" "}
                 <a
                   href={credit.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   {credit.title}
-                </a>{' '}
-                by{' '}
+                </a>{" "}
+                by{" "}
                 <a
                   href={credit.authorUrl}
                   target="_blank"
@@ -49,7 +59,7 @@ export const SiteApp: React.FC = () => {
                 >
                   {credit.author}
                 </a>
-                , licensed{' '}
+                , licensed{" "}
                 <a
                   href={credit.licenseUrl}
                   target="_blank"

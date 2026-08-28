@@ -2,8 +2,58 @@
 
 **Decision date:** 2026-08-21
 
-**Status:** user-approved direction; local implementation and visual QA complete; production/mobile-lab performance verification remains open
+**Status:** user-approved direction; local implementation, production-preview visual QA, and local lab verification complete; live and physical-device verification remain open
 **Reference:** C:\Users\Sevan\iCloudDrive\Documents\sevanworks is a visual/system reference only. Reuse the design language and engineering ideas, not its orange palette, exact geometry, source code, or interaction effects.
+
+## Implementation update — 2026-08-28: final performance pass
+
+**Source:** repository inspection, GLB inspection, same-machine Lighthouse 13.4.1 runs against the local production preview, and rendered browser checks. **Deployment status:** local only; no Cloudflare, DNS, GitHub, or production settings were changed.
+
+### Changes accepted
+
+- Replaced the 2,909,120-byte source GLB with a 1,447,052-byte `gltfpack 1.2` WebP quality-10 candidate: **50.3% smaller**. Inspection before and after preserved 178 nodes, 89 meshes/draw calls, 72 materials, 68 textures, and 4,204 triangles. WebP was selected over KTX2 here because the high-quality candidate retained the scene visually without adding a transcoder or creating a production-worker compatibility dependency.
+- Removed the eager module-level model preload. The cubicle begins loading only after the globe has produced a visible frame, so the first mark is not competing with a 3D asset request.
+- Replaced the one-frame synchronous shader/texture spike with `WebGLRenderer.compileAsync` (sync fallback retained) and unique-texture uploads split across idle slices while the blue veil is still opaque. The handoff is readiness-driven; the old fixed 2.4-second minimum is gone.
+- Kept spatial quality stable during interaction. The runtime DPR drop/restore and frame-sampler oscillation were removed; each device keeps its existing quality-tier DPR, anisotropy, antialiasing, and shadow resolution while pointer events are coalesced into the latest pending camera target.
+- Frozen shadows now receive one staged update before `autoUpdate` is disabled. The monitor screensaver is mounted directly inside the physical CRT mesh and requests an idle frame at a capped 24 fps; it no longer uses a render target or second scene pass, and it continues animating during a camera drag. The TV keeps its independent retro update cadence during the same interaction. The phone lock uses a code-native CSS composition, so the mobile-first route does not import Three.js for a transient background.
+- Local Vite development uses native Windows file notifications by default instead of scanning the entire repository every 100 ms; polling remains opt-in with `VITE_USE_POLLING=1` for filesystems that need it.
+
+### Same-machine lab comparison
+
+These numbers are local synthetic evidence, not public PageSpeed or field data. Both sides were captured in this workspace against production builds on the same host.
+
+| Profile        | Performance |          FCP |          LCP |        TBT |        Transfer | Long-task maximum |
+| -------------- | ----------: | -----------: | -----------: | ---------: | --------------: | ----------------: |
+| Desktop before |          75 |     1,299 ms |     3,948 ms |      90 ms |     4,169,332 B |            120 ms |
+| Desktop after  |      **97** |   **391 ms** |   **431 ms** |  **76 ms** | **1,844,197 B** |            137 ms |
+| Mobile before  |          38 |     6,802 ms |     7,852 ms |     948 ms |     1,308,814 B |            998 ms |
+| Mobile after   |      **97** | **1,372 ms** | **1,522 ms** | **197 ms** |   **398,798 B** |        **203 ms** |
+
+Desktop Speed Index moved from 1,299 ms to 1,663 ms even though FCP, LCP, TBT, transfer weight, and the overall score improved. That metric remains a watch item rather than being hidden by the aggregate score. Desktop total traced main-thread work also includes the intentionally hidden room preparation after the early canvas paint; the user-visible acceptance check is that this work no longer lands mid-drag or mid-reveal.
+
+### Ship-candidate refresh after mobile cleanup
+
+The complete 2026-08-28 ship candidate was rebuilt and measured again after the direct-CRT correction and final mobile pass. The desktop canvas now has an immediate branded DOM paint candidate instead of relying on incidental timing from the static fallback. The mobile route no longer imports Three.js, React Three Fiber, the desktop typeface JSON, or Framer Motion; its first-visit transfer in this production-preview session fell from 1,307,292 B to 243,689 B (**81.4%**).
+
+| Profile                | Performance |          FCP |          LCP |       TBT |  Speed Index |      Transfer |
+| ---------------------- | ----------: | -----------: | -----------: | --------: | -----------: | ------------: |
+| Desktop ship candidate |      **97** |   **361 ms** |   **441 ms** | **86 ms** | **1,581 ms** |   2,615,653 B |
+| Mobile ship candidate  |      **95** | **1,830 ms** | **2,763 ms** |  **0 ms** | **1,830 ms** | **243,689 B** |
+
+The transfer totals above came from the local Cloudflare production-preview server and are not directly comparable to a compressed public response. Lighthouse produced complete JSON reports, but its Windows Chrome launcher returned a cleanup-only `EPERM` after writing each report; scores and audit data were present and inspected despite that nonzero CLI exit.
+
+### Acceptance evidence
+
+- Production build rendered the original star-shell, cubicle composition, materials, poster, monitor, TV, and lighting without visible regression or browser warnings/errors.
+- A camera drag completed without the previous quality-resolution jump; both physical screens continued playing throughout the gesture, and the room settled without continuing a drag render loop.
+- The semantic “Open the computer” route received keyboard focus and opened the interactive Retro OS; the resulting DOM retained named app, tab, window, resume, and external-link controls.
+- `npm.cmd run type-check`, `npm.cmd run lint`, `npm.cmd test`, `npm.cmd run build`, and `git diff --check` passed. The test command currently has no test files and exits successfully by explicit configuration; rendered interaction checks remain required.
+
+### Remaining external gates
+
+1. Repeat the drag and entry trace on a representative integrated-GPU laptop and physical mid-tier phone/tablet.
+2. After an authorized deployment, collect fresh public mobile/desktop PageSpeed and field data before treating these local scores as production results.
+3. Keep the NobleCrow/Sketchfab model attribution and license obligations intact if the asset is transformed again.
 
 ## Revised direction — authoritative for the next build
 
@@ -53,7 +103,7 @@ Reported symptom: hitching while dragging around the room. Three causes, all fix
 
 **Device tiering** (`deviceTier.ts`): tier resolved once from `hardwareConcurrency`/`deviceMemory` — low (≤4 cores or ≤4 GB): DPR 1, no MSAA, 4× aniso, 1024² shadows; medium: DPR 1.5, MSAA, 8×, 2048²; high (≥8 cores and ≥8 GB): DPR 1.75, MSAA, 16×, 2048². Capable machines are unchanged from before this pass.
 
-**Runtime safety net:** core count says nothing about the GPU, so `CubicleScene` samples real frame time *only during continuous motion* (drag/transitions — the idle loop is deliberately capped at 30 fps and would read as a false failure) and steps DPR down at most twice, never back up, so resolution cannot oscillate.
+**Runtime safety net:** core count says nothing about the GPU, so `CubicleScene` samples real frame time _only during continuous motion_ (drag/transitions — the idle loop is deliberately capped at 30 fps and would read as a false failure) and steps DPR down at most twice, never back up, so resolution cannot oscillate.
 
 Verified locally: type check, production build, fresh-load drag test with zero runtime errors; tier resolution confirmed live (24 cores/32 GB → high → canvas DPR 1.75, no runtime downgrade).
 

@@ -31,7 +31,6 @@ export class ModelRetryBoundary extends React.Component<
   }
 
   override componentDidCatch(error: unknown): void {
-    // eslint-disable-next-line no-console
     console.warn("3D scene failed to load, retrying…", error);
     useGLTF.clear(this.props.modelPath);
     const delay = Math.min(5000, 1000 * 2 ** this.state.attempt);

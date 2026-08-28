@@ -1,33 +1,35 @@
-/**
- * Returns `true` when the user is on an actual mobile/tablet device.
- *
- * Uses device capabilities (coarse pointer, touch points, user-agent) rather
- * than viewport width so that resizing a desktop browser window never
- * accidentally triggers the mobile layout.
- *
- * The value is computed once at module load and never changes.
- */
+import { useEffect, useState } from "react";
 
-const IS_MOBILE = typeof window !== 'undefined' && detectMobileDevice();
+const MOBILE_LAYOUT_QUERY = "(max-width: 1024px)";
 
-export const useIsMobile = (): boolean => IS_MOBILE;
-
-function detectMobileDevice(): boolean {
-  // 1. Primary input is a coarse pointer (finger) - most reliable signal
-  if (window.matchMedia('(pointer: coarse)').matches) {
-    return true;
-  }
-
-  // 2. Device reports touch capability AND small screen
-  //    (some laptops have touch screens, so we also check screen width)
-  if (navigator.maxTouchPoints > 0 && window.screen.width <= 1024) {
-    return true;
-  }
-
-  // 3. User-agent fallback for older browsers
-  if (/Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-    return true;
-  }
-
-  return false;
+function devOverride(): boolean | null {
+  if (!import.meta.env.DEV) return null;
+  const param = new URLSearchParams(window.location.search).get("mobile");
+  if (param === null) return null;
+  return param !== "0";
 }
+
+/**
+ * Selects the layout from the actual viewport, so narrow desktop windows and
+ * tablets receive the interface that fits. Dev-only ?mobile=1/0 remains a
+ * deterministic visual-QA override.
+ */
+export const useIsMobile = (): boolean => {
+  const override = typeof window === "undefined" ? null : devOverride();
+  const [matches, setMatches] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia(MOBILE_LAYOUT_QUERY).matches,
+  );
+
+  useEffect(() => {
+    if (override !== null) return;
+    const media = window.matchMedia(MOBILE_LAYOUT_QUERY);
+    const update = () => setMatches(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [override]);
+
+  return override ?? matches;
+};

@@ -5,12 +5,18 @@
  * Uses dynamic import() since Vite ?worker creates ES-module workers
  * where importScripts() is not available.
  *
- * Output streams: stdout/stderr are wired through pyodide.setStdout/
- * setStderr in batched (per-line) mode, so print() appears live instead
- * of arriving in one lump when the program ends. input() reads lines
- * from a stdin buffer supplied with each run; when it runs out, Python
- * raises EOFError exactly like a real piped process.
+ * Output streams are buffered into small batches and capped per run before
+ * crossing the worker boundary. This prevents print-heavy programs from
+ * flooding React with hundreds of thousands of messages. input() reads lines
+ * from a stdin buffer supplied with each run; when it runs out, Python raises
+ * EOFError exactly like a real piped process.
  */
+
+import {
+  OUTPUT_BATCH_CHARACTER_LIMIT,
+  OUTPUT_BATCH_LINE_LIMIT,
+  takeOutputWithinBudget,
+} from "./executionLimits";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ctx: any = self;
@@ -20,6 +26,69 @@ let pyodide: any = null;
 
 const PYODIDE_VERSION = "0.27.4";
 const PYODIDE_CDN = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
+
+type WorkerOutputType = "stdout" | "stderr" | "result";
+
+let outputCharacters = 0;
+let outputLimited = false;
+let outputBatchType: WorkerOutputType = "stdout";
+let outputBatch: string[] = [];
+let outputBatchCharacters = 0;
+
+function resetOutputCapture() {
+  outputCharacters = 0;
+  outputLimited = false;
+  outputBatchType = "stdout";
+  outputBatch = [];
+  outputBatchCharacters = 0;
+}
+
+function flushOutputBatch() {
+  if (outputBatch.length === 0) return;
+
+  ctx.postMessage({
+    type: outputBatchType,
+    text: outputBatch.join("\n"),
+  });
+  outputBatch = [];
+  outputBatchCharacters = 0;
+}
+
+/**
+ * Batches normal output and raises a single resource-limit event as soon as
+ * the character budget is exhausted. The main thread then terminates this
+ * worker, which is the only reliable browser-level interruption boundary for
+ * arbitrary synchronous Python.
+ */
+function captureOutput(type: WorkerOutputType, text: string) {
+  if (outputLimited) return;
+
+  if (outputBatch.length > 0 && outputBatchType !== type) {
+    flushOutputBatch();
+  }
+  outputBatchType = type;
+
+  const budget = takeOutputWithinBudget(outputCharacters, text);
+  outputCharacters = budget.nextUsed;
+
+  if (budget.acceptedText.length > 0 || text.length === 0) {
+    outputBatch.push(budget.acceptedText);
+    outputBatchCharacters += budget.acceptedText.length;
+  }
+
+  if (
+    outputBatchCharacters >= OUTPUT_BATCH_CHARACTER_LIMIT ||
+    outputBatch.length >= OUTPUT_BATCH_LINE_LIMIT ||
+    budget.exceeded
+  ) {
+    flushOutputBatch();
+  }
+
+  if (budget.exceeded) {
+    outputLimited = true;
+    ctx.postMessage({ type: "output-limit" });
+  }
+}
 
 async function initPyodide() {
   ctx.postMessage({ type: "status", status: "loading" });
@@ -33,12 +102,13 @@ async function initPyodide() {
 
     pyodide = await mod.loadPyodide({ indexURL: PYODIDE_CDN });
 
-    // Live output: batched mode delivers one callback per line.
+    // Pyodide calls us once per line; captureOutput combines those calls into
+    // bounded messages before they reach the main thread.
     pyodide.setStdout({
-      batched: (text: string) => ctx.postMessage({ type: "stdout", text }),
+      batched: (text: string) => captureOutput("stdout", text),
     });
     pyodide.setStderr({
-      batched: (text: string) => ctx.postMessage({ type: "stderr", text }),
+      batched: (text: string) => captureOutput("stderr", text),
     });
 
     const version: string = pyodide.runPython(
@@ -47,7 +117,7 @@ async function initPyodide() {
 
     ctx.postMessage({ type: "status", status: "ready", version });
   } catch (err) {
-    ctx.postMessage({ type: "error", text: `Failed to load Python: ${err}` });
+    ctx.postMessage({ type: "fatal", text: `Failed to load Python: ${err}` });
   }
 }
 
@@ -78,9 +148,11 @@ function cleanTraceback(message: string): string {
 
 async function runCode(code: string, stdinText: string) {
   if (!pyodide) {
-    ctx.postMessage({ type: "error", text: "Python is not loaded yet." });
+    ctx.postMessage({ type: "fatal", text: "Python is not loaded yet." });
     return;
   }
+
+  resetOutputCapture();
 
   // Auto-install any importable packages the code asks for (numpy, pandas,
   // matplotlib, …). Downloads can take a while, so bracket them with
@@ -114,7 +186,7 @@ async function runCode(code: string, stdinText: string) {
       } catch {
         text = "<unprintable result>";
       }
-      ctx.postMessage({ type: "result", text });
+      captureOutput("result", text);
       if (typeof result === "object" && typeof result.destroy === "function") {
         try {
           result.destroy();
@@ -125,8 +197,10 @@ async function runCode(code: string, stdinText: string) {
     }
   } catch (pyErr: unknown) {
     const message = pyErr instanceof Error ? pyErr.message : String(pyErr);
-    ctx.postMessage({ type: "stderr", text: cleanTraceback(message) });
+    captureOutput("stderr", cleanTraceback(message));
   }
+
+  flushOutputBatch();
 
   ctx.postMessage({
     type: "done",

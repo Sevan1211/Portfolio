@@ -43,7 +43,9 @@
 
 .py-btn:active:not(:disabled),
 .py-btn--pressed {
-  box-shadow: inset 1px 1px 0 var(--sh), inset -1px -1px 0 var(--hi);
+  box-shadow:
+    inset 1px 1px 0 var(--sh),
+    inset -1px -1px 0 var(--hi);
 }
 
 .py-btn--pressed {
@@ -212,16 +214,39 @@
 
 /* ── Syntax Highlighting Colors ────── */
 /* Classic IDE palette for light background */
-.py-hl-keyword   { color: #0000cc; font-weight: bold; }  /* blue - keywords */
-.py-hl-builtin   { color: #6a0dad; }                      /* purple - builtins */
-.py-hl-string    { color: #a31515; }                      /* red - strings */
-.py-hl-comment   { color: #008000; font-style: italic; }  /* green - comments */
-.py-hl-number    { color: #b5740b; }                      /* orange - numbers */
-.py-hl-func      { color: #795e26; }                      /* brown - function calls */
-.py-hl-self      { color: #c71585; font-style: italic; }  /* magenta - self */
-.py-hl-decorator { color: #6a0dad; }                      /* purple - decorators */
-.py-hl-operator  { color: #444; }                          /* dark gray - operators */
-.py-hl-punct     { color: #666; }                          /* gray - punctuation */
+.py-hl-keyword {
+  color: #0000cc;
+  font-weight: bold;
+} /* blue - keywords */
+.py-hl-builtin {
+  color: #6a0dad;
+} /* purple - builtins */
+.py-hl-string {
+  color: #a31515;
+} /* red - strings */
+.py-hl-comment {
+  color: #008000;
+  font-style: italic;
+} /* green - comments */
+.py-hl-number {
+  color: #b5740b;
+} /* orange - numbers */
+.py-hl-func {
+  color: #795e26;
+} /* brown - function calls */
+.py-hl-self {
+  color: #c71585;
+  font-style: italic;
+} /* magenta - self */
+.py-hl-decorator {
+  color: #6a0dad;
+} /* purple - decorators */
+.py-hl-operator {
+  color: #444;
+} /* dark gray - operators */
+.py-hl-punct {
+  color: #666;
+} /* gray - punctuation */
 
 /* ── Stdin panel ───────────────────── */
 .py-stdin {
@@ -357,14 +382,28 @@
   background: #12b312;
 }
 
+.py-status__dot--error {
+  background: #c00000;
+}
+
 .py-status__dot--running {
   background: #c0c000;
   animation: py-pulse 0.6s ease-in-out infinite alternate;
 }
 
+@media (max-width: 720px) {
+  .py-status__seg--limits {
+    display: none;
+  }
+}
+
 @keyframes py-pulse {
-  from { opacity: 1; }
-  to   { opacity: 0.3; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.3;
+  }
 }
 
 /* ── Loading Overlay ───────────────── */
@@ -419,8 +458,12 @@
 }
 
 @keyframes py-blocks {
-  from { background-position-x: 0; }
-  to   { background-position-x: 16px; }
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: 16px;
+  }
 }
 
 .py-loading__hint {

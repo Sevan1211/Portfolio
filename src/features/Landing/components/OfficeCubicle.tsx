@@ -106,8 +106,8 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
   } | null>(null);
   const steamSystemRef = useRef<SteamSystem | null>(null);
   const steamAnchorRef = useRef<Group>(null);
-  // A static fitted glass texture gives the tube a soft vignette, bloom, and
-  // phosphor grain without the conspicuous repeated black scan bars.
+  // A static fitted glass texture gives the tube a broad reflection and fine
+  // phosphor grain without scan bars, dark corners, or a second render loop.
   const glassTexture = useMemo(() => {
     const glass = document.createElement("canvas");
     glass.width = 160;
@@ -116,18 +116,15 @@ export const OfficeCubicle: React.FC<OfficeCubicleProps> = ({
     if (context) {
       context.clearRect(0, 0, glass.width, glass.height);
 
-      const vignette = context.createRadialGradient(80, 54, 22, 80, 60, 94);
-      vignette.addColorStop(0, "rgba(4, 10, 24, 0)");
-      vignette.addColorStop(0.68, "rgba(4, 10, 24, 0.025)");
-      vignette.addColorStop(1, "rgba(0, 3, 12, 0.56)");
-      context.fillStyle = vignette;
+      context.fillStyle = "rgba(4, 12, 24, 0.035)";
       context.fillRect(0, 0, glass.width, glass.height);
 
-      const glow = context.createRadialGradient(45, 24, 0, 45, 24, 76);
-      glow.addColorStop(0, "rgba(224, 242, 255, 0.12)");
-      glow.addColorStop(0.38, "rgba(194, 225, 255, 0.035)");
-      glow.addColorStop(1, "rgba(194, 225, 255, 0)");
-      context.fillStyle = glow;
+      const reflection = context.createLinearGradient(0, 0, 160, 120);
+      reflection.addColorStop(0, "rgba(226, 242, 255, 0.1)");
+      reflection.addColorStop(0.18, "rgba(210, 234, 255, 0.035)");
+      reflection.addColorStop(0.42, "rgba(194, 225, 255, 0)");
+      reflection.addColorStop(1, "rgba(194, 225, 255, 0.012)");
+      context.fillStyle = reflection;
       context.fillRect(0, 0, glass.width, glass.height);
 
       for (let index = 0; index < 120; index += 1) {

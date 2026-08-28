@@ -104,9 +104,9 @@
   opacity: 1;
 }
 
-/* Fitted CRT glass, without the heavy repeated scan bars. The vignette and
-   soft corner tint stay fixed to the viewport, so the desktop fills the tube
-   cleanly at every screen size and all text remains crisp. */
+/* Fitted CRT glass without scan bars or a corner vignette. A broad reflection
+   and extremely fine phosphor grain add tube character while preserving the
+   desktop's geometry and text clarity at every viewport size. */
 .os-overlay::after {
   content: "";
   position: absolute;
@@ -114,17 +114,21 @@
   z-index: 2147483647;
   pointer-events: none;
   background:
-    radial-gradient(
-      ellipse at center,
-      rgba(220, 240, 255, 0.015) 0 66%,
-      rgba(0, 6, 18, 0.14) 100%
+    linear-gradient(
+      112deg,
+      rgba(226, 242, 255, 0.045) 0%,
+      rgba(226, 242, 255, 0.012) 18%,
+      transparent 39%,
+      transparent 76%,
+      rgba(6, 18, 34, 0.025) 100%
     ),
     radial-gradient(
-      circle at 24% 10%,
-      rgba(224, 242, 255, 0.055),
-      transparent 32%
-    );
-  box-shadow: inset 0 0 48px rgba(0, 8, 22, 0.14);
+        circle,
+        rgba(210, 232, 255, 0.035) 0 0.55px,
+        transparent 0.8px
+      )
+      0 0 / 4px 4px;
+  opacity: 0.72;
 }
 
 .os-overlay .retro-os--fullscreen {
